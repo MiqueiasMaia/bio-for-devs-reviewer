@@ -17,3 +17,9 @@ export const supabase = createClient<Database>(
 )
 
 export { isEnvConfigured }
+
+if (import.meta.env.DEV) {
+  // Lets you inspect the live session from the browser console during
+  // local development: `await window.supabase.auth.getSession()`.
+  ;(window as unknown as { supabase: typeof supabase }).supabase = supabase
+}
