@@ -18,6 +18,8 @@ import { MembersTab } from '@/features/projects/settings/MembersTab'
 import { ImportWizardPage } from '@/features/imports/ImportWizardPage'
 import { DedupReviewPage } from '@/features/imports/DedupReviewPage'
 import { ScreeningWorkspacePage } from '@/features/screening/ScreeningWorkspacePage'
+import { ConflictsPage } from '@/features/conflicts/ConflictsPage'
+import { PrismaPage } from '@/features/prisma/PrismaPage'
 import { EnvSetupNotice } from '@/components/EnvSetupNotice'
 
 function App() {
@@ -52,6 +54,8 @@ function App() {
               <Route path="import" element={<ImportWizardPage />} />
               <Route path="duplicates" element={<DedupReviewPage />} />
               <Route path="screening" element={<ScreeningWorkspacePage />} />
+              <Route path="conflicts" element={<ConflictsPage />} />
+              <Route path="prisma" element={<PrismaPage />} />
               <Route path="settings" element={<ProjectSettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
                 <Route path="general" element={<GeneralTab />} />

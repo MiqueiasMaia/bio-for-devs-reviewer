@@ -10,7 +10,7 @@ import type {
   ProjectRole,
   ProjectSettings,
   ScreeningStage,
-} from '@/types/domain'
+} from '../types/domain.js'
 
 // The `Relationships` array is required by supabase-js's GenericTable/
 // GenericView constraint (used to type foreign-table embeds like
@@ -213,6 +213,11 @@ export interface Database {
           dedup_primary?: boolean
         }
       >
+      record_counters: Table<
+        { project_id: string; next_seq: number },
+        { project_id: string; next_seq?: number },
+        { next_seq?: number }
+      >
       fulltext_docs: Table<
         {
           id: string
@@ -296,8 +301,9 @@ export interface Database {
           resolved_decision: Decision
           resolved_by: string
           rationale?: string
+          resolved_at?: string
         },
-        { resolved_decision?: Decision; rationale?: string }
+        { resolved_decision?: Decision; rationale?: string; resolved_at?: string }
       >
     }
     Views: {

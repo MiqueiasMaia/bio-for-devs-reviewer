@@ -1,7 +1,8 @@
-import { NavLink, Outlet, useParams } from 'react-router-dom'
+import { Link, NavLink, Outlet, useParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { AppLayout } from '@/components/AppLayout'
+import { Button } from '@/components/ui/Button'
 import { useProject } from './hooks'
 import type { ProjectDetail } from './api'
 
@@ -17,8 +18,21 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function ProjectLayout() {
   const { projectId } = useParams<{ projectId: string }>()
-  const { data: project, isLoading } = useProject(projectId)
+  const { data: project, isLoading, isError } = useProject(projectId)
   const { t } = useTranslation()
+
+  if (isError) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <p className="text-sm font-medium text-red-700">{t('common.error')}</p>
+          <Link to="/projects">
+            <Button variant="secondary">{t('common.back')}</Button>
+          </Link>
+        </div>
+      </AppLayout>
+    )
+  }
 
   if (isLoading || !project) {
     return (
@@ -47,6 +61,12 @@ export function ProjectLayout() {
           </NavLink>
           <NavLink to="screening" className={navLinkClass}>
             {t('projectNav.screening')}
+          </NavLink>
+          <NavLink to="conflicts" className={navLinkClass}>
+            {t('projectNav.conflicts')}
+          </NavLink>
+          <NavLink to="prisma" className={navLinkClass}>
+            {t('projectNav.prisma')}
           </NavLink>
           <NavLink to="settings" className={navLinkClass}>
             {t('projectNav.settings')}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import { useTranslation } from '@/i18n'
+import { useTranslation, type TranslationKey } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
@@ -22,15 +22,15 @@ import { detectFormat, parseByFormat } from './importPipeline'
 import { useRunImport } from './hooks'
 import type { ImportFormat } from '@/types/domain'
 
-const FIELD_LABELS: Record<CsvTargetField, string> = {
-  title: 'Título',
-  authors: 'Autores',
-  abstract: 'Resumo',
-  year: 'Ano',
-  doi: 'DOI',
-  pmid: 'PMID',
-  journal: 'Periódico',
-  sourceDb: 'Base de dados',
+const FIELD_LABEL_KEYS: Record<CsvTargetField, TranslationKey> = {
+  title: 'importWizard.field_title',
+  authors: 'importWizard.field_authors',
+  abstract: 'importWizard.field_abstract',
+  year: 'importWizard.field_year',
+  doi: 'importWizard.field_doi',
+  pmid: 'importWizard.field_pmid',
+  journal: 'importWizard.field_journal',
+  sourceDb: 'importWizard.field_sourceDb',
 }
 
 export function ImportWizardPage() {
@@ -152,7 +152,7 @@ export function ImportWizardPage() {
             {CSV_TARGET_FIELDS.map((field) => (
               <Select
                 key={field}
-                label={FIELD_LABELS[field]}
+                label={t(FIELD_LABEL_KEYS[field])}
                 value={csvMapping[field] ?? ''}
                 onChange={(e) =>
                   setCsvMapping((prev) => ({ ...prev, [field]: e.target.value || undefined }))
@@ -179,10 +179,10 @@ export function ImportWizardPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-line text-mut">
-                  <th className="py-1 pr-3">{FIELD_LABELS.title}</th>
-                  <th className="py-1 pr-3">{FIELD_LABELS.authors}</th>
-                  <th className="py-1 pr-3">{FIELD_LABELS.year}</th>
-                  <th className="py-1 pr-3">{FIELD_LABELS.doi}</th>
+                  <th className="py-1 pr-3">{t(FIELD_LABEL_KEYS.title)}</th>
+                  <th className="py-1 pr-3">{t(FIELD_LABEL_KEYS.authors)}</th>
+                  <th className="py-1 pr-3">{t(FIELD_LABEL_KEYS.year)}</th>
+                  <th className="py-1 pr-3">{t(FIELD_LABEL_KEYS.doi)}</th>
                 </tr>
               </thead>
               <tbody>

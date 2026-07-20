@@ -4,8 +4,25 @@ Ferramenta web para condução de revisões sistemáticas de literatura seguindo
 fluxo PRISMA 2020, com triagem cega, múltiplos revisores e pré-triagem
 assistida por IA. Interface em português (pt-BR).
 
-Status: em construção, entregue em etapas (ver histórico de commits). Este
-README é atualizado a cada etapa do build.
+## Funcionalidades
+
+- Múltiplos projetos, papéis (proprietário/revisor/visualizador) e convite de
+  membros por e-mail.
+- Critérios de elegibilidade, PICOTS (destaques configuráveis) e taxonomia de
+  motivos de exclusão — tudo editável por projeto, nada fixo no código.
+- Importação de RIS, NBIB (PubMed) e CSV (com mapeamento de colunas e
+  compatibilidade com o triador legado), deduplicação por DOI e similaridade
+  de título com tela de revisão.
+- Triagem cega com atalhos de teclado (I/U/E, ←/→), destaques PICOTS,
+  motivos de exclusão, notas com autosave e fallback offline em
+  localStorage, fila por revisor, e triagem de texto completo com upload de
+  PDF.
+- Resolução de conflitos, concordância entre revisores (kappa de Cohen/
+  Fleiss), diagrama PRISMA 2020 (SVG/PNG) com contagens ao vivo, e painel do
+  projeto.
+- Triagem assistida por IA (opcional, por projeto) via função serverless.
+- Exportação de decisões (CSV), backup completo do projeto (JSON) e
+  referências dos estudos incluídos (RIS/BibTeX).
 
 ## Stack
 
@@ -56,7 +73,7 @@ Abra http://localhost:5173.
 
 1. No painel do Supabase, abra **SQL Editor**.
 2. Cole o conteúdo de cada arquivo em `supabase/migrations/`, em ordem
-   (por nome de arquivo, de `0001_...` a `0009_...`), e execute (**Run**)
+   (por nome de arquivo, de `0001_...` a `0010_...`), e execute (**Run**)
    um de cada vez.
 3. Crie sua conta na aplicação (passo 3 acima) — isso cria seu `profile`
    automaticamente.
@@ -87,9 +104,20 @@ supabase db push
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
    - `ANTHROPIC_API_KEY` (server-only, necessária apenas se a triagem por IA
      estiver habilitada)
-   - `ANTHROPIC_MODEL` (server-only, ex: `claude-fable-5`)
+   - `ANTHROPIC_MODEL` (server-only, ex: `claude-opus-4-8`)
 4. Clique **Deploy**. Nenhuma alteração de código é necessária após as
    variáveis de ambiente estarem configuradas.
+
+### Triagem assistida por IA (`/api/ai-screen`)
+
+Desabilitada por padrão (`settings.ai_screening_enabled = false`). Para
+habilitar em um projeto: defina `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` nas
+variáveis de ambiente da Vercel, depois ative o toggle em **Configurações →
+Geral** do projeto. A função lê os critérios/PICOTS armazenados no banco (via
+`SUPABASE_SERVICE_ROLE_KEY`) e monta o prompt inteiramente a partir deles —
+nada específico do tema da revisão fica no código. Para testar `/api`
+localmente, use `vercel dev` (o `npm run dev` padrão só serve o SPA, sem as
+Vercel Functions).
 
 ## Scripts
 
@@ -107,13 +135,15 @@ npm run lint        # oxlint
 ```
 src/
   components/     # componentes de UI compartilhados
-  features/       # módulos por domínio (auth, projects, ...)
+  domain/         # lógica pura testável (parsers, dedup, kappa, highlight, ...)
+  features/       # módulos por domínio (auth, projects, screening, ...)
   i18n/           # camada de internacionalização (pt-BR)
   lib/            # clientes (Supabase, React Query) e utilitários
 supabase/
   migrations/     # schema SQL versionado (tabelas, RLS, views, RPCs)
   seed.sql        # dados de demonstração (projeto exemplo com PICOTS/critérios)
-api/              # Vercel Functions (adicionado na Etapa 7 — triagem por IA)
+api/              # Vercel Functions (server-only) — /api/ai-screen (triagem por IA)
+legacy/           # app original de referência (não faz parte do build)
 ```
 
 ## Segurança

@@ -6,6 +6,7 @@ import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useUpdateProjectSettings } from '../hooks'
+import { BackupPanel } from '@/features/backup/BackupPanel'
 import type { ScreeningStage } from '@/types/domain'
 
 export function GeneralTab() {
@@ -36,6 +37,7 @@ export function GeneralTab() {
   }
 
   return (
+    <div className="flex flex-col gap-6">
     <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <h2 className="text-base font-semibold text-fg">{t('settingsGeneral.title')}</h2>
@@ -161,5 +163,7 @@ export function GeneralTab() {
         </div>
       </form>
     </Card>
+    <BackupPanel projectId={project.id} settings={settings} />
+    </div>
   )
 }

@@ -1,0 +1,121 @@
+import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from '@/i18n'
+import { useAuth } from '@/features/auth/useAuth'
+import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import type { ProjectSettings } from '@/types/domain'
+import { downloadJson, exportProjectBackup } from './api'
+import { useImportBackup } from './hooks'
+import { isValidProjectBackup } from './schema'
+import { fetchIncludedRecords } from './referenceApi'
+import { buildBibtex, buildRis } from '@/domain/referenceExport/referenceExport'
+
+function downloadText(filename: string, content: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export function BackupPanel({ projectId, settings }: { projectId: string; settings: ProjectSettings }) {
+  const { t } = useTranslation()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const importBackup = useImportBackup()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [referenceMessage, setReferenceMessage] = useState<string | null>(null)
+
+  const finalStage = settings.stages_enabled.includes('full_text') ? 'full_text' : 'title_abstract'
+
+  async function handleExportJson() {
+    const backup = await exportProjectBackup(projectId)
+    downloadJson(`backup_${projectId.slice(0, 8)}_${new Date().toISOString().slice(0, 10)}.json`, backup)
+  }
+
+  async function handleImportFile(file: File) {
+    const text = await file.text()
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(text)
+    } catch {
+      importBackup.reset()
+      alert(t('backup.invalidFile'))
+      return
+    }
+    if (!isValidProjectBackup(parsed) || !user) {
+      alert(t('backup.invalidFile'))
+      return
+    }
+    const result = await importBackup.mutateAsync([parsed, user.id])
+    navigate(`/projects/${result.projectId}`)
+  }
+
+  async function handleExportRis() {
+    const records = await fetchIncludedRecords(projectId, finalStage)
+    if (records.length === 0) {
+      setReferenceMessage(t('backup.noIncluded'))
+      return
+    }
+    downloadText(`incluidos_${projectId.slice(0, 8)}.ris`, buildRis(records), 'application/x-research-info-systems')
+  }
+
+  async function handleExportBibtex() {
+    const records = await fetchIncludedRecords(projectId, finalStage)
+    if (records.length === 0) {
+      setReferenceMessage(t('backup.noIncluded'))
+      return
+    }
+    downloadText(`incluidos_${projectId.slice(0, 8)}.bib`, buildBibtex(records), 'application/x-bibtex')
+  }
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div>
+        <h3 className="text-sm font-semibold text-fg">{t('backup.title')}</h3>
+        <p className="text-xs text-mut">{t('backup.subtitle')}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" onClick={handleExportJson}>
+          {t('backup.exportJson')}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleImportFile(f)
+            e.target.value = ''
+          }}
+        />
+        <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={importBackup.isPending}>
+          {importBackup.isPending ? t('backup.importing') : t('backup.importJson')}
+        </Button>
+        <Button variant="secondary" onClick={handleExportRis}>
+          {t('backup.exportRis')}
+        </Button>
+        <Button variant="secondary" onClick={handleExportBibtex}>
+          {t('backup.exportBibtex')}
+        </Button>
+      </div>
+
+      {importBackup.isSuccess && (
+        <p className="text-sm text-include">
+          {t('backup.importSuccess', {
+            records: importBackup.data.recordCount,
+            screenings: importBackup.data.screeningCount,
+            skipped: importBackup.data.skippedScreenings,
+          })}
+        </p>
+      )}
+      {importBackup.isError && <p className="text-sm text-red-600">{t('backup.importError')}</p>}
+      {referenceMessage && <p className="text-sm text-mut">{referenceMessage}</p>}
+    </Card>
+  )
+}

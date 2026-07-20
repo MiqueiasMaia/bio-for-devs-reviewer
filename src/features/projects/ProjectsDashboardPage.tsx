@@ -5,12 +5,13 @@ import { AppLayout } from '@/components/AppLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ProgressRing } from '@/components/ui/ProgressRing'
+import { ErrorState } from '@/components/ErrorState'
 import { useProjects } from './hooks'
 import { CreateProjectDialog } from './CreateProjectDialog'
 
 export function ProjectsDashboardPage() {
   const { t } = useTranslation()
-  const { data: projects, isLoading } = useProjects()
+  const { data: projects, isLoading, isError, refetch } = useProjects()
   const [wizardOpen, setWizardOpen] = useState(false)
 
   return (
@@ -23,9 +24,10 @@ export function ProjectsDashboardPage() {
         <Button onClick={() => setWizardOpen(true)}>{t('projects.newProject')}</Button>
       </div>
 
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
 
-      {!isLoading && projects?.length === 0 && (
+      {!isLoading && !isError && projects?.length === 0 && (
         <Card className="flex flex-col items-center gap-2 py-16 text-center">
           <p className="font-medium text-fg">{t('projects.empty')}</p>
           <p className="text-sm text-mut">{t('projects.emptyHint')}</p>

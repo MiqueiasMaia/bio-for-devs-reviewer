@@ -12,6 +12,8 @@ import type { Decision, ScreeningStage } from '@/types/domain'
 import { useQueue, useMyScreenings, useQueueSummary, useSaveScreening, useReconcileDrafts } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
 import { downloadCsv, exportDecisionsCsv, importLegacyDecisionsCsv } from './csvRoundTrip'
+import { FulltextPanel } from '@/features/fulltext/FulltextPanel'
+import { ErrorState } from '@/components/ErrorState'
 
 type FilterValue = 'all' | 'undecided' | Decision
 
@@ -77,11 +79,17 @@ export function ScreeningWorkspacePage() {
     if (found >= 0) setIndex(found)
   }
 
+  // Full-text exclusions must carry a reason (spec §6); title/abstract
+  // exclusions don't require one. The reasons panel still opens immediately
+  // either way — only the actual save is gated at full_text.
+  const reasonRequired = stage === 'full_text'
+
   function handleDecision(d: Decision) {
     if (!current) return
     setDecisionDraft(d)
     const reasons = d === 'EXCLUDE' ? reasonsDraft : []
     if (d !== 'EXCLUDE') setReasonsDraft([])
+    if (d === 'EXCLUDE' && reasonRequired && reasons.length === 0) return
     saveScreening.mutate({ recordId: current.id, decision: d, reasons, notes: notesDraft })
     if (d !== 'EXCLUDE' && project.settings.auto_advance_on_decision) {
       setTimeout(() => go(1), 180)
@@ -92,7 +100,7 @@ export function ScreeningWorkspacePage() {
     if (!current) return
     setReasonsDraft((prev) => {
       const next = prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
-      if (decisionDraft === 'EXCLUDE') {
+      if (decisionDraft === 'EXCLUDE' && next.length > 0) {
         saveScreening.mutate({ recordId: current.id, decision: 'EXCLUDE', reasons: next, notes: notesDraft })
       }
       return next
@@ -217,7 +225,9 @@ export function ScreeningWorkspacePage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
         <div className="rounded-xl border border-line bg-white p-6">
-          {!current ? (
+          {queue.isError ? (
+            <ErrorState onRetry={() => queue.refetch()} />
+          ) : !current ? (
             <p className="py-16 text-center text-sm text-mut">
               {queue.isLoading ? t('common.loading') : filteredQueue.length === 0 && (queue.data?.length ?? 0) === 0 ? t('screening.emptyQueue') : t('screening.noRecords')}
             </p>
@@ -227,7 +237,7 @@ export function ScreeningWorkspacePage() {
                 {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
               </div>
               <p className="mb-2 text-xl font-semibold leading-snug text-fg">
-                <HighlightedText text={current.title || '(sem título)'} termSets={termSets} enabled={hlOn} />
+                <HighlightedText text={current.title || t('common.untitled')} termSets={termSets} enabled={hlOn} />
               </p>
               <div className="mb-4 text-sm italic text-mut">{current.authors}</div>
               {current.abstract ? (
@@ -273,10 +283,12 @@ export function ScreeningWorkspacePage() {
                 {(['INCLUDE', 'UNCERTAIN', 'EXCLUDE'] as Decision[]).map((d) => (
                   <button
                     key={d}
+                    type="button"
                     data-sel={decisionDraft === d}
+                    aria-pressed={decisionDraft === d}
                     onClick={() => handleDecision(d)}
                     className={clsx(
-                      'flex-1 rounded-lg border-2 py-3 text-[15px] font-bold cursor-pointer',
+                      'flex-1 rounded-lg border-2 py-3 text-[15px] font-bold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
                       DECISION_STYLES[d],
                     )}
                   >
@@ -295,9 +307,11 @@ export function ScreeningWorkspacePage() {
                     {(exclusionReasons.data ?? []).map((r) => (
                       <button
                         key={r.id}
+                        type="button"
+                        aria-pressed={reasonsDraft.includes(r.code)}
                         onClick={() => toggleReason(r.code)}
                         className={clsx(
-                          'rounded-full border px-2.5 py-1 text-xs font-semibold cursor-pointer',
+                          'rounded-full border px-2.5 py-1 text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
                           reasonsDraft.includes(r.code)
                             ? 'border-red-700 bg-red-700 text-white'
                             : 'border-red-300 text-red-700',
@@ -307,6 +321,15 @@ export function ScreeningWorkspacePage() {
                       </button>
                     ))}
                   </div>
+                  {reasonRequired && reasonsDraft.length === 0 && (
+                    <p className="mt-2 text-xs font-medium text-red-800">{t('fulltext.reasonRequired')}</p>
+                  )}
+                </div>
+              )}
+
+              {stage === 'full_text' && (
+                <div className="mt-3">
+                  <FulltextPanel recordId={current.id} projectId={project.id} />
                 </div>
               )}
 

@@ -32,7 +32,7 @@ function DedupGroupCard({ group }: { group: DedupGroupSummary }) {
             {r.dedupPrimary ? t('duplicates.primary') : t('duplicates.duplicate')}
           </span>
           <div className="flex-1">
-            <p className="text-sm font-medium text-fg">{r.title || '(sem título)'}</p>
+            <p className="text-sm font-medium text-fg">{r.title || t('common.untitled')}</p>
             <p className="text-xs text-mut">
               {r.humanRef} · {r.authors || '—'} · {r.year ?? '—'} {r.doi ? `· ${r.doi}` : ''}
             </p>
