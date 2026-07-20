@@ -26,7 +26,13 @@ export function SignupPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: { display_name: displayName },
+        // Always redirect back to wherever this app is actually being
+        // served from (localhost during dev, the real domain in prod)
+        // instead of relying on the dashboard's single static Site URL.
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
     })
     if (error) setError(t('auth.signUpError'))
     else setSuccess(true)

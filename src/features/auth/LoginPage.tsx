@@ -35,7 +35,10 @@ export function LoginPage() {
     if (!email) return
     setSubmitting(true)
     setError(null)
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/login` },
+    })
     if (error) setError(t('auth.signInError'))
     else setMagicLinkSent(true)
     setSubmitting(false)
