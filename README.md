@@ -45,11 +45,15 @@ assistida por IA. Interface em português (pt-BR).
    project**.
 2. Escolha organização, nome (ex: `revisao-sistematica`), senha do banco e
    região. Aguarde a criação (~2 min).
-3. Em **Project Settings → API**, copie:
+3. Em **Project Settings → API Keys**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
-   - **anon public key** → `VITE_SUPABASE_ANON_KEY`
-   - **service_role key** → `SUPABASE_SERVICE_ROLE_KEY` (nunca exponha esta
-     chave no cliente)
+   - **Publishable key** (`sb_publishable_...`) → `VITE_SUPABASE_ANON_KEY`
+   - **Secret key** (`sb_secret_...`) → `SUPABASE_SERVICE_ROLE_KEY` (nunca
+     exponha esta chave no cliente)
+
+   > Projetos mais antigos podem mostrar as chaves legadas **anon** e
+   > **service_role** (JWTs) em vez de publishable/secret — ambos os pares
+   > funcionam da mesma forma nas variáveis acima.
 
 ## 2. Configurar variáveis de ambiente localmente
 
