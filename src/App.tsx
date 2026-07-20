@@ -1,0 +1,73 @@
+import { QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { queryClient } from '@/lib/queryClient'
+import { isEnvConfigured } from '@/lib/env'
+import { AuthProvider } from '@/features/auth/AuthProvider'
+import { LoginPage } from '@/features/auth/LoginPage'
+import { SignupPage } from '@/features/auth/SignupPage'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { ProjectsDashboardPage } from '@/features/projects/ProjectsDashboardPage'
+import { ProjectLayout } from '@/features/projects/ProjectLayout'
+import { ProjectOverviewPage } from '@/features/projects/ProjectOverviewPage'
+import { ProjectSettingsLayout } from '@/features/projects/settings/ProjectSettingsLayout'
+import { GeneralTab } from '@/features/projects/settings/GeneralTab'
+import { CriteriaTab } from '@/features/projects/settings/CriteriaTab'
+import { PicotsTab } from '@/features/projects/settings/PicotsTab'
+import { ExclusionReasonsTab } from '@/features/projects/settings/ExclusionReasonsTab'
+import { MembersTab } from '@/features/projects/settings/MembersTab'
+import { ImportWizardPage } from '@/features/imports/ImportWizardPage'
+import { DedupReviewPage } from '@/features/imports/DedupReviewPage'
+import { ScreeningWorkspacePage } from '@/features/screening/ScreeningWorkspacePage'
+import { EnvSetupNotice } from '@/components/EnvSetupNotice'
+
+function App() {
+  if (!isEnvConfigured) {
+    return <EnvSetupNotice />
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route
+              path="/projects"
+              element={
+                <ProtectedRoute>
+                  <ProjectsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/:projectId"
+              element={
+                <ProtectedRoute>
+                  <ProjectLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<ProjectOverviewPage />} />
+              <Route path="import" element={<ImportWizardPage />} />
+              <Route path="duplicates" element={<DedupReviewPage />} />
+              <Route path="screening" element={<ScreeningWorkspacePage />} />
+              <Route path="settings" element={<ProjectSettingsLayout />}>
+                <Route index element={<Navigate to="general" replace />} />
+                <Route path="general" element={<GeneralTab />} />
+                <Route path="criteria" element={<CriteriaTab />} />
+                <Route path="picots" element={<PicotsTab />} />
+                <Route path="exclusion-reasons" element={<ExclusionReasonsTab />} />
+                <Route path="members" element={<MembersTab />} />
+              </Route>
+            </Route>
+            <Route path="/" element={<Navigate to="/projects" replace />} />
+            <Route path="*" element={<Navigate to="/projects" replace />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  )
+}
+
+export default App

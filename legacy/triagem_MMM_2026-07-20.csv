@@ -1,0 +1,6 @@
+﻿"rec_id","reviewer","human_decision","human_reasons","human_notes","year","title","doi","exported_on"
+"REC0007","MMM","INCLUDE","","","2026","An Explainable Machine Learning Model Integrating Transcranial Doppler and Clinical Data to Predict Outcomes After Endovascular Thrombectomy in Acute Ischemic Stroke","10.1016/j.wneu.2026.125065","2026-07-20"
+"REC0008","MMM","INCLUDE","","","2026","An Integrated Genetic, Molecular, and Imaging Machine Learning Model for Predicting Neurorepair Potential and Guiding Personalized Rehabilitation After Intracerebral Hemorrhage: A Multicenter Retrospective Study","10.1155/ane/4590863","2026-07-20"
+"REC0009","MMM","INCLUDE","","","2026","An ultrasensitive electrochemical immunosensor for SLC2A3 detection enables prognostic prediction in acute ischemic stroke","10.1016/j.aca.2026.345444","2026-07-20"
+"REC0011","MMM","INCLUDE","","","2026","Artificial intelligence to predict modified rankin score after acute stroke symptoms using wrist-worn triaxial accelerometry data","10.1016/j.jstrokecerebrovasdis.2025.108508","2026-07-20"
+"REC0014","MMM","INCLUDE","","","2026","Automated Multi-Modal MRI Segmentation of Stroke Lesions and Corticospinal Tract Integrity for Functional Outcome Prediction","10.3390/tomography12030029","2026-07-20"
