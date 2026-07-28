@@ -1,4 +1,4 @@
-# Revisão Sistemática
+# Biofor Reviewers
 
 Ferramenta web para condução de revisões sistemáticas de literatura seguindo o
 fluxo PRISMA 2020, com triagem cega, múltiplos revisores e pré-triagem
@@ -73,29 +73,35 @@ Abra http://localhost:5173.
 
 ## 4. Aplicar o schema do banco (migrations)
 
-**Opção A — SQL editor (mais simples, sem instalar CLI):**
+Nada de copiar e colar SQL manualmente no painel — as migrations são
+aplicadas por um script (`scripts/db-migrate.mjs`), que conecta direto no
+Postgres do projeto e registra o que já rodou em `public._app_migrations`
+(rodar de novo é sempre seguro; migrations e o seed já aplicados são
+pulados).
 
-1. No painel do Supabase, abra **SQL Editor**.
-2. Cole o conteúdo de cada arquivo em `supabase/migrations/`, em ordem
-   (por nome de arquivo, de `0001_...` a `0010_...`), e execute (**Run**)
-   um de cada vez.
+1. Em **Project Settings → Database → Connect → URI**, copie a connection
+   string (já vem com a senha do banco) e defina `SUPABASE_DB_URL` no seu
+   `.env.local` (ver `.env.example`).
+2. Aplique as migrations:
+
+   ```bash
+   npm run db:migrate
+   ```
+
 3. Crie sua conta na aplicação (passo 3 acima) — isso cria seu `profile`
    automaticamente.
-4. Volte ao SQL Editor, cole o conteúdo de `supabase/seed.sql` e execute.
-   Isso cria o projeto de demonstração ("Ensemble ML no prognóstico
-   pós-AVC") com você como proprietário.
+4. Rode o seed (cria o projeto de demonstração "Ensemble ML no prognóstico
+   pós-AVC" com você como proprietário — só funciona depois que existe pelo
+   menos um usuário, criado no passo anterior):
 
-**Opção B — Supabase CLI:**
+   ```bash
+   npm run db:seed
+   ```
 
-```bash
-npm install -g supabase
-supabase login
-supabase link --project-ref <seu-project-ref>
-supabase db push
-# depois de criar sua conta na aplicação:
-# cole supabase/seed.sql no SQL Editor do painel (o CLI não roda seeds
-# automaticamente contra um projeto remoto com `db push`)
-```
+`SUPABASE_DB_URL` é usada **só** por esses dois scripts, localmente — nunca
+pelo app em si (que continua falando com o Supabase via
+`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` e, no servidor, via
+`SUPABASE_SERVICE_ROLE_KEY`).
 
 ## 5. Deploy na Vercel
 
@@ -147,6 +153,7 @@ supabase/
   migrations/     # schema SQL versionado (tabelas, RLS, views, RPCs)
   seed.sql        # dados de demonstração (projeto exemplo com PICOTS/critérios)
 api/              # Vercel Functions (server-only) — /api/ai-screen (triagem por IA)
+scripts/          # tooling local — db-migrate.mjs (aplica migrations/seed via SUPABASE_DB_URL)
 legacy/           # app original de referência (não faz parte do build)
 ```
 

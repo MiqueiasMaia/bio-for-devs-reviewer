@@ -1,6 +1,6 @@
 export const ptBR = {
   common: {
-    appName: 'Revisão Sistemática',
+    appName: 'Biofor Reviewers',
     save: 'Salvar',
     cancel: 'Cancelar',
     delete: 'Excluir',

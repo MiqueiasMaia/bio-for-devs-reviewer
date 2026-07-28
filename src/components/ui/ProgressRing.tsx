@@ -35,7 +35,7 @@ export function ProgressRing({ value, total, size = 56, strokeWidth = 6, label }
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-xs font-semibold text-fg">{value}/{total}</span>
+      <span className="font-mono text-xs font-semibold text-fg">{value}/{total}</span>
       {label && <span className="text-[11px] text-mut">{label}</span>}
     </div>
   )

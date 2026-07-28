@@ -32,7 +32,7 @@ export function AgreementCard({ projectId, stage }: { projectId: string; stage: 
             <p className="text-xs text-mut">
               {data.method === 'cohen' ? t('agreement.kappaCohen') : t('agreement.kappaFleiss')}
             </p>
-            <p className="text-lg font-semibold text-fg">
+            <p className="font-mono text-lg font-semibold text-fg">
               {Number.isNaN(data.kappa) ? '—' : data.kappa.toFixed(3)}
             </p>
             {!Number.isNaN(data.kappa) && (
@@ -41,13 +41,13 @@ export function AgreementCard({ projectId, stage }: { projectId: string; stage: 
           </div>
           <div>
             <p className="text-xs text-mut">{t('agreement.observedAgreement')}</p>
-            <p className="text-lg font-semibold text-fg">
+            <p className="font-mono text-lg font-semibold text-fg">
               {Number.isNaN(data.observedAgreement) ? '—' : `${(data.observedAgreement * 100).toFixed(0)}%`}
             </p>
           </div>
           <div>
             <p className="text-xs text-mut">{t('agreement.percentAgreement')}</p>
-            <p className="text-lg font-semibold text-fg">
+            <p className="font-mono text-lg font-semibold text-fg">
               {Number.isNaN(data.percentAgreement) ? '—' : `${(data.percentAgreement * 100).toFixed(0)}%`}
             </p>
           </div>

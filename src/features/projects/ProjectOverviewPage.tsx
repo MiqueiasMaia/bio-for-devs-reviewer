@@ -75,7 +75,7 @@ export function ProjectOverviewPage() {
             {throughput?.map((r) => (
               <li key={r.reviewerId} className="flex justify-between border-b border-line py-1 last:border-b-0">
                 <span className="text-fg">{r.reviewerName}</span>
-                <span className="font-semibold text-mut">{r.count}</span>
+                <span className="font-mono font-semibold text-mut">{r.count}</span>
               </li>
             ))}
           </ul>
@@ -83,7 +83,7 @@ export function ProjectOverviewPage() {
 
         <Card>
           <h3 className="mb-3 text-sm font-semibold text-fg">{t('dashboard.conflictCount')}</h3>
-          <p className="text-3xl font-bold text-fg">{conflictCount ?? '—'}</p>
+          <p className="font-mono text-3xl font-bold text-fg">{conflictCount ?? '—'}</p>
           <Link to={`/projects/${project.id}/conflicts`} className="mt-2 inline-block text-sm text-include">
             {t('conflicts.title')} →
           </Link>
@@ -105,19 +105,19 @@ export function ProjectOverviewPage() {
           <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
             <div>
               <p className="text-xs text-mut">{t('prisma.recordsIdentified')}</p>
-              <p className="font-semibold text-fg">{counts.recordsIdentified}</p>
+              <p className="font-mono font-semibold text-fg">{counts.recordsIdentified}</p>
             </div>
             <div>
               <p className="text-xs text-mut">{t('prisma.recordsScreened')}</p>
-              <p className="font-semibold text-fg">{counts.recordsScreenedTa}</p>
+              <p className="font-mono font-semibold text-fg">{counts.recordsScreenedTa}</p>
             </div>
             <div>
               <p className="text-xs text-mut">{t('prisma.fulltextAssessed')}</p>
-              <p className="font-semibold text-fg">{counts.fulltextAssessed}</p>
+              <p className="font-mono font-semibold text-fg">{counts.fulltextAssessed}</p>
             </div>
             <div>
               <p className="text-xs text-mut">{t('prisma.studiesIncluded')}</p>
-              <p className="font-semibold text-fg">{counts.includedFinal}</p>
+              <p className="font-mono font-semibold text-fg">{counts.includedFinal}</p>
             </div>
           </div>
         )}

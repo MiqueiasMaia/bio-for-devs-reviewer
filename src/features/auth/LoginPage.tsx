@@ -6,6 +6,7 @@ import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
+import { Logo } from '@/components/Logo'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -46,7 +47,9 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
-      <h1 className="mb-6 text-center text-lg font-semibold">{t('common.appName')}</h1>
+      <div className="mb-6 flex justify-center">
+        <Logo size="lg" />
+      </div>
       <Card className="flex flex-col gap-4">
         <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-4">
           <TextField

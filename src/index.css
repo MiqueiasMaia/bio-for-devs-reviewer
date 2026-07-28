@@ -1,31 +1,48 @@
 @import "tailwindcss";
 
+/*
+ * Paleta derivada da identidade do Biofor Devs (verde-neon + ciano sobre
+ * terminal escuro): aqui reinterpretada para uma interface clara e
+ * profissional. Mesma família de matiz (verde-azulado + ciano), tons
+ * fechados o suficiente para contraste AA em texto sobre branco.
+ */
 @theme {
-  --color-fg: #1a2733;
-  --color-mut: #5b6b7a;
-  --color-line: #e2e8ee;
-  --color-bg: #f6f8fa;
-  --color-include: #1f6f8b;
-  --color-exclude: #8a97a4;
-  --color-uncertain: #d98b2b;
+  --color-fg: #16211c;
+  --color-mut: #5a6b62;
+  --color-line: #dbe6e1;
+  --color-bg: #f6f9f7;
+  --color-include: #087a52;
+  --color-exclude: #64726b;
+  --color-uncertain: #9c5f09;
 
   --color-hl-population: #e6d9f2;
   --color-hl-population-fg: #4b2673;
-  --color-hl-intervention: #c9ead4;
-  --color-hl-intervention-fg: #0f5132;
-  --color-hl-outcome: #cfe6f0;
-  --color-hl-outcome-fg: #0a4a63;
+  --color-hl-intervention: #cfead9;
+  --color-hl-intervention-fg: #0a6b46;
+  --color-hl-outcome: #cdeaf3;
+  --color-hl-outcome-fg: #075c78;
   --color-hl-timing: #fbe8c4;
   --color-hl-timing-fg: #7a4d0a;
   --color-hl-exclusion: #f6d5cd;
   --color-hl-exclusion-fg: #8a2b12;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 @layer base {
   body {
     @apply bg-bg text-fg font-sans m-0;
     line-height: 1.5;
+  }
+
+  ::selection {
+    background-color: var(--color-include);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-include);
+    outline-offset: 2px;
   }
 }
