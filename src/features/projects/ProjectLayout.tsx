@@ -53,9 +53,16 @@ export function ProjectLayout() {
           <NavLink to="" end className={navLinkClass}>
             {t('projectNav.overview')}
           </NavLink>
-          <NavLink to="screening" className={navLinkClass}>
-            {t('projectNav.screening')}
-          </NavLink>
+          {project.settings.stages_enabled.includes('title_abstract') && (
+            <NavLink to="screening/title-abstract" className={navLinkClass}>
+              {t('screening.stageTitleAbstract')}
+            </NavLink>
+          )}
+          {project.settings.stages_enabled.includes('full_text') && (
+            <NavLink to="screening/full-text" className={navLinkClass}>
+              {t('screening.stageFullText')}
+            </NavLink>
+          )}
           <NavLink to="conflicts" className={navLinkClass}>
             {t('projectNav.conflicts')}
           </NavLink>

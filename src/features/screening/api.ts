@@ -19,7 +19,7 @@ export interface ScreeningState {
   notes: string
 }
 
-async function listEligibleRecordIds(projectId: string, stage: ScreeningStage): Promise<Set<string>> {
+export async function listEligibleRecordIds(projectId: string, stage: ScreeningStage): Promise<Set<string>> {
   if (stage === 'title_abstract') {
     const { data, error } = await supabase
       .from('records')
@@ -151,13 +151,12 @@ export async function fetchQueueSummary(
   stage: ScreeningStage,
   reviewerId: string,
 ): Promise<QueueSummary> {
-  const { data, error } = await supabase
-    .from('records')
-    .select('id, is_duplicate')
-    .eq('project_id', projectId)
-    .eq('is_duplicate', false)
-  if (error) throw error
-  const total = data.length
+  // Must match fetchQueue's eligibility exactly — otherwise the progress
+  // bar shows "all non-duplicate records" as the denominator for every
+  // stage, including full_text, where the real denominator is only the
+  // records that were INCLUDEd at title_abstract (usually a small subset).
+  const relevantIds = await listEligibleRecordIds(projectId, stage)
+  const total = relevantIds.size
 
   const { data: mine, error: mineError } = await supabase
     .from('screenings')
@@ -166,7 +165,6 @@ export async function fetchQueueSummary(
     .eq('stage', stage)
   if (mineError) throw mineError
 
-  const relevantIds = new Set(data.map((r) => r.id))
   let include = 0
   let uncertain = 0
   let exclude = 0

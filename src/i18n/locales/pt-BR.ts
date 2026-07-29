@@ -68,7 +68,6 @@ export const ptBR = {
   },
   projectNav: {
     overview: 'Visão geral',
-    screening: 'Triagem',
     conflicts: 'Conflitos',
     riskOfBias: 'Risco de viés',
     prisma: 'PRISMA',

@@ -23,14 +23,13 @@ const DECISION_STYLES: Record<Decision, string> = {
   EXCLUDE: 'border-exclude text-exclude data-[sel=true]:bg-exclude data-[sel=true]:text-white',
 }
 
-export function ScreeningWorkspacePage() {
+export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const { project } = useOutletContext<ProjectOutletContext>()
   const { user } = useAuth()
   const { t } = useTranslation()
   const reviewerId = user!.id
   const reviewersRequired = project.settings.reviewers_required_per_record
 
-  const [stage, setStage] = useState<ScreeningStage>(project.settings.stages_enabled[0] ?? 'title_abstract')
   const [filter, setFilter] = useState<FilterValue>('all')
   const [index, setIndex] = useState(0)
   const [hlOn, setHlOn] = useState(true)
@@ -177,22 +176,6 @@ export function ScreeningWorkspacePage() {
   return (
     <div>
       <div className="sticky top-[57px] z-[5] -mx-6 mb-4 flex flex-wrap items-center gap-3 border-b border-line bg-bg/95 px-6 py-3 backdrop-blur">
-        {project.settings.stages_enabled.length > 1 && (
-          <div className="flex gap-1">
-            {project.settings.stages_enabled.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStage(s)}
-                className={clsx(
-                  'rounded-md px-2 py-1 text-xs font-medium',
-                  stage === s ? 'bg-fg text-white' : 'text-mut hover:bg-white',
-                )}
-              >
-                {s === 'title_abstract' ? t('screening.stageTitleAbstract') : t('screening.stageFullText')}
-              </button>
-            ))}
-          </div>
-        )}
         {summary.data && (
           <div className="flex flex-1 min-w-40 items-center gap-2 text-xs text-mut">
             <span>

@@ -54,7 +54,14 @@ function App() {
               <Route index element={<ProjectOverviewPage />} />
               <Route path="import" element={<ImportWizardPage />} />
               <Route path="duplicates" element={<DedupReviewPage />} />
-              <Route path="screening" element={<ScreeningWorkspacePage />} />
+              <Route
+                path="screening/title-abstract"
+                element={<ScreeningWorkspacePage key="title_abstract" stage="title_abstract" />}
+              />
+              <Route
+                path="screening/full-text"
+                element={<ScreeningWorkspacePage key="full_text" stage="full_text" />}
+              />
               <Route path="conflicts" element={<ConflictsPage />} />
               <Route path="risk-of-bias" element={<RiskOfBiasPage />} />
               <Route path="prisma" element={<PrismaPage />} />
