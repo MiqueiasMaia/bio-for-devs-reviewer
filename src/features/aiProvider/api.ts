@@ -5,20 +5,27 @@ export interface AiProviderConfig {
   provider: AIProvider
   model: string
   hasKey: boolean
+  isActive: boolean
   updatedAt: string
 }
 
 /** Reads the safe status view (never the encrypted key itself) — RLS on
- * project_ai_providers already restricts this to the project owner. */
-export async function getAiProviderConfig(projectId: string): Promise<AiProviderConfig | null> {
+ * project_ai_providers already restricts this to the project owner. A
+ * project can have a key saved for more than one provider at once (so
+ * reviewers can switch without re-entering keys); only one is active. */
+export async function listAiProviderConfigs(projectId: string): Promise<AiProviderConfig[]> {
   const { data, error } = await supabase
     .from('v_project_ai_config')
-    .select('provider, model, has_key, updated_at')
+    .select('provider, model, has_key, is_active, updated_at')
     .eq('project_id', projectId)
-    .maybeSingle()
   if (error) throw error
-  if (!data) return null
-  return { provider: data.provider, model: data.model, hasKey: data.has_key, updatedAt: data.updated_at }
+  return data.map((d) => ({
+    provider: d.provider,
+    model: d.model,
+    hasKey: d.has_key,
+    isActive: d.is_active,
+    updatedAt: d.updated_at,
+  }))
 }
 
 async function authorizedFetch(path: string, method: 'POST' | 'DELETE', body: unknown): Promise<void> {
@@ -40,7 +47,9 @@ async function authorizedFetch(path: string, method: 'POST' | 'DELETE', body: un
 /**
  * The plaintext key only ever passes through /api/project-ai-config,
  * which encrypts it (pgp_sym_encrypt) before persisting — this client
- * function never touches Supabase directly for writes.
+ * function never touches Supabase directly for writes. Saving a brand-new
+ * key always makes that provider the active one; omitting apiKey on an
+ * already-configured provider just updates its model (doesn't activate).
  */
 export async function saveAiProviderConfig(input: {
   projectId: string
@@ -51,8 +60,14 @@ export async function saveAiProviderConfig(input: {
   await authorizedFetch('/api/project-ai-config', 'POST', input)
 }
 
-export async function deleteAiProviderConfig(projectId: string): Promise<void> {
-  await authorizedFetch('/api/project-ai-config', 'DELETE', { projectId })
+/** Switches which already-configured provider is active — no key or model
+ * touched. This is the actual "trocar de provedor sem reconfigurar" flow. */
+export async function activateAiProviderConfig(projectId: string, provider: AIProvider): Promise<void> {
+  await authorizedFetch('/api/project-ai-config', 'POST', { projectId, provider, activateOnly: true })
+}
+
+export async function deleteAiProviderConfig(projectId: string, provider: AIProvider): Promise<void> {
+  await authorizedFetch('/api/project-ai-config', 'DELETE', { projectId, provider })
 }
 
 export interface ProviderUsageSummary {

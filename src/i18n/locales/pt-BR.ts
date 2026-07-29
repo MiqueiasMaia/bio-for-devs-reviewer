@@ -515,9 +515,11 @@ export const ptBR = {
   aiProvider: {
     title: 'Provedor de IA',
     subtitle: 'Configure o provedor, modelo e chave de API usados pela triagem assistida por IA deste projeto — cada revisão usa sua própria chave e paga pelo próprio uso.',
+    multiProviderHint: 'Você pode configurar mais de um provedor ao mesmo tempo e trocar qual está ativo a qualquer momento, sem precisar colar a chave de novo — útil se um provedor tiver problema de cobrança ou limite.',
     ownerOnly: 'Somente o(a) proprietário(a) do projeto pode ver e configurar isto.',
-    currentConfig: 'Configuração atual: {{provider}} · {{model}} · chave configurada em {{date}}',
-    provider: 'Provedor',
+    active: 'Ativo',
+    useThisProvider: 'Usar este provedor',
+    configuredSince: 'Chave configurada em {{date}}',
     model: 'Modelo',
     setupTitle: 'Como obter uma chave — {{provider}}',
     openKeyPage: 'Abrir {{url}}',

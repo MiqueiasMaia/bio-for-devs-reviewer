@@ -13,9 +13,9 @@ configurado).
 
 | Provedor | Free tier | Modelos recomendados | Observações |
 |---|---|---|---|
-| **Google Gemini** (AI Studio) | Bem generoso | `gemini-2.5-flash`, `gemini-2.0-flash` | Melhor custo-benefício para triagem de texto; suporta JSON Schema nativo |
+| **Google Gemini** (AI Studio) | Bem generoso | `gemini-3.1-flash-lite` (mais barato) | Toda a geração 2.x (2.0 Flash, 2.5 Flash/Flash-Lite) foi desativada ou está retornando 404 "no longer available" bem antes do prazo anunciado (jul/2026) — use a geração 3.x. Confira ai.google.dev/gemini-api/docs/pricing antes de configurar |
 | **Groq** | Gratuito, com rate limits | Llama 3.x, Mixtral, Gemma | Extremamente rápido; confiabilidade do JSON mode varia por modelo |
-| **OpenRouter** | Vários modelos com tag `:free` | Llama, Mistral, Gemini, etc. | Agrega vários provedores atrás de uma API OpenAI-compatible; confiabilidade de structured output varia conforme o modelo por trás |
+| **OpenRouter** | Vários modelos com tag `:free` | Varia — confira `openrouter.ai/models?fmt=table&order=top-weekly&max_price=0` | Agrega vários provedores atrás de uma API OpenAI-compatible; o catálogo gratuito muda com muita frequência (a própria OpenRouter recomenda não depender de um `:free` específico por muito tempo) — confira a disponibilidade atual antes de configurar |
 | **Anthropic Claude** | Sem free tier (pago) | O modelo já usado no projeto | Melhor qualidade/confiabilidade de structured output; usa recursos específicos (thinking adaptativo, prompt caching) |
 
 Nomes de modelo e condições de free tier mudam com frequência — confira a

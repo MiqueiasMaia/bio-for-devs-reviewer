@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUpdateProjectSettings } from '../hooks'
 import { BackupPanel } from '@/features/backup/BackupPanel'
-import { useAiProviderConfig } from '@/features/aiProvider/hooks'
+import { useAiProviderConfigs } from '@/features/aiProvider/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import type { ScreeningStage } from '@/types/domain'
 
@@ -22,11 +22,13 @@ export function GeneralTab() {
   const unarchiveProject = useUnarchiveProject()
   const deleteProject = useDeleteProject()
   // v_project_ai_config is owner-only (RLS) — a reviewer would just see no
-  // row regardless of whether a provider is actually configured, so this
+  // rows regardless of whether a provider is actually configured, so this
   // check (and the resulting disabled state below) only applies when the
-  // current user is the owner; reviewers keep the toggle as before.
-  const { data: aiProviderConfig } = useAiProviderConfig(project.id)
-  const aiProviderMissing = isOwner && !aiProviderConfig
+  // current user is the owner; reviewers keep the toggle as before. A
+  // project can have several providers saved but only needs one *active*
+  // one to actually run AI screening.
+  const { data: aiProviderConfigs } = useAiProviderConfigs(project.id)
+  const aiProviderMissing = isOwner && !aiProviderConfigs?.some((c) => c.isActive)
   const [deleteConfirmName, setDeleteConfirmName] = useState('')
 
   const [name, setName] = useState(project.name)

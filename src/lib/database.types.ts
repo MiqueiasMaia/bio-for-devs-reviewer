@@ -277,10 +277,12 @@ export interface Database {
       >
       project_ai_providers: Table<
         {
+          id: string
           project_id: string
           provider: AIProvider
           model: string
           api_key_encrypted: string
+          is_active: boolean
           created_at: string
           updated_at: string
         },
@@ -558,6 +560,7 @@ export interface Database {
           provider: AIProvider
           model: string
           has_key: boolean
+          is_active: boolean
           updated_at: string
         }>
       v_ai_screening_stats: View<{
@@ -591,7 +594,11 @@ export interface Database {
         Returns: { provider: AIProvider; model: string; api_key: string }[]
       }
       delete_project_ai_key: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_provider: AIProvider }
+        Returns: undefined
+      }
+      set_active_ai_provider: {
+        Args: { p_project_id: string; p_provider: AIProvider }
         Returns: undefined
       }
     }
