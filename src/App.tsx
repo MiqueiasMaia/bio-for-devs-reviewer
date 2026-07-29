@@ -5,6 +5,7 @@ import { isEnvConfigured } from '@/lib/env'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SignupPage } from '@/features/auth/SignupPage'
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { ProjectsDashboardPage } from '@/features/projects/ProjectsDashboardPage'
 import { ProjectLayout } from '@/features/projects/ProjectLayout'
@@ -36,6 +37,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/projects"
               element={

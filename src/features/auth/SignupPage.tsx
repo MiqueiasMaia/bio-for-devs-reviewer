@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
 import { Logo } from '@/components/Logo'
+import { AuthLayout } from './AuthLayout'
+import { ProviderButtons } from './ProviderButtons'
 
 export function SignupPage() {
   const { t } = useTranslation()
@@ -41,52 +43,67 @@ export function SignupPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
-      <div className="mb-6 flex justify-center">
+    <AuthLayout>
+      <div className="mb-8 flex justify-center">
         <Logo size="lg" />
       </div>
-      <Card className="flex flex-col gap-4">
+
+      <Card className="flex flex-col gap-5">
         {success ? (
           <p className="text-sm text-include">{t('auth.checkYourEmail')}</p>
         ) : (
-          <form onSubmit={handleSignUp} className="flex flex-col gap-4">
-            <TextField
-              label="Nome"
-              autoComplete="name"
-              required
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-            />
-            <TextField
-              label={t('auth.email')}
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label={t('auth.password')}
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <Button type="submit" disabled={submitting}>
-              {t('auth.signUp')}
-            </Button>
-          </form>
+          <>
+            <div>
+              <h2 className="text-base font-semibold text-fg">{t('auth.createAccountTitle')}</h2>
+              <p className="mt-1 text-sm text-mut">{t('auth.createAccountSubtitle')}</p>
+            </div>
+            <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+              <TextField
+                label="Nome"
+                autoComplete="name"
+                required
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+              <TextField
+                label={t('auth.email')}
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                label={t('auth.password')}
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              <Button type="submit" disabled={submitting}>
+                {t('auth.signUp')}
+              </Button>
+            </form>
+
+            <div className="flex items-center gap-3 text-xs text-mut">
+              <div className="h-px flex-1 bg-line" />
+              {t('auth.continueWith')}
+              <div className="h-px flex-1 bg-line" />
+            </div>
+            <ProviderButtons />
+          </>
         )}
       </Card>
+
       <p className="mt-4 text-center text-sm text-mut">
         {t('auth.haveAccount')}{' '}
         <Link to="/login" className="font-medium text-include">
           {t('auth.signIn')}
         </Link>
       </p>
-    </div>
+    </AuthLayout>
   )
 }
