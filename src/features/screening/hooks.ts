@@ -40,6 +40,14 @@ export function useQueueSummary(projectId: string, stage: ScreeningStage, review
   })
 }
 
+export function useAiMatchForStage(projectId: string, stage: ScreeningStage, enabled: boolean) {
+  return useQuery({
+    queryKey: ['ai_match_for_stage', projectId, stage],
+    queryFn: () => api.fetchAiMatchForStage(projectId, stage),
+    enabled,
+  })
+}
+
 export function useProjectDecisionCounts(projectId: string, stage: ScreeningStage) {
   return useQuery({
     queryKey: ['project_decision_counts', projectId, stage],

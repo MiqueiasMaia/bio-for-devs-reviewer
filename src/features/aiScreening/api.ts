@@ -6,6 +6,28 @@ export async function listUnscreenedRecordIds(
   stage: ScreeningStage,
   limit: number,
 ): Promise<string[]> {
+  return listRecordIdsToScreen(projectId, stage, limit, false)
+}
+
+/** `includeAlreadyScreened: true` re-sends every non-duplicate record,
+ * regardless of whether the AI already screened it — the backend upserts
+ * on (record_id, stage, model_name), so this is how a batch re-run works. */
+export async function listRecordIdsToScreen(
+  projectId: string,
+  stage: ScreeningStage,
+  limit: number,
+  includeAlreadyScreened: boolean,
+): Promise<string[]> {
+  const { data: records, error } = await supabase
+    .from('records')
+    .select('id')
+    .eq('project_id', projectId)
+    .eq('is_duplicate', false)
+    .order('human_ref', { ascending: true })
+  if (error) throw error
+
+  if (includeAlreadyScreened) return records.map((r) => r.id).slice(0, limit)
+
   const { data: alreadyScreened, error: aiError } = await supabase
     .from('ai_screenings')
     .select('record_id, records!inner(project_id)')
@@ -14,14 +36,6 @@ export async function listUnscreenedRecordIds(
     .returns<{ record_id: string }[]>()
   if (aiError) throw aiError
   const screenedIds = new Set(alreadyScreened.map((r) => r.record_id))
-
-  const { data: records, error } = await supabase
-    .from('records')
-    .select('id')
-    .eq('project_id', projectId)
-    .eq('is_duplicate', false)
-    .order('human_ref', { ascending: true })
-  if (error) throw error
 
   return records.map((r) => r.id).filter((id) => !screenedIds.has(id)).slice(0, limit)
 }

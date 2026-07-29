@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import { Select } from '@/components/ui/Select'
 import type { ProjectOutletContext } from '../ProjectLayout'
-import { CURATED_MODELS, PROVIDER_LABELS, PROVIDER_ORDER } from '@/domain/aiProvider/models'
+import { CURATED_MODELS, MODEL_TIER_LABELS, PROVIDER_LABELS, PROVIDER_ORDER } from '@/domain/aiProvider/models'
 import { PROVIDER_SETUP_INSTRUCTIONS } from '@/domain/aiProvider/setupInstructions'
 import type { AIProvider } from '@/types/domain'
 import type { AiProviderConfig } from '@/features/aiProvider/api'
@@ -80,7 +80,7 @@ function ProviderConfigCard({
       <Select label={t('aiProvider.model')} value={model} onChange={(e) => setModel(e.target.value)}>
         {CURATED_MODELS[provider].map((m) => (
           <option key={m.value} value={m.value}>
-            {m.label}
+            {m.label} — {MODEL_TIER_LABELS[m.tier]}
           </option>
         ))}
       </Select>

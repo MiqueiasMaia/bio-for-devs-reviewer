@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './useAuth'
 import { useTranslation } from '@/i18n'
-import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
-import { Logo } from '@/components/Logo'
 import { AuthLayout } from './AuthLayout'
+import { AuthTabs } from './AuthTabs'
 import { ProviderButtons } from './ProviderButtons'
 
 export function SignupPage() {
@@ -44,15 +43,16 @@ export function SignupPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-8 flex justify-center">
-        <Logo size="lg" />
-      </div>
-
-      <Card className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5">
         {success ? (
-          <p className="text-sm text-include">{t('auth.checkYourEmail')}</p>
+          <>
+            <AuthTabs active="signUp" />
+            <p className="text-sm text-include">{t('auth.checkYourEmail')}</p>
+          </>
         ) : (
           <>
+            <AuthTabs active="signUp" />
+
             <div>
               <h2 className="text-base font-semibold text-fg">{t('auth.createAccountTitle')}</h2>
               <p className="mt-1 text-sm text-mut">{t('auth.createAccountSubtitle')}</p>
@@ -96,14 +96,7 @@ export function SignupPage() {
             <ProviderButtons />
           </>
         )}
-      </Card>
-
-      <p className="mt-4 text-center text-sm text-mut">
-        {t('auth.haveAccount')}{' '}
-        <Link to="/login" className="font-medium text-include">
-          {t('auth.signIn')}
-        </Link>
-      </p>
+      </div>
     </AuthLayout>
   )
 }

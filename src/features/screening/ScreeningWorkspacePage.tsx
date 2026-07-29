@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
 import type { Decision, ScreeningStage } from '@/types/domain'
-import { useQueue, useMyScreenings, useQueueSummary, useSaveScreening, useReconcileDrafts } from './hooks'
+import { useQueue, useMyScreenings, useQueueSummary, useAiMatchForStage, useSaveScreening, useReconcileDrafts } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
+import { computeAiMatchBadge } from './aiMatchBadge'
 import { downloadCsv, exportDecisionsCsv, importLegacyDecisionsCsv } from './csvRoundTrip'
 import { getDailyGoal, getLastPosition, saveLastPosition, setDailyGoal } from './sessionTracker'
 import { useTranslateRecord } from '@/features/translation/hooks'
@@ -51,6 +52,15 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const queue = useQueue(project.id, stage, reviewerId, reviewersRequired)
   const myScreenings = useMyScreenings(project.id, stage, reviewerId)
   const summary = useQueueSummary(project.id, stage, reviewerId)
+  // Only shown when the AI is a triage aid, not a formal co-reviewer — if
+  // ai_counts_as_reviewer is on, its decision is one of the "reviewers'
+  // decisions" screening.blindNotice promises stays hidden until conflict
+  // resolution, same as any human peer.
+  const aiMatch = useAiMatchForStage(
+    project.id,
+    stage,
+    project.settings.ai_screening_enabled && !project.settings.ai_counts_as_reviewer,
+  )
   const highlightTerms = useHighlightTerms(project.id)
   const exclusionReasons = useExclusionReasons(project.id)
   const criteria = useCriteria(project.id)
@@ -364,8 +374,18 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           ) : (
             <>
               <div className="mb-1 flex items-center justify-between gap-2 text-xs text-mut">
-                <span>
+                <span className="flex items-center gap-2">
                   {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
+                  {(() => {
+                    const match = aiMatch.data?.get(current.id)
+                    if (!match) return null
+                    const badge = computeAiMatchBadge(match.decision, match.confidence)
+                    return (
+                      <span className={clsx('text-sm', badge.className)} title={t('screening.aiMatchHint')}>
+                        {badge.icon}
+                      </span>
+                    )
+                  })()}
                 </span>
                 <button
                   type="button"

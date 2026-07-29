@@ -11,6 +11,7 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
   const { data: pendingCount } = useUnscreenedCount(projectId, stage)
   const runScreening = useRunAiScreening(projectId, stage)
   const [batchSize, setBatchSize] = useState(10)
+  const [includeAlreadyScreened, setIncludeAlreadyScreened] = useState(false)
 
   return (
     <Card className="flex flex-col gap-3">
@@ -25,6 +26,15 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
           : t('aiScreening.pending', { count: pendingCount ?? 0 })}
       </p>
 
+      <label className="flex items-center gap-2 text-sm text-fg">
+        <input
+          type="checkbox"
+          checked={includeAlreadyScreened}
+          onChange={(e) => setIncludeAlreadyScreened(e.target.checked)}
+        />
+        {t('aiScreening.includeAlreadyScreened')}
+      </label>
+
       <div className="flex items-end gap-2">
         <TextField
           label={t('aiScreening.batchSize')}
@@ -36,8 +46,8 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
           className="max-w-32"
         />
         <Button
-          onClick={() => runScreening.mutate(batchSize)}
-          disabled={runScreening.isPending || pendingCount === 0}
+          onClick={() => runScreening.mutate({ limit: batchSize, includeAlreadyScreened })}
+          disabled={runScreening.isPending || (pendingCount === 0 && !includeAlreadyScreened)}
         >
           {runScreening.isPending ? t('aiScreening.running') : t('aiScreening.run')}
         </Button>

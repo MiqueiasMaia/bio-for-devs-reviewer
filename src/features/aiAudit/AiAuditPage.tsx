@@ -10,11 +10,10 @@ import { Select } from '@/components/ui/Select'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
 import { decisionLabelKey } from '@/lib/decisionLabel'
-import type { Decision, ScreeningStage } from '@/types/domain'
-import { useAiScreenedRecords, useAiScreeningStats, useAiHumanDivergences } from './hooks'
+import type { ScreeningStage } from '@/types/domain'
+import { useAiScreenedRecords, useAiScreeningStats, useAiHumanDivergences, useRerunAiScreening } from './hooks'
 import { buildAiScreeningStatsCsv } from './api'
-
-type DecisionFilter = 'all' | Decision
+import { filterAiScreenedRecords, type DecisionFilter } from './filterRecords'
 
 export function AiAuditPage() {
   const { project } = useOutletContext<ProjectOutletContext>()
@@ -28,14 +27,12 @@ export function AiAuditPage() {
   const { data: records, isLoading } = useAiScreenedRecords(project.id, stage)
   const { data: stats } = useAiScreeningStats(project.id, stage)
   const { data: divergences } = useAiHumanDivergences(project.id, stage)
+  const rerun = useRerunAiScreening(project.id, stage)
 
-  const filteredRecords = useMemo(() => {
-    return (records ?? []).filter((r) => {
-      if (decisionFilter !== 'all' && r.decision !== decisionFilter) return false
-      if (minConfidence > 0 && r.confidence !== null && r.confidence * 100 < minConfidence) return false
-      return true
-    })
-  }, [records, decisionFilter, minConfidence])
+  const filteredRecords = useMemo(
+    () => filterAiScreenedRecords(records ?? [], decisionFilter, minConfidence),
+    [records, decisionFilter, minConfidence],
+  )
 
   const current = useMemo(
     () => filteredRecords.find((r) => r.id === selectedId) ?? filteredRecords[0],
@@ -195,12 +192,22 @@ export function AiAuditPage() {
 
                 {current && (
                   <Card className="flex flex-col gap-3">
-                    <div>
-                      <p className="text-lg font-semibold text-fg">{current.title || t('common.untitled')}</p>
-                      <p className="text-sm text-mut">
-                        {current.authors} · {current.year ?? '—'}
-                      </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-semibold text-fg">{current.title || t('common.untitled')}</p>
+                        <p className="text-sm text-mut">
+                          {current.authors} · {current.year ?? '—'}
+                        </p>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        onClick={() => rerun.mutate(current.id)}
+                        disabled={rerun.isPending}
+                      >
+                        {rerun.isPending ? t('aiAudit.rerunning') : t('aiAudit.rerun')}
+                      </Button>
                     </div>
+                    {rerun.isError && <p className="text-sm text-red-600">{(rerun.error as Error).message}</p>}
                     <div className="flex items-center gap-4 text-sm">
                       <span className="font-semibold text-fg">{t(decisionLabelKey(current.decision))}</span>
                       {current.confidence !== null && (

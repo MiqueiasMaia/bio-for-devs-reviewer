@@ -3,10 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './useAuth'
 import { useTranslation } from '@/i18n'
-import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
-import { Logo } from '@/components/Logo'
 import { AuthLayout } from './AuthLayout'
 
 /**
@@ -50,11 +48,7 @@ export function ResetPasswordPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-8 flex justify-center">
-        <Logo size="lg" />
-      </div>
-
-      <Card className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5">
         {!loading && !session ? (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-red-600">{t('auth.invalidResetLink')}</p>
@@ -93,7 +87,7 @@ export function ResetPasswordPage() {
             </form>
           </>
         )}
-      </Card>
+      </div>
     </AuthLayout>
   )
 }

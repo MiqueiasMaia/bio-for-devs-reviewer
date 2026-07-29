@@ -133,6 +133,29 @@ export async function fetchMyScreenings(
   )
 }
 
+export interface AiMatchState {
+  decision: Decision
+  confidence: number | null
+}
+
+/** For the Rayyan-style automated match indicator shown next to the
+ * article while screening (see aiMatchBadge.ts) — one row per record for
+ * this project/stage, keyed by record id. Joined through `records` to
+ * scope by project since `ai_screenings` has no project_id of its own. */
+export async function fetchAiMatchForStage(
+  projectId: string,
+  stage: ScreeningStage,
+): Promise<Map<string, AiMatchState>> {
+  const { data, error } = await supabase
+    .from('ai_screenings')
+    .select('record_id, decision, confidence, records!inner(project_id)')
+    .eq('stage', stage)
+    .eq('records.project_id', projectId)
+    .returns<{ record_id: string; decision: Decision; confidence: number | null }[]>()
+  if (error) throw error
+  return new Map(data.map((s) => [s.record_id, { decision: s.decision, confidence: s.confidence }]))
+}
+
 export async function saveScreening(input: {
   recordId: string
   reviewerId: string
