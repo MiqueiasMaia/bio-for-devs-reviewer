@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { AppLayout } from '@/components/AppLayout'
 import { Card } from '@/components/ui/Card'
@@ -10,7 +12,8 @@ import { CreateProjectDialog } from './CreateProjectDialog'
 
 export function ProjectsDashboardPage() {
   const { t } = useTranslation()
-  const { data: projects, isLoading, isError, refetch } = useProjects()
+  const [archived, setArchived] = useState(false)
+  const { data: projects, isLoading, isError, refetch } = useProjects(archived)
   const wizardOpen = useCreateProjectDialogStore((s) => s.open)
   const setWizardOpen = useCreateProjectDialogStore((s) => s.setOpen)
 
@@ -19,6 +22,27 @@ export function ProjectsDashboardPage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold">{t('projects.title')}</h1>
         <p className="text-sm text-mut">{t('projects.subtitle')}</p>
+      </div>
+
+      <div className="mb-4 flex gap-1">
+        <button
+          onClick={() => setArchived(false)}
+          className={clsx(
+            'px-3 py-1.5 text-sm font-medium',
+            !archived ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
+          )}
+        >
+          {t('projects.filterActive')}
+        </button>
+        <button
+          onClick={() => setArchived(true)}
+          className={clsx(
+            'px-3 py-1.5 text-sm font-medium',
+            archived ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
+          )}
+        >
+          {t('projects.filterArchived')}
+        </button>
       </div>
 
       {isError && <ErrorState onRetry={() => refetch()} />}

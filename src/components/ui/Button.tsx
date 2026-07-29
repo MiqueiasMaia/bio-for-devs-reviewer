@@ -2,13 +2,14 @@ import { type ButtonHTMLAttributes } from 'react'
 import clsx from 'clsx'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
 }
 
 const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary: 'bg-include text-white border-include hover:bg-include/90',
   secondary: 'bg-white text-fg border-line hover:bg-bg',
   ghost: 'bg-transparent text-mut border-transparent hover:bg-bg',
+  danger: 'bg-white text-red-700 border-red-300 hover:bg-red-50',
 }
 
 export function Button({ variant = 'primary', className, ...props }: ButtonProps) {

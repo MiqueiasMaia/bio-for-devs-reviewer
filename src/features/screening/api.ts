@@ -181,3 +181,36 @@ export async function fetchQueueSummary(
   const decided = include + uncertain + exclude
   return { include, uncertain, exclude, undecided: total - decided, total }
 }
+
+/**
+ * Same shape as fetchQueueSummary, but the project-wide consensus view
+ * instead of one reviewer's own decisions — the "project" side of the
+ * Your progress / Project progress toggle.
+ */
+export async function fetchProjectDecisionCounts(
+  projectId: string,
+  stage: ScreeningStage,
+): Promise<QueueSummary> {
+  const relevantIds = await listEligibleRecordIds(projectId, stage)
+  const total = relevantIds.size
+  if (total === 0) return { include: 0, uncertain: 0, exclude: 0, undecided: 0, total: 0 }
+
+  const { data, error } = await supabase
+    .from('v_record_final_decision')
+    .select('record_id, final_decision')
+    .eq('project_id', projectId)
+    .eq('stage', stage)
+  if (error) throw error
+
+  let include = 0
+  let uncertain = 0
+  let exclude = 0
+  for (const d of data) {
+    if (!relevantIds.has(d.record_id)) continue
+    if (d.final_decision === 'INCLUDE') include++
+    else if (d.final_decision === 'UNCERTAIN') uncertain++
+    else if (d.final_decision === 'EXCLUDE') exclude++
+  }
+  const decided = include + uncertain + exclude
+  return { include, uncertain, exclude, undecided: total - decided, total }
+}

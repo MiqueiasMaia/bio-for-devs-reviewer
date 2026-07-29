@@ -5,11 +5,11 @@ import * as api from './api'
 export const projectsQueryKey = ['projects'] as const
 export const projectQueryKey = (projectId: string) => ['projects', projectId] as const
 
-export function useProjects() {
+export function useProjects(archived = false) {
   const { user } = useAuth()
   return useQuery({
-    queryKey: projectsQueryKey,
-    queryFn: () => api.listMyProjects(user!.id),
+    queryKey: [...projectsQueryKey, archived],
+    queryFn: () => api.listMyProjects(user!.id, { archived }),
     enabled: Boolean(user),
   })
 }
@@ -26,6 +26,36 @@ export function useCreateProject() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: api.createProject,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: projectsQueryKey }),
+  })
+}
+
+export function useArchiveProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (projectId: string) => api.archiveProject(projectId),
+    onSuccess: (_data, projectId) => {
+      queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      queryClient.invalidateQueries({ queryKey: projectQueryKey(projectId) })
+    },
+  })
+}
+
+export function useUnarchiveProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (projectId: string) => api.unarchiveProject(projectId),
+    onSuccess: (_data, projectId) => {
+      queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      queryClient.invalidateQueries({ queryKey: projectQueryKey(projectId) })
+    },
+  })
+}
+
+export function useDeleteProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (projectId: string) => api.deleteProject(projectId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: projectsQueryKey }),
   })
 }

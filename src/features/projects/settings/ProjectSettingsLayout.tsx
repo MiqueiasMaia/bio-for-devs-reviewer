@@ -34,6 +34,9 @@ export function ProjectSettingsLayout() {
         <NavLink to="members" className={tabClass}>
           {t('settingsNav.members')}
         </NavLink>
+        <NavLink to="ai-setup" className={tabClass}>
+          {t('settingsNav.aiSetup')}
+        </NavLink>
       </nav>
       <Outlet context={context} />
     </div>

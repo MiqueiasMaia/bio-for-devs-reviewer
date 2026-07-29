@@ -1,18 +1,23 @@
 import { useState, type FormEvent } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
 import type { ProjectOutletContext } from '../ProjectLayout'
-import { useUpdateProjectSettings } from '../hooks'
+import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUpdateProjectSettings } from '../hooks'
 import { BackupPanel } from '@/features/backup/BackupPanel'
 import type { ScreeningStage } from '@/types/domain'
 
 export function GeneralTab() {
   const { project } = useOutletContext<ProjectOutletContext>()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const updateSettings = useUpdateProjectSettings(project.id)
+  const archiveProject = useArchiveProject()
+  const unarchiveProject = useUnarchiveProject()
+  const deleteProject = useDeleteProject()
+  const [deleteConfirmName, setDeleteConfirmName] = useState('')
 
   const [name, setName] = useState(project.name)
   const [description, setDescription] = useState(project.description)
@@ -172,6 +177,57 @@ export function GeneralTab() {
       </form>
     </Card>
     <BackupPanel projectId={project.id} settings={settings} />
+
+    <Card className="flex flex-col gap-4 border-red-300">
+      <div>
+        <h2 className="text-base font-semibold text-red-700">{t('dangerZone.title')}</h2>
+        <p className="text-sm text-mut">{t('dangerZone.subtitle')}</p>
+      </div>
+
+      <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
+        <div>
+          <p className="text-sm font-medium text-fg">
+            {project.archivedAt ? t('dangerZone.archivedLabel') : t('dangerZone.archiveLabel')}
+          </p>
+          <p className="text-xs text-mut">{t('dangerZone.archiveHint')}</p>
+        </div>
+        {project.archivedAt ? (
+          <Button
+            variant="secondary"
+            disabled={unarchiveProject.isPending}
+            onClick={() => unarchiveProject.mutate(project.id)}
+          >
+            {t('dangerZone.unarchive')}
+          </Button>
+        ) : (
+          <Button
+            variant="secondary"
+            disabled={archiveProject.isPending}
+            onClick={() => archiveProject.mutate(project.id)}
+          >
+            {t('dangerZone.archive')}
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-line pt-4">
+        <p className="text-sm font-medium text-fg">{t('dangerZone.deleteLabel')}</p>
+        <p className="text-xs text-mut">{t('dangerZone.deleteHint')}</p>
+        <TextField
+          label={t('dangerZone.confirmNameLabel', { name: project.name })}
+          value={deleteConfirmName}
+          onChange={(e) => setDeleteConfirmName(e.target.value)}
+        />
+        <Button
+          variant="danger"
+          className="self-start"
+          disabled={deleteConfirmName !== project.name || deleteProject.isPending}
+          onClick={() => deleteProject.mutate(project.id, { onSuccess: () => navigate('/projects') })}
+        >
+          {deleteProject.isPending ? t('dangerZone.deleting') : t('dangerZone.delete')}
+        </Button>
+      </div>
+    </Card>
     </div>
   )
 }

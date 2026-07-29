@@ -49,6 +49,7 @@ export interface Database {
           created_by: string
           created_at: string
           updated_at: string
+          archived_at: string | null
         },
         {
           id?: string
@@ -58,12 +59,14 @@ export interface Database {
           prospero_id?: string | null
           settings?: ProjectSettings
           created_by: string
+          archived_at?: string | null
         },
         {
           name?: string
           description?: string
           prospero_id?: string | null
           settings?: ProjectSettings
+          archived_at?: string | null
         }
       >
       project_members: Table<

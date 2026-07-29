@@ -206,3 +206,29 @@ export async function splitRecordFromGroup(recordId: string): Promise<void> {
 export async function setDedupPrimary(groupId: string, recordIds: string[], primaryId: string): Promise<void> {
   await applyDedupGroup(groupId, recordIds, primaryId)
 }
+
+export interface DedupSummary {
+  /** Total records marked as duplicates (member_count - 1 per group, summed). */
+  totalDuplicates: number
+  /** Groups that still need a primary picked. */
+  unresolved: number
+  /** Groups that already have a primary chosen. */
+  resolved: number
+}
+
+export async function fetchDedupSummary(projectId: string): Promise<DedupSummary> {
+  const { data, error } = await supabase
+    .from('v_dedup_groups')
+    .select('member_count, has_primary')
+    .eq('project_id', projectId)
+  if (error) throw error
+  let totalDuplicates = 0
+  let unresolved = 0
+  let resolved = 0
+  for (const g of data) {
+    totalDuplicates += g.member_count - 1
+    if (g.has_primary) resolved++
+    else unresolved++
+  }
+  return { totalDuplicates, unresolved, resolved }
+}

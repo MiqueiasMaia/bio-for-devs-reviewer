@@ -14,6 +14,7 @@ export function useRunImport(projectId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: recordsKey(projectId) })
       qc.invalidateQueries({ queryKey: dedupGroupsKey(projectId) })
+      qc.invalidateQueries({ queryKey: ['dedup_summary', projectId] })
       qc.invalidateQueries({ queryKey: projectsQueryKey })
     },
   })
@@ -23,11 +24,19 @@ export function useDedupGroups(projectId: string) {
   return useQuery({ queryKey: dedupGroupsKey(projectId), queryFn: () => api.listDedupGroups(projectId) })
 }
 
+export function useDedupSummary(projectId: string) {
+  return useQuery({
+    queryKey: ['dedup_summary', projectId],
+    queryFn: () => api.fetchDedupSummary(projectId),
+  })
+}
+
 export function useDedupMutations(projectId: string) {
   const qc = useQueryClient()
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: dedupGroupsKey(projectId) })
     qc.invalidateQueries({ queryKey: recordsKey(projectId) })
+    qc.invalidateQueries({ queryKey: ['dedup_summary', projectId] })
     qc.invalidateQueries({ queryKey: projectsQueryKey })
   }
   return {

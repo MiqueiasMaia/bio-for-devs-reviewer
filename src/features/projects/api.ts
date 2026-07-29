@@ -23,6 +23,7 @@ export interface ProjectDetail {
   ownerId: string
   settings: ProjectSettings
   createdAt: string
+  archivedAt: string | null
 }
 
 interface ProjectWithRoleRow {
@@ -34,14 +35,20 @@ interface ProjectWithRoleRow {
   project_members: { role: ProjectRole }[]
 }
 
-export async function listMyProjects(userId: string): Promise<ProjectSummary[]> {
+export async function listMyProjects(
+  userId: string,
+  options?: { archived?: boolean },
+): Promise<ProjectSummary[]> {
+  const archived = options?.archived ?? false
   // Relationships aren't declared in database.types.ts (see the comment
   // there), so the embed's row shape is pinned explicitly with .returns()
   // rather than relying on supabase-js to infer it from FK metadata.
-  const { data: rows, error } = await supabase
+  let query = supabase
     .from('projects')
     .select('id, name, description, prospero_id, created_at, project_members!inner(role)')
     .eq('project_members.user_id', userId)
+  query = archived ? query.not('archived_at', 'is', null) : query.is('archived_at', null)
+  const { data: rows, error } = await query
     .order('created_at', { ascending: false })
     .returns<ProjectWithRoleRow[]>()
 
@@ -99,7 +106,7 @@ export async function createProject(input: CreateProjectInput): Promise<{ id: st
 export async function getProject(projectId: string): Promise<ProjectDetail> {
   const { data, error } = await supabase
     .from('projects')
-    .select('id, name, description, prospero_id, owner_id, settings, created_at')
+    .select('id, name, description, prospero_id, owner_id, settings, created_at, archived_at')
     .eq('id', projectId)
     .single()
   if (error) throw error
@@ -111,6 +118,7 @@ export async function getProject(projectId: string): Promise<ProjectDetail> {
     ownerId: data.owner_id,
     settings: data.settings,
     createdAt: data.created_at,
+    archivedAt: data.archived_at,
   }
 }
 
@@ -130,7 +138,51 @@ export async function updateProjectSettings(
   if (error) throw error
 }
 
+export async function archiveProject(projectId: string): Promise<void> {
+  const { error } = await supabase
+    .from('projects')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', projectId)
+  if (error) throw error
+}
+
+export async function unarchiveProject(projectId: string): Promise<void> {
+  const { error } = await supabase.from('projects').update({ archived_at: null }).eq('id', projectId)
+  if (error) throw error
+}
+
+/** Storage objects (imports/fulltext PDFs) aren't covered by the `on delete
+ * cascade` on the DB tables that reference them — they live in Supabase
+ * Storage, not a table row — so they need to be listed and removed
+ * explicitly before the project row itself is deleted. `list()` only
+ * descends one folder level at a time, hence the recursion. */
+async function listStorageObjectPaths(bucket: string, prefix: string): Promise<string[]> {
+  const { data, error } = await supabase.storage.from(bucket).list(prefix, { limit: 1000 })
+  if (error) throw error
+  const paths: string[] = []
+  for (const entry of data ?? []) {
+    const path = `${prefix}/${entry.name}`
+    if (entry.id === null) {
+      paths.push(...(await listStorageObjectPaths(bucket, path)))
+    } else {
+      paths.push(path)
+    }
+  }
+  return paths
+}
+
+async function deleteProjectStorageObjects(projectId: string): Promise<void> {
+  for (const bucket of ['imports', 'fulltext'] as const) {
+    const paths = await listStorageObjectPaths(bucket, projectId)
+    if (paths.length > 0) {
+      const { error } = await supabase.storage.from(bucket).remove(paths)
+      if (error) throw error
+    }
+  }
+}
+
 export async function deleteProject(projectId: string): Promise<void> {
+  await deleteProjectStorageObjects(projectId)
   const { error } = await supabase.from('projects').delete().eq('id', projectId)
   if (error) throw error
 }

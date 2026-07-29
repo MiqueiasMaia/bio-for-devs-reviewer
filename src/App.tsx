@@ -15,6 +15,7 @@ import { CriteriaTab } from '@/features/projects/settings/CriteriaTab'
 import { PicotsTab } from '@/features/projects/settings/PicotsTab'
 import { ExclusionReasonsTab } from '@/features/projects/settings/ExclusionReasonsTab'
 import { MembersTab } from '@/features/projects/settings/MembersTab'
+import { AiSetupPage } from '@/features/aiSetup/AiSetupPage'
 import { ImportWizardPage } from '@/features/imports/ImportWizardPage'
 import { DedupReviewPage } from '@/features/imports/DedupReviewPage'
 import { ScreeningWorkspacePage } from '@/features/screening/ScreeningWorkspacePage'
@@ -73,6 +74,7 @@ function App() {
                 <Route path="picots" element={<PicotsTab />} />
                 <Route path="exclusion-reasons" element={<ExclusionReasonsTab />} />
                 <Route path="members" element={<MembersTab />} />
+                <Route path="ai-setup" element={<AiSetupPage />} />
               </Route>
             </Route>
             <Route path="/" element={<Navigate to="/projects" replace />} />
