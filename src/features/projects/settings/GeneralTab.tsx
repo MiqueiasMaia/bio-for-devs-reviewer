@@ -5,10 +5,12 @@ import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
 import type { ProjectOutletContext } from '../ProjectLayout'
-import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUpdateProjectSettings } from '../hooks'
+import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUnlockStage, useUpdateProjectSettings } from '../hooks'
 import { BackupPanel } from '@/features/backup/BackupPanel'
 import { useAiProviderConfigs } from '@/features/aiProvider/hooks'
 import { useAuth } from '@/features/auth/useAuth'
+import { canUnlockStage, getApplicableStages, isStageUnlocked, reconcileUnlockedStages } from '@/domain/stageLock/stageLock'
+import { stageLabelKey } from '@/lib/stageLabel'
 import type { ScreeningStage } from '@/types/domain'
 
 export function GeneralTab() {
@@ -18,6 +20,7 @@ export function GeneralTab() {
   const { user } = useAuth()
   const isOwner = project.ownerId === user?.id
   const updateSettings = useUpdateProjectSettings(project.id)
+  const stageLock = useUnlockStage(project.id)
   const archiveProject = useArchiveProject()
   const unarchiveProject = useUnarchiveProject()
   const deleteProject = useDeleteProject()
@@ -48,9 +51,16 @@ export function GeneralTab() {
     })
   }
 
+  const applicableStages = getApplicableStages(project.settings)
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    updateSettings.mutate({ name, description, prosperoId: prosperoId || null, settings })
+    // Enabling/disabling a stage here can change which stage is "first"
+    // (auto-unlocked) or drop a stage that was previously unlocked — keep
+    // unlocked_stages consistent with whatever stages_enabled/
+    // risk_of_bias_enabled/data_extraction_enabled end up as.
+    const reconciled = reconcileUnlockedStages(settings.unlocked_stages, getApplicableStages(settings))
+    updateSettings.mutate({ name, description, prosperoId: prosperoId || null, settings: { ...settings, unlocked_stages: reconciled } })
   }
 
   return (
@@ -169,6 +179,33 @@ export function GeneralTab() {
             {t('settingsGeneral.stageFullText')}
           </label>
         </fieldset>
+
+        {isOwner && (
+          <fieldset className="flex flex-col gap-2 border-t border-line pt-4">
+            <legend className="text-sm font-medium text-fg">{t('settingsGeneral.stagesUnlocked')}</legend>
+            {applicableStages.map((stage, i) => {
+              const unlocked = isStageUnlocked(stage, project.settings.unlocked_stages, applicableStages)
+              const isFirst = i === 0
+              const canToggle = !isFirst && (canUnlockStage(stage, project.settings.unlocked_stages, applicableStages) || unlocked)
+              return (
+                <label key={stage} className="flex flex-col gap-0.5 text-sm text-fg">
+                  <span className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={unlocked}
+                      disabled={isFirst || !canToggle || stageLock.isPending}
+                      onChange={() => (unlocked ? stageLock.lock(project, stage) : stageLock.unlock(project, stage))}
+                    />
+                    {t(stageLabelKey(stage))}
+                  </span>
+                  {!isFirst && !unlocked && !canToggle && (
+                    <span className="ml-6 text-xs text-uncertain">{t('settingsGeneral.stageLockedHint')}</span>
+                  )}
+                </label>
+              )
+            })}
+          </fieldset>
+        )}
 
         <div className="border-t border-line pt-4">
           <h3 className="mb-2 text-sm font-semibold text-fg">{t('settingsGeneral.dedupTitle')}</h3>

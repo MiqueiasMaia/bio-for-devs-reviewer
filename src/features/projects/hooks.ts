@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/useAuth'
+import { getApplicableStages, lockStage, unlockStage } from '@/domain/stageLock/stageLock'
+import type { StageKey } from '@/types/domain'
 import * as api from './api'
+import type { ProjectDetail } from './api'
 
 export const projectsQueryKey = ['projects'] as const
 export const projectQueryKey = (projectId: string) => ['projects', projectId] as const
@@ -70,4 +73,31 @@ export function useUpdateProjectSettings(projectId: string) {
       queryClient.invalidateQueries({ queryKey: projectsQueryKey })
     },
   })
+}
+
+/**
+ * Unlocks/locks a workflow stage (título/resumo -> texto completo ->
+ * conflitos -> risco de viés -> extração de dados). Reads from the
+ * server-fresh `project` passed at call time rather than any locally
+ * drafted settings, so it can't clobber unrelated unsaved edits elsewhere
+ * (e.g. a pending Settings form draft).
+ */
+export function useUnlockStage(projectId: string) {
+  const update = useUpdateProjectSettings(projectId)
+  return {
+    ...update,
+    unlock: (project: ProjectDetail, stage: StageKey) => {
+      const applicable = getApplicableStages(project.settings)
+      const next = unlockStage(stage, project.settings.unlocked_stages, applicable)
+      if (next !== project.settings.unlocked_stages) {
+        update.mutate({ settings: { ...project.settings, unlocked_stages: next } })
+      }
+    },
+    lock: (project: ProjectDetail, stage: StageKey) => {
+      const applicable = getApplicableStages(project.settings)
+      update.mutate({
+        settings: { ...project.settings, unlocked_stages: lockStage(stage, project.settings.unlocked_stages, applicable) },
+      })
+    },
+  }
 }

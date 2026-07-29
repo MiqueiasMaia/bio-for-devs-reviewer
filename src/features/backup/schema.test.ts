@@ -19,6 +19,7 @@ const validBackup: ProjectBackup = {
       ai_counts_as_reviewer: false,
       risk_of_bias_enabled: false,
       data_extraction_enabled: false,
+      unlocked_stages: ['title_abstract'],
     },
   },
   criteria: [],

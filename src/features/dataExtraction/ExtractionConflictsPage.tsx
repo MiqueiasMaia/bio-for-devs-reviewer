@@ -6,6 +6,7 @@ import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
+import { StageGate } from '@/components/StageGate'
 import { useExtractionConflicts, useResolveExtractionField } from './hooks'
 import type { ExtractionConflictDetail } from './api'
 
@@ -81,25 +82,27 @@ export function ExtractionConflictsPage() {
   const { data: conflicts, isLoading } = useExtractionConflicts(project.id)
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-fg">{t('dataExtraction.conflictsTitle')}</h2>
-          <p className="text-sm text-mut">{t('dataExtraction.conflictsSubtitle')}</p>
+    <StageGate project={project} stage="data_extraction">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-fg">{t('dataExtraction.conflictsTitle')}</h2>
+            <p className="text-sm text-mut">{t('dataExtraction.conflictsSubtitle')}</p>
+          </div>
+          <Link to=".." relative="path" className="text-sm text-include">
+            ← {t('dataExtraction.backToExtraction')}
+          </Link>
         </div>
-        <Link to=".." relative="path" className="text-sm text-include">
-          ← {t('dataExtraction.backToExtraction')}
-        </Link>
+
+        {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
+        {!isLoading && conflicts?.length === 0 && (
+          <Card className="py-10 text-center text-sm text-mut">{t('dataExtraction.noConflicts')}</Card>
+        )}
+
+        {conflicts?.map((c) => (
+          <ExtractionConflictCard key={`${c.recordId}-${c.fieldKey}`} conflict={c} projectId={project.id} />
+        ))}
       </div>
-
-      {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
-      {!isLoading && conflicts?.length === 0 && (
-        <Card className="py-10 text-center text-sm text-mut">{t('dataExtraction.noConflicts')}</Card>
-      )}
-
-      {conflicts?.map((c) => (
-        <ExtractionConflictCard key={`${c.recordId}-${c.fieldKey}`} conflict={c} projectId={project.id} />
-      ))}
-    </div>
+    </StageGate>
   )
 }

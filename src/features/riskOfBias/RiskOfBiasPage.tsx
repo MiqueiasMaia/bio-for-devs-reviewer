@@ -7,6 +7,7 @@ import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { StageGate } from '@/components/StageGate'
 import { PROBAST_DOMAINS, ROB_ANSWER_OPTIONS, ROB_JUDGMENT_OPTIONS, type ProbastDomainConfig } from '@/domain/riskOfBias/probast'
 import type { RobAnswer, RobJudgment } from '@/types/domain'
 import { useRobAssessments, useRobEligibleRecords, useRobOverallStatus, useSaveRobAssessment } from './hooks'
@@ -182,70 +183,72 @@ export function RiskOfBiasPage() {
   const current = useMemo(() => records?.find((r) => r.id === selectedId), [records, selectedId])
 
   return (
-    <div>
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-fg">{t('riskOfBias.title')}</h2>
-        <p className="text-sm text-mut">{t('riskOfBias.subtitle')}</p>
-      </div>
+    <StageGate project={project} stage="risk_of_bias">
+      <div>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-fg">{t('riskOfBias.title')}</h2>
+          <p className="text-sm text-mut">{t('riskOfBias.subtitle')}</p>
+        </div>
 
-      {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
-      {!isLoading && records?.length === 0 && (
-        <Card className="py-10 text-center text-sm text-mut">{t('riskOfBias.empty')}</Card>
-      )}
+        {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
+        {!isLoading && records?.length === 0 && (
+          <Card className="py-10 text-center text-sm text-mut">{t('riskOfBias.empty')}</Card>
+        )}
 
-      {records && records.length > 0 && (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr]">
-          <div className="flex flex-col gap-1.5">
-            {records.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setSelectedId(r.id)}
-                className={clsx(
-                  'border px-3 py-2 text-left text-sm cursor-pointer',
-                  selectedId === r.id ? 'border-include bg-include/5' : 'border-line hover:bg-bg',
-                )}
-              >
-                <span className="block truncate font-medium text-fg">{r.title || t('common.untitled')}</span>
-                <span className="text-xs text-mut">
-                  {r.humanRef} ·{' '}
-                  {overallStatus?.get(r.id) ? t('riskOfBias.statusDone') : t('riskOfBias.statusPending')}
-                </span>
-              </button>
-            ))}
-          </div>
+        {records && records.length > 0 && (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr]">
+            <div className="flex flex-col gap-1.5">
+              {records.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setSelectedId(r.id)}
+                  className={clsx(
+                    'border px-3 py-2 text-left text-sm cursor-pointer',
+                    selectedId === r.id ? 'border-include bg-include/5' : 'border-line hover:bg-bg',
+                  )}
+                >
+                  <span className="block truncate font-medium text-fg">{r.title || t('common.untitled')}</span>
+                  <span className="text-xs text-mut">
+                    {r.humanRef} ·{' '}
+                    {overallStatus?.get(r.id) ? t('riskOfBias.statusDone') : t('riskOfBias.statusPending')}
+                  </span>
+                </button>
+              ))}
+            </div>
 
-          {current && (
-            <div className="flex flex-col gap-4">
-              <Card>
-                <p className="text-lg font-semibold text-fg">{current.title || t('common.untitled')}</p>
-                <p className="text-sm text-mut">
-                  {current.authors} · {current.year ?? '—'}
-                </p>
-              </Card>
+            {current && (
+              <div className="flex flex-col gap-4">
+                <Card>
+                  <p className="text-lg font-semibold text-fg">{current.title || t('common.untitled')}</p>
+                  <p className="text-sm text-mut">
+                    {current.authors} · {current.year ?? '—'}
+                  </p>
+                </Card>
 
-              {PROBAST_DOMAINS.map((config) => (
-                <DomainBlock
-                  key={`${config.id}-${selectedId}`}
+                {PROBAST_DOMAINS.map((config) => (
+                  <DomainBlock
+                    key={`${config.id}-${selectedId}`}
+                    projectId={project.id}
+                    recordId={selectedId!}
+                    assessorId={assessorId}
+                    config={config}
+                    initial={assessments?.get(config.id)}
+                  />
+                ))}
+
+                <OverallBlock
+                  key={`overall-${selectedId}`}
                   projectId={project.id}
                   recordId={selectedId!}
                   assessorId={assessorId}
-                  config={config}
-                  initial={assessments?.get(config.id)}
+                  initial={assessments?.get('overall')}
                 />
-              ))}
-
-              <OverallBlock
-                key={`overall-${selectedId}`}
-                projectId={project.id}
-                recordId={selectedId!}
-                assessorId={assessorId}
-                initial={assessments?.get('overall')}
-              />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </StageGate>
   )
 }

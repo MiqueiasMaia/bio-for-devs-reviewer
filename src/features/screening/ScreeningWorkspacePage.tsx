@@ -9,6 +9,9 @@ import { HighlightedText } from '@/components/HighlightedText'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
+import { StageGate } from '@/components/StageGate'
+import { getApplicableStages, getNextStage, isStageUnlocked } from '@/domain/stageLock/stageLock'
+import { useUnlockStage } from '@/features/projects/hooks'
 import type { Decision, ScreeningStage } from '@/types/domain'
 import { useQueue, useMyScreenings, useQueueSummary, useAiMatchForStage, useSaveScreening, useReconcileDrafts } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
@@ -37,8 +40,8 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const [filter, setFilter] = useState<FilterValue>('all')
   const [index, setIndex] = useState(0)
   const [hlOn, setHlOn] = useState(true)
-  const [showInclusionCriteria, setShowInclusionCriteria] = useState(true)
-  const [showExclusionCriteria, setShowExclusionCriteria] = useState(true)
+  const [showInclusionCriteria, setShowInclusionCriteria] = useState(false)
+  const [showExclusionCriteria, setShowExclusionCriteria] = useState(false)
   const [decisionDraft, setDecisionDraft] = useState<Decision | null>(null)
   const [reasonsDraft, setReasonsDraft] = useState<string[]>([])
   const [notesDraft, setNotesDraft] = useState('')
@@ -52,6 +55,12 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const queue = useQueue(project.id, stage, reviewerId, reviewersRequired)
   const myScreenings = useMyScreenings(project.id, stage, reviewerId)
   const summary = useQueueSummary(project.id, stage, reviewerId)
+  const applicableStages = useMemo(() => getApplicableStages(project.settings), [project.settings])
+  const nextStage = getNextStage(stage, applicableStages)
+  const nextStageAlreadyUnlocked = !nextStage || isStageUnlocked(nextStage, project.settings.unlocked_stages, applicableStages)
+  const showUnlockCta = summary.data?.undecided === 0 && (summary.data?.total ?? 0) > 0 && !!nextStage && !nextStageAlreadyUnlocked
+  const isOwner = project.ownerId === user?.id
+  const { unlock, isPending: unlocking } = useUnlockStage(project.id)
   // Only shown when the AI is a triage aid, not a formal co-reviewer — if
   // ai_counts_as_reviewer is on, its decision is one of the "reviewers'
   // decisions" screening.blindNotice promises stays hidden until conflict
@@ -270,6 +279,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const exclusionCriteria = criteria.data?.filter((c) => c.kind === 'exclusion') ?? []
 
   return (
+    <StageGate project={project} stage={stage}>
     <div>
       <div className="sticky top-[57px] z-[5] -mx-6 mb-4 flex flex-wrap items-center gap-3 border-b border-line bg-bg/95 px-6 py-3 backdrop-blur">
         {summary.data && (
@@ -536,6 +546,19 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
               </div>
               <p className="mt-2 text-center text-[11px] text-mut">{t('screening.autosaved')}</p>
 
+              {showUnlockCta && (
+                <div className="mt-4 border border-include p-4 text-center">
+                  <p className="mb-2 text-sm font-semibold text-include">{t('stageLock.reviewerDoneTitle')}</p>
+                  {isOwner ? (
+                    <Button onClick={() => unlock(project, nextStage!)} disabled={unlocking}>
+                      {t('stageLock.unlockNextCta')}
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-mut">{t('stageLock.waitingForOwner')}</p>
+                  )}
+                </div>
+              )}
+
               {summary.data && (
                 <div className="mt-3 flex flex-wrap gap-1.5 text-[11.5px]">
                   <span className="border border-line bg-[#e7f1f4] px-2 py-0.5 font-semibold text-include">
@@ -597,5 +620,6 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
         </aside>
       </div>
     </div>
+    </StageGate>
   )
 }

@@ -7,6 +7,7 @@ import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ErrorState } from '@/components/ErrorState'
+import { StageGate } from '@/components/StageGate'
 import type { Decision, ScreeningStage } from '@/types/domain'
 import { decisionLabelKey } from '@/lib/decisionLabel'
 import { useConflicts, useResolveConflict } from './hooks'
@@ -92,38 +93,40 @@ export function ConflictsPage() {
   const { data: conflicts, isLoading, isError, refetch } = useConflicts(project.id, stage)
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-lg font-semibold text-fg">{t('conflicts.title')}</h2>
-        <p className="text-sm text-mut">{t('conflicts.subtitle')}</p>
-      </div>
-
-      {project.settings.stages_enabled.length > 1 && (
-        <div className="flex gap-1">
-          {project.settings.stages_enabled.map((s) => (
-            <button
-              key={s}
-              onClick={() => setStage(s)}
-              className={clsx(
-                'px-3 py-1.5 text-sm font-medium',
-                stage === s ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
-              )}
-            >
-              {s === 'title_abstract' ? t('screening.stageTitleAbstract') : t('screening.stageFullText')}
-            </button>
-          ))}
+    <StageGate project={project} stage="conflicts">
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-lg font-semibold text-fg">{t('conflicts.title')}</h2>
+          <p className="text-sm text-mut">{t('conflicts.subtitle')}</p>
         </div>
-      )}
 
-      {isError && <ErrorState onRetry={() => refetch()} />}
-      {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
-      {!isLoading && !isError && conflicts?.length === 0 && (
-        <Card className="py-10 text-center text-sm text-mut">{t('conflicts.empty')}</Card>
-      )}
+        {project.settings.stages_enabled.length > 1 && (
+          <div className="flex gap-1">
+            {project.settings.stages_enabled.map((s) => (
+              <button
+                key={s}
+                onClick={() => setStage(s)}
+                className={clsx(
+                  'px-3 py-1.5 text-sm font-medium',
+                  stage === s ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
+                )}
+              >
+                {s === 'title_abstract' ? t('screening.stageTitleAbstract') : t('screening.stageFullText')}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {conflicts?.map((c) => (
-        <ConflictCard key={c.recordId} conflict={c} stage={stage} projectId={project.id} />
-      ))}
-    </div>
+        {isError && <ErrorState onRetry={() => refetch()} />}
+        {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
+        {!isLoading && !isError && conflicts?.length === 0 && (
+          <Card className="py-10 text-center text-sm text-mut">{t('conflicts.empty')}</Card>
+        )}
+
+        {conflicts?.map((c) => (
+          <ConflictCard key={c.recordId} conflict={c} stage={stage} projectId={project.id} />
+        ))}
+      </div>
+    </StageGate>
   )
 }

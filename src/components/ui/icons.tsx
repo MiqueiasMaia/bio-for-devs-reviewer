@@ -42,6 +42,15 @@ export function SearchIcon({ className }: IconProps) {
   )
 }
 
+export function LockIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="4.5" y="9" width="11" height="8" rx="1.4" />
+      <path d="M6.8 9V6.8a3.2 3.2 0 0 1 6.4 0V9" />
+    </svg>
+  )
+}
+
 /** Generic (monochrome, currentColor) provider glyphs for the disabled
  * "coming soon" sign-in buttons — not brand-accurate logomarks, just
  * recognizable enough to read as "Google" / "GitHub" / "ORCID" at a glance. */
