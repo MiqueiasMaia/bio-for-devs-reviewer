@@ -8,6 +8,7 @@ import { useCriteria, useExclusionReasons, useHighlightTerms } from '@/features/
 import { HighlightedText } from '@/components/HighlightedText'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
 import type { Decision, ScreeningStage } from '@/types/domain'
 import { useQueue, useMyScreenings, useQueueSummary, useSaveScreening, useReconcileDrafts } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
@@ -112,6 +113,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
   function toggleReason(code: string) {
     if (!current) return
+    const isAdding = !reasonsDraft.includes(code)
     setReasonsDraft((prev) => {
       const next = prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
       if (decisionDraft === 'EXCLUDE' && next.length > 0) {
@@ -119,6 +121,14 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
       }
       return next
     })
+    // Picking a reason is what "completes" an EXCLUDE decision (the
+    // buttons alone don't, so there's time to choose one — see the pin
+    // comment above). Once a reason is picked, advance the same way
+    // INCLUDE/UNCERTAIN already do. Only on adding a reason, not removing
+    // one — unchecking a reason is a correction, not a fresh decision.
+    if (isAdding && decisionDraft === 'EXCLUDE' && project.settings.auto_advance_on_decision) {
+      setTimeout(() => go(1), 180)
+    }
   }
 
   function handleNotesBlur() {
@@ -209,11 +219,23 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             e.target.value = ''
           }}
         />
-        <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
-          {t('screening.importCsv')}
+        <Button
+          variant="secondary"
+          className="p-2"
+          title={t('screening.importCsv')}
+          aria-label={t('screening.importCsv')}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <UploadIcon />
         </Button>
-        <Button variant="secondary" onClick={handleExport}>
-          {t('screening.exportCsv')}
+        <Button
+          variant="secondary"
+          className="p-2"
+          title={t('screening.exportCsv')}
+          aria-label={t('screening.exportCsv')}
+          onClick={handleExport}
+        >
+          <DownloadIcon />
         </Button>
       </div>
 

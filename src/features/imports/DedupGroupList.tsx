@@ -15,26 +15,25 @@ function DedupGroupCard({ projectId, group }: { projectId: string; group: DedupG
         {t('duplicates.groupLabel')} · {group.records.length}
       </h3>
       {group.records.map((r) => (
-        <div
-          key={r.id}
-          className="flex items-start gap-3 border-b border-line py-2 last:border-b-0"
-        >
-          <span
-            className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
-              r.dedupPrimary
-                ? 'border-include text-include'
-                : 'border-line text-mut'
-            }`}
-          >
-            {r.dedupPrimary ? t('duplicates.primary') : t('duplicates.duplicate')}
-          </span>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-fg">{r.title || t('common.untitled')}</p>
-            <p className="text-xs text-mut">
-              {r.humanRef} · {r.authors || '—'} · {r.year ?? '—'} {r.doi ? `· ${r.doi}` : ''}
-            </p>
+        <div key={r.id} className="flex flex-col gap-2 border-b border-line py-2 last:border-b-0">
+          <div className="flex items-start gap-3">
+            <span
+              className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                r.dedupPrimary
+                  ? 'border-include text-include'
+                  : 'border-line text-mut'
+              }`}
+            >
+              {r.dedupPrimary ? t('duplicates.primary') : t('duplicates.duplicate')}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-fg">{r.title || t('common.untitled')}</p>
+              <p className="text-xs text-mut">
+                {r.humanRef} · {r.authors || '—'} · {r.year ?? '—'} {r.doi ? `· ${r.doi}` : ''}
+              </p>
+            </div>
           </div>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             {!r.dedupPrimary && (
               <Button
                 variant="secondary"

@@ -1,14 +1,19 @@
 import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import clsx from 'clsx'
 
 interface ModalProps {
   open: boolean
   onClose: () => void
   title: string
   children: ReactNode
+  /** 'default' (max-w-lg) fits simple forms; 'wide' (max-w-3xl) is for
+   * content with its own internal rows/actions (tables, cards with
+   * buttons) that would otherwise clip in a narrow panel. */
+  size?: 'default' | 'wide'
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({ open, onClose, title, children, size = 'default' }: ModalProps) {
   useEffect(() => {
     if (!open) return
     function onKeyDown(e: KeyboardEvent) {
@@ -26,7 +31,10 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-white p-6 shadow-lg"
+        className={clsx(
+          'max-h-[85vh] w-full overflow-y-auto rounded-xl border border-line bg-white p-6 shadow-lg',
+          size === 'wide' ? 'max-w-3xl' : 'max-w-lg',
+        )}
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-fg">{title}</h2>

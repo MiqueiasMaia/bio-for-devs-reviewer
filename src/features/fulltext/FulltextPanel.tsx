@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { Button } from '@/components/ui/Button'
+import { SearchIcon, UploadIcon } from '@/components/ui/icons'
 import { useFulltextDocs, useFulltextMutations } from './hooks'
 import { getSignedPdfUrl } from './api'
 
@@ -33,10 +34,13 @@ export function FulltextPanel({
           {doi && (
             <Button
               variant="secondary"
+              className="p-2"
+              title={mutations.fetchOpenAccess.isPending ? t('fulltext.searching') : t('fulltext.searchOpenAccess')}
+              aria-label={mutations.fetchOpenAccess.isPending ? t('fulltext.searching') : t('fulltext.searchOpenAccess')}
               onClick={() => mutations.fetchOpenAccess.mutate(doi)}
               disabled={mutations.fetchOpenAccess.isPending}
             >
-              {mutations.fetchOpenAccess.isPending ? t('fulltext.searching') : t('fulltext.searchOpenAccess')}
+              <SearchIcon />
             </Button>
           )}
           <input
@@ -50,8 +54,15 @@ export function FulltextPanel({
               e.target.value = ''
             }}
           />
-          <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={mutations.upload.isPending}>
-            {mutations.upload.isPending ? t('fulltext.uploading') : t('fulltext.upload')}
+          <Button
+            variant="secondary"
+            className="p-2"
+            title={mutations.upload.isPending ? t('fulltext.uploading') : t('fulltext.upload')}
+            aria-label={mutations.upload.isPending ? t('fulltext.uploading') : t('fulltext.upload')}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={mutations.upload.isPending}
+          >
+            <UploadIcon />
           </Button>
         </div>
       </div>

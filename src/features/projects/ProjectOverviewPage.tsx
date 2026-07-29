@@ -78,7 +78,7 @@ export function ProjectOverviewPage() {
         </Card>
       </div>
 
-      <Modal open={dedupModalOpen} onClose={() => setDedupModalOpen(false)} title={t('duplicates.title')}>
+      <Modal open={dedupModalOpen} onClose={() => setDedupModalOpen(false)} title={t('duplicates.title')} size="wide">
         <DedupGroupList projectId={project.id} />
       </Modal>
 
