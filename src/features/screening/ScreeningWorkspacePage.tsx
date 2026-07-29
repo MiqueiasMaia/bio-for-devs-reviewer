@@ -49,19 +49,34 @@ export function ScreeningWorkspacePage() {
   const saveScreening = useSaveScreening(project.id, stage, reviewerId)
   useReconcileDrafts(stage, reviewerId, saveScreening)
 
+  // Keeps whichever record is currently open on screen from disappearing out
+  // from under the reviewer the instant a decision is saved for it — e.g.
+  // marking EXCLUDE (or picking its first reason) immediately updates
+  // myScreenings, which would otherwise drop it from the "undecided"/
+  // per-decision filter mid-edit and silently shift `current` to the next
+  // record before there's time to pick a reason. The pin only follows
+  // records the reviewer is actively viewing; it's cleared on filter/stage
+  // change and moves on the moment they navigate away on purpose.
+  const pinnedIdRef = useRef<string | null>(null)
+
   const filteredQueue = useMemo(() => {
     const base = queue.data ?? []
+    const pinnedId = pinnedIdRef.current
     if (filter === 'all') return base
-    if (filter === 'undecided') return base.filter((r) => !myScreenings.data?.get(r.id)?.decision)
-    return base.filter((r) => myScreenings.data?.get(r.id)?.decision === filter)
+    if (filter === 'undecided') return base.filter((r) => r.id === pinnedId || !myScreenings.data?.get(r.id)?.decision)
+    return base.filter((r) => r.id === pinnedId || myScreenings.data?.get(r.id)?.decision === filter)
   }, [queue.data, filter, myScreenings.data])
 
-  useEffect(() => setIndex(0), [filter, stage])
+  useEffect(() => {
+    pinnedIdRef.current = null
+    setIndex(0)
+  }, [filter, stage])
 
   const current = filteredQueue[index]
   const currentState = current ? myScreenings.data?.get(current.id) : undefined
 
   useEffect(() => {
+    pinnedIdRef.current = current?.id ?? null
     setDecisionDraft(currentState?.decision ?? null)
     setReasonsDraft(currentState?.reasons ?? [])
     setNotesDraft(currentState?.notes ?? '')
