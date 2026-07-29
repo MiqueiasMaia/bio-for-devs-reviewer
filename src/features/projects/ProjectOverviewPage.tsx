@@ -10,7 +10,7 @@ import type { ProjectOutletContext } from './ProjectLayout'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useOpenConflictCount, useReviewerProgress } from '@/features/dashboard/hooks'
 import { useDedupGroups, useDedupSummary } from '@/features/imports/hooks'
-import { DedupGroupList } from '@/features/imports/DedupGroupList'
+import { DedupResolutionWizard } from '@/features/imports/DedupResolutionWizard'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { useQueueSummary, useProjectDecisionCounts } from '@/features/screening/hooks'
 import { useAuth } from '@/features/auth/useAuth'
@@ -104,7 +104,7 @@ export function ProjectOverviewPage() {
       </Card>
 
       <Modal open={dedupModalOpen} onClose={() => setDedupModalOpen(false)} title={t('duplicates.title')} size="wide">
-        <DedupGroupList projectId={project.id} />
+        <DedupResolutionWizard projectId={project.id} />
       </Modal>
 
       {/* Your progress / Project progress -------------------------------- */}

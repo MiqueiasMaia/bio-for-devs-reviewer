@@ -189,6 +189,7 @@ export interface Database {
           dedup_group_id: string | null
           is_duplicate: boolean
           dedup_primary: boolean
+          dedup_confirmed: boolean
           human_ref: string
           created_at: string
           updated_at: string
@@ -210,6 +211,7 @@ export interface Database {
           dedup_group_id?: string | null
           is_duplicate?: boolean
           dedup_primary?: boolean
+          dedup_confirmed?: boolean
           human_ref?: string
         },
         {
@@ -217,6 +219,7 @@ export interface Database {
           dedup_group_id?: string | null
           is_duplicate?: boolean
           dedup_primary?: boolean
+          dedup_confirmed?: boolean
         }
       >
       record_counters: Table<
@@ -351,6 +354,7 @@ export interface Database {
           member_count: number
           record_ids: string[]
           has_primary: boolean
+          confirmed: boolean
         }>
       v_record_stage_decisions: View<{
           record_id: string

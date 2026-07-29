@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { projectsQueryKey } from '@/features/projects/hooks'
+import type { AutoResolveCriteria } from '@/domain/dedup/autoResolve'
 import * as api from './api'
 import { runImportPipeline, type RunImportInput } from './importPipeline'
 
@@ -50,4 +51,17 @@ export function useDedupMutations(projectId: string) {
       onSuccess: invalidate,
     }),
   }
+}
+
+export function useAutoResolveDedup(projectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (criteria: AutoResolveCriteria) => api.autoResolveDedupGroups(projectId, criteria),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: dedupGroupsKey(projectId) })
+      qc.invalidateQueries({ queryKey: recordsKey(projectId) })
+      qc.invalidateQueries({ queryKey: ['dedup_summary', projectId] })
+      qc.invalidateQueries({ queryKey: projectsQueryKey })
+    },
+  })
 }

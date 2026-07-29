@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { ParsedRecord } from '@/domain/import/types'
 import type { ImportFormat, Decision } from '@/types/domain'
+import { isGroupAutoResolvable, type AutoResolveCriteria } from '@/domain/dedup/autoResolve'
 
 export async function uploadImportOriginal(
   projectId: string,
@@ -124,22 +125,30 @@ export async function listNonDuplicateRecords(projectId: string): Promise<Dedupa
   }))
 }
 
+/**
+ * `confirmed` is false for the automatic heuristic pick computeDedupGroups
+ * makes right after import (runImportPipeline) — nobody has looked at that
+ * group yet. It's only set true when a human explicitly picks/confirms a
+ * primary in the dedup wizard, or the Auto Resolver approves the group
+ * against the reviewer's chosen criteria.
+ */
 export async function applyDedupGroup(
   groupId: string,
   recordIds: string[],
   primaryId: string,
+  confirmed = false,
 ): Promise<void> {
   const duplicateIds = recordIds.filter((id) => id !== primaryId)
   const { error: primaryError } = await supabase
     .from('records')
-    .update({ dedup_group_id: groupId, is_duplicate: false, dedup_primary: true })
+    .update({ dedup_group_id: groupId, is_duplicate: false, dedup_primary: true, dedup_confirmed: confirmed })
     .eq('id', primaryId)
   if (primaryError) throw primaryError
 
   if (duplicateIds.length > 0) {
     const { error: dupError } = await supabase
       .from('records')
-      .update({ dedup_group_id: groupId, is_duplicate: true, dedup_primary: false })
+      .update({ dedup_group_id: groupId, is_duplicate: true, dedup_primary: false, dedup_confirmed: false })
       .in('id', duplicateIds)
     if (dupError) throw dupError
   }
@@ -147,6 +156,7 @@ export async function applyDedupGroup(
 
 export interface DedupGroupSummary {
   dedupGroupId: string
+  confirmed: boolean
   records: {
     id: string
     humanRef: string
@@ -154,6 +164,7 @@ export interface DedupGroupSummary {
     authors: string
     year: number | null
     doi: string | null
+    journal: string | null
     isDuplicate: boolean
     dedupPrimary: boolean
   }[]
@@ -162,7 +173,7 @@ export interface DedupGroupSummary {
 export async function listDedupGroups(projectId: string): Promise<DedupGroupSummary[]> {
   const { data: groups, error: groupsError } = await supabase
     .from('v_dedup_groups')
-    .select('dedup_group_id, record_ids')
+    .select('dedup_group_id, record_ids, confirmed')
     .eq('project_id', projectId)
   if (groupsError) throw groupsError
   if (groups.length === 0) return []
@@ -170,13 +181,14 @@ export async function listDedupGroups(projectId: string): Promise<DedupGroupSumm
   const allIds = groups.flatMap((g) => g.record_ids)
   const { data: records, error: recordsError } = await supabase
     .from('records')
-    .select('id, human_ref, title, authors, year, doi, is_duplicate, dedup_primary')
+    .select('id, human_ref, title, authors, year, doi, journal, is_duplicate, dedup_primary')
     .in('id', allIds)
   if (recordsError) throw recordsError
 
   const byId = new Map(records.map((r) => [r.id, r]))
   return groups.map((g) => ({
     dedupGroupId: g.dedup_group_id,
+    confirmed: g.confirmed,
     records: g.record_ids
       .map((id) => byId.get(id))
       .filter((r): r is NonNullable<typeof r> => Boolean(r))
@@ -187,6 +199,7 @@ export async function listDedupGroups(projectId: string): Promise<DedupGroupSumm
         authors: r.authors,
         year: r.year,
         doi: r.doi,
+        journal: r.journal,
         isDuplicate: r.is_duplicate,
         dedupPrimary: r.dedup_primary,
       })),
@@ -197,29 +210,69 @@ export async function listDedupGroups(projectId: string): Promise<DedupGroupSumm
 export async function splitRecordFromGroup(recordId: string): Promise<void> {
   const { error } = await supabase
     .from('records')
-    .update({ dedup_group_id: null, is_duplicate: false, dedup_primary: false })
+    .update({ dedup_group_id: null, is_duplicate: false, dedup_primary: false, dedup_confirmed: false })
     .eq('id', recordId)
   if (error) throw error
 }
 
-/** Re-picks which record in a group is the non-duplicate "primary" survivor. */
+/** A human explicitly picking/confirming a group's primary in the dedup wizard. */
 export async function setDedupPrimary(groupId: string, recordIds: string[], primaryId: string): Promise<void> {
-  await applyDedupGroup(groupId, recordIds, primaryId)
+  await applyDedupGroup(groupId, recordIds, primaryId, true)
+}
+
+/**
+ * Bulk-confirms every not-yet-confirmed group whose members agree closely
+ * enough on the reviewer's chosen criteria (see domain/dedup/autoResolve) —
+ * the group's existing primary (the heuristic pick from import time) is
+ * kept as-is, just marked confirmed. Groups that don't meet the criteria
+ * are left untouched for manual review in the wizard. Never deletes or
+ * merges records — same non-destructive model as the rest of dedup review.
+ */
+export async function autoResolveDedupGroups(
+  projectId: string,
+  criteria: AutoResolveCriteria,
+): Promise<{ resolvedCount: number }> {
+  const groups = await listDedupGroups(projectId)
+  let resolvedCount = 0
+  for (const group of groups) {
+    if (group.confirmed) continue
+    const resolvable = isGroupAutoResolvable(
+      group.records.map((r) => ({
+        id: r.id,
+        doi: r.doi,
+        title: r.title,
+        authors: r.authors,
+        year: r.year,
+        journal: r.journal,
+      })),
+      criteria,
+    )
+    if (!resolvable) continue
+    const primary = group.records.find((r) => r.dedupPrimary) ?? group.records[0]
+    await applyDedupGroup(
+      group.dedupGroupId,
+      group.records.map((r) => r.id),
+      primary.id,
+      true,
+    )
+    resolvedCount++
+  }
+  return { resolvedCount }
 }
 
 export interface DedupSummary {
   /** Total records marked as duplicates (member_count - 1 per group, summed). */
   totalDuplicates: number
-  /** Groups that still need a primary picked. */
+  /** Groups nobody has confirmed yet (still just the automatic heuristic pick). */
   unresolved: number
-  /** Groups that already have a primary chosen. */
+  /** Groups a human or the Auto Resolver has explicitly confirmed. */
   resolved: number
 }
 
 export async function fetchDedupSummary(projectId: string): Promise<DedupSummary> {
   const { data, error } = await supabase
     .from('v_dedup_groups')
-    .select('member_count, has_primary')
+    .select('member_count, confirmed')
     .eq('project_id', projectId)
   if (error) throw error
   let totalDuplicates = 0
@@ -227,7 +280,7 @@ export async function fetchDedupSummary(projectId: string): Promise<DedupSummary
   let resolved = 0
   for (const g of data) {
     totalDuplicates += g.member_count - 1
-    if (g.has_primary) resolved++
+    if (g.confirmed) resolved++
     else unresolved++
   }
   return { totalDuplicates, unresolved, resolved }
