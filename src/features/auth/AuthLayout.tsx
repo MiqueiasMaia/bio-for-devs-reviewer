@@ -72,7 +72,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         {/* 1. Logo — top-left, generous negative space around it. */}
         <div className="relative z-10 flex shrink-0 items-center gap-2 text-[#3ecf8e]">
           <BioforMark size={22} />
-          <span className="font-mono text-sm font-bold tracking-tight text-[#eef5f1]">Biofor Reviewers</span>
+          <span className="font-brand text-sm font-bold tracking-tight text-[#eef5f1]">Biofor Reviewers</span>
         </div>
 
         {/* Feature copy and mockup side by side, vertically centered in the
@@ -148,7 +148,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-col items-center gap-3 border-b border-line bg-[#0d1512] px-6 py-6 md:hidden">
         <div className="flex items-center gap-2 text-[#3ecf8e]">
           <BioforMark size={18} />
-          <span className="font-mono text-xs font-bold tracking-tight text-[#eef5f1]">Biofor Reviewers</span>
+          <span className="font-brand text-xs font-bold tracking-tight text-[#eef5f1]">Biofor Reviewers</span>
         </div>
         <img src="/screenshots/dashboard-preview.png" alt="" className="w-full max-w-xs border border-[#1f2e28] shadow-md" />
       </div>

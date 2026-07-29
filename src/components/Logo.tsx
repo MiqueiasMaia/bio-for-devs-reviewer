@@ -8,7 +8,7 @@ export function Logo({ size = 'sm', className }: { size?: 'sm' | 'lg'; className
   return (
     <span className={clsx('inline-flex items-center gap-2 text-include', className)}>
       <BioforMark size={size === 'lg' ? 32 : 20} />
-      <span className={clsx('font-mono font-bold tracking-tight text-fg', size === 'lg' ? 'text-xl' : 'text-sm')}>
+      <span className={clsx('font-brand font-bold tracking-tight text-fg', size === 'lg' ? 'text-xl' : 'text-sm')}>
         {t('common.appName')}
       </span>
     </span>
