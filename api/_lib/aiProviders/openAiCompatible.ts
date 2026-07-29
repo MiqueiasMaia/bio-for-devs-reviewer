@@ -67,7 +67,7 @@ export async function callOpenAiCompatible(baseUrl: string, args: AIProviderCall
   let content = response.choices?.[0]?.message?.content ?? ''
 
   let parsed = tryParse(content)
-  if (!parsed) {
+  if (!parsed.ok) {
     response = await chatCompletion(
       baseUrl,
       args.apiKey,
@@ -78,15 +78,21 @@ export async function callOpenAiCompatible(baseUrl: string, args: AIProviderCall
     content = response.choices?.[0]?.message?.content ?? ''
     parsed = tryParse(content)
   }
-  if (!parsed) {
-    throw new Error('Model did not return a valid structured result after retry')
+  if (!parsed.ok) {
+    // Includes a snippet of the actual raw response and why it didn't
+    // validate — a bare "did not return a valid structured result" gives
+    // no way to tell a JSON syntax error from a schema mismatch (wrong
+    // field names, decision not uppercase, etc.) without this.
+    throw new Error(
+      `Model did not return a valid structured result after retry (${parsed.reason}). Raw response: ${content.slice(0, 500)}`,
+    )
   }
 
   return {
-    decision: parsed.decision,
-    confidence: parsed.confidence,
-    rationale: parsed.rationale,
-    criteria: parsed.criteria,
+    decision: parsed.value.decision,
+    confidence: parsed.value.confidence,
+    rationale: parsed.value.rationale,
+    criteria: parsed.value.criteria,
     modelUsed: response.model ?? args.model,
     usage: {
       inputTokens: response.usage?.prompt_tokens ?? 0,
@@ -95,13 +101,18 @@ export async function callOpenAiCompatible(baseUrl: string, args: AIProviderCall
   }
 }
 
-function tryParse(content: string): ReturnType<typeof ScreeningResultSchema.parse> | null {
+type ParseResult =
+  | { ok: true; value: ReturnType<typeof ScreeningResultSchema.parse> }
+  | { ok: false; reason: string }
+
+function tryParse(content: string): ParseResult {
+  let lastReason = 'empty response'
   for (const candidate of [content, extractJsonBlock(content)]) {
     try {
-      return ScreeningResultSchema.parse(JSON.parse(candidate))
-    } catch {
-      continue
+      return { ok: true, value: ScreeningResultSchema.parse(JSON.parse(candidate)) }
+    } catch (err) {
+      lastReason = err instanceof Error ? err.message : 'unknown parse error'
     }
   }
-  return null
+  return { ok: false, reason: lastReason }
 }
