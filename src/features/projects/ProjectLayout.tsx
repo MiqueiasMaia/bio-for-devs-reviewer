@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { AppLayout } from '@/components/AppLayout'
 import { Button } from '@/components/ui/Button'
+import { useAuth } from '@/features/auth/useAuth'
 import { useProject } from './hooks'
 import type { ProjectDetail } from './api'
 
@@ -20,6 +21,7 @@ export function ProjectLayout() {
   const { projectId } = useParams<{ projectId: string }>()
   const { data: project, isLoading, isError } = useProject(projectId)
   const { t } = useTranslation()
+  const { user } = useAuth()
 
   if (isError) {
     return (
@@ -74,6 +76,11 @@ export function ProjectLayout() {
           {project.settings.data_extraction_enabled && (
             <NavLink to="data-extraction" className={navLinkClass}>
               {t('projectNav.dataExtraction')}
+            </NavLink>
+          )}
+          {project.ownerId === user?.id && (
+            <NavLink to="ai-audit" className={navLinkClass}>
+              {t('projectNav.aiAudit')}
             </NavLink>
           )}
           <NavLink to="prisma" className={navLinkClass}>

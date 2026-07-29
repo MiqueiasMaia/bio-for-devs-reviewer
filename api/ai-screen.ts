@@ -1,26 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Anthropic from '@anthropic-ai/sdk'
-import { z } from 'zod'
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { buildSystemPrompt, buildUserMessage } from '../src/domain/aiScreening/promptBuilder.js'
 import { createAdminClient } from './_lib/supabaseAdmin.js'
+import { callAIProvider } from './_lib/aiProviders/index.js'
 
 const MAX_RECORDS_PER_REQUEST = 25
 const CONCURRENCY = 3
-
-const ScreeningResultSchema = z.object({
-  decision: z.enum(['INCLUDE', 'UNCERTAIN', 'EXCLUDE']),
-  confidence: z.number().min(0).max(1),
-  rationale: z.string(),
-  criteria: z.array(
-    z.object({
-      criterion: z.string(),
-      kind: z.enum(['inclusion', 'exclusion']),
-      met: z.boolean(),
-      note: z.string(),
-    }),
-  ),
-})
 
 interface RequestBody {
   projectId: string
@@ -110,14 +94,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  const model = process.env.ANTHROPIC_MODEL
-  if (!apiKey || !model) {
-    res.status(500).json({ error: 'AI screening is not configured on the server' })
+  const secret = process.env.AI_KEY_ENCRYPTION_SECRET
+  if (!secret) {
+    res.status(500).json({ error: 'AI_KEY_ENCRYPTION_SECRET is not configured on the server' })
     return
   }
 
-  const [{ data: criteria }, { data: exclusionReasons }, { data: records }] = await Promise.all([
+  const { data: aiConfigRows, error: aiConfigError } = await admin.rpc('get_project_ai_key', {
+    p_project_id: projectId,
+    p_secret: secret,
+  })
+  if (aiConfigError) {
+    res.status(500).json({ error: aiConfigError.message })
+    return
+  }
+  const aiConfig = aiConfigRows?.[0]
+  if (!aiConfig) {
+    // The actual enforcement point for "no provider configured" — the
+    // Configurações UI also disables the ai_screening_enabled toggle for
+    // this case, but this is where money would actually get spent.
+    res.status(400).json({ error: 'No AI provider configured for this project' })
+    return
+  }
+  const { provider, model, api_key: apiKey } = aiConfig
+
+  const [{ data: criteria }, { data: exclusionReasons }, { data: records }, { data: pricing }] = await Promise.all([
     admin.from('criteria').select('kind, text, picots_dimension').eq('project_id', projectId),
     admin.from('exclusion_reasons').select('code, label').eq('project_id', projectId),
     admin
@@ -125,6 +126,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .select('id, title, authors, abstract, year')
       .eq('project_id', projectId)
       .in('id', recordIds),
+    admin
+      .from('ai_pricing')
+      .select('input_price_per_million_tokens, output_price_per_million_tokens')
+      .eq('provider', provider)
+      .eq('model', model)
+      .maybeSingle(),
   ])
 
   if (!records || records.length === 0) {
@@ -141,49 +148,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     (exclusionReasons ?? []).map((r) => ({ code: r.code, label: r.label })),
   )
 
-  const anthropic = new Anthropic({ apiKey })
-  const outputFormat = zodOutputFormat(ScreeningResultSchema)
-
   const results = await runWithConcurrency(records, CONCURRENCY, async (record) => {
     try {
-      const response = await anthropic.messages.parse({
+      const result = await callAIProvider(provider, {
+        apiKey,
         model,
-        max_tokens: 1500,
-        thinking: { type: 'adaptive' },
-        output_config: { effort: 'medium', format: outputFormat },
-        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
-        messages: [
-          {
-            role: 'user',
-            content: buildUserMessage({
-              title: record.title,
-              authors: record.authors,
-              abstract: record.abstract,
-              year: record.year,
-            }),
-          },
-        ],
+        systemPrompt,
+        userMessage: buildUserMessage({
+          title: record.title,
+          authors: record.authors,
+          abstract: record.abstract,
+          year: record.year,
+        }),
       })
 
-      if (!response.parsed_output) {
-        return { recordId: record.id, error: 'Model did not return a valid structured result' }
-      }
-
-      const parsed = response.parsed_output
       const { error: upsertError } = await admin.from('ai_screenings').upsert(
         {
           record_id: record.id,
-          model_name: response.model,
-          decision: parsed.decision,
-          rationale: parsed.rationale,
-          confidence: parsed.confidence,
+          model_name: result.modelUsed,
+          decision: result.decision,
+          rationale: result.rationale,
+          confidence: result.confidence,
+          criteria_detail: result.criteria,
           stage,
         },
         { onConflict: 'record_id,stage,model_name' },
       )
       if (upsertError) return { recordId: record.id, error: upsertError.message }
 
-      return { recordId: record.id, decision: parsed.decision, confidence: parsed.confidence }
+      const estimatedCost = pricing
+        ? (result.usage.inputTokens / 1_000_000) * pricing.input_price_per_million_tokens +
+          (result.usage.outputTokens / 1_000_000) * pricing.output_price_per_million_tokens
+        : null
+
+      await admin.from('ai_usage_log').insert({
+        project_id: projectId,
+        record_id: record.id,
+        provider,
+        model: result.modelUsed,
+        input_tokens: result.usage.inputTokens,
+        output_tokens: result.usage.outputTokens,
+        estimated_cost: estimatedCost,
+      })
+
+      return { recordId: record.id, decision: result.decision, confidence: result.confidence }
     } catch (err) {
       return { recordId: record.id, error: err instanceof Error ? err.message : 'Unknown error' }
     }

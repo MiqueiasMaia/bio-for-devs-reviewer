@@ -3,6 +3,8 @@
 // regenerates this file from the live schema — keep the shape compatible if
 // you do (Database['public']['Tables'][...]['Row'/'Insert'/'Update']).
 import type {
+  AiCriterionDetail,
+  AIProvider,
   CriterionKind,
   Decision,
   ExtractionFieldType,
@@ -257,6 +259,7 @@ export interface Database {
           rationale: string | null
           confidence: number | null
           stage: ScreeningStage
+          criteria_detail: AiCriterionDetail[]
           created_at: string
           updated_at: string
         },
@@ -268,6 +271,56 @@ export interface Database {
           rationale?: string | null
           confidence?: number | null
           stage: ScreeningStage
+          criteria_detail?: AiCriterionDetail[]
+        },
+        Record<string, never>
+      >
+      project_ai_providers: Table<
+        {
+          project_id: string
+          provider: AIProvider
+          model: string
+          api_key_encrypted: string
+          created_at: string
+          updated_at: string
+        },
+        Record<string, never>,
+        Record<string, never>
+      >
+      ai_pricing: Table<
+        {
+          id: string
+          provider: AIProvider
+          model: string
+          input_price_per_million_tokens: number
+          output_price_per_million_tokens: number
+          currency: string
+          updated_at: string
+        },
+        Record<string, never>,
+        Record<string, never>
+      >
+      ai_usage_log: Table<
+        {
+          id: string
+          project_id: string
+          record_id: string
+          provider: AIProvider
+          model: string
+          input_tokens: number
+          output_tokens: number
+          estimated_cost: number | null
+          created_at: string
+        },
+        {
+          id?: string
+          project_id: string
+          record_id: string
+          provider: AIProvider
+          model: string
+          input_tokens?: number
+          output_tokens?: number
+          estimated_cost?: number | null
         },
         Record<string, never>
       >
@@ -500,6 +553,19 @@ export interface Database {
           final_value: string | string[] | null
           is_conflict: boolean
         }>
+      v_project_ai_config: View<{
+          project_id: string
+          provider: AIProvider
+          model: string
+          has_key: boolean
+          updated_at: string
+        }>
+      v_ai_screening_stats: View<{
+          project_id: string
+          stage: ScreeningStage
+          decision: Decision
+          count: number
+        }>
     }
     Functions: {
       create_project: {
@@ -511,6 +577,22 @@ export interface Database {
           p_stages_enabled?: string[]
         }
         Returns: Database['public']['Tables']['projects']['Row']
+      }
+      set_project_ai_key: {
+        Args: { p_project_id: string; p_provider: AIProvider; p_model: string; p_api_key: string; p_secret: string }
+        Returns: undefined
+      }
+      set_project_ai_model: {
+        Args: { p_project_id: string; p_provider: AIProvider; p_model: string }
+        Returns: undefined
+      }
+      get_project_ai_key: {
+        Args: { p_project_id: string; p_secret: string }
+        Returns: { provider: AIProvider; model: string; api_key: string }[]
+      }
+      delete_project_ai_key: {
+        Args: { p_project_id: string }
+        Returns: undefined
       }
     }
   }

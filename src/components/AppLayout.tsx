@@ -18,7 +18,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-white">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+        <div className="flex h-14 w-full items-center justify-between px-6">
           <Link to="/projects">
             <Logo />
           </Link>
@@ -33,7 +33,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+      <main className="w-full flex-1 px-6 py-8">{children}</main>
       <Footer />
     </div>
   )

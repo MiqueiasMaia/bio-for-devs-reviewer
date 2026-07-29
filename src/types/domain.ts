@@ -49,3 +49,12 @@ export type RobAnswer = 'yes' | 'probably_yes' | 'probably_no' | 'no' | 'no_info
 export type RobJudgment = 'low' | 'high' | 'unclear'
 
 export type ExtractionFieldType = 'text' | 'number' | 'single_choice' | 'multi_choice'
+
+export type AIProvider = 'google' | 'groq' | 'openrouter' | 'anthropic'
+
+export interface AiCriterionDetail {
+  criterion: string
+  kind: CriterionKind
+  met: boolean
+  note: string
+}

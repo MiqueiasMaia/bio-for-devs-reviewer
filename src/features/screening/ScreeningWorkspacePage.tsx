@@ -347,7 +347,11 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
       <p className="mb-4 text-xs text-mut">{t('screening.blindNotice')}</p>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
+      {/* Capped width here (unlike the rest of the now-fluid app shell) —
+          this is the one screen dominated by long-form reading (title +
+          abstract), and letting it stretch edge-to-edge on wide monitors
+          would make lines uncomfortably long. */}
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
         <div className="border border-line bg-white p-6">
           {queue.isError ? (
             <ErrorState onRetry={() => queue.refetch()} />

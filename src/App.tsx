@@ -26,6 +26,8 @@ import { RiskOfBiasPage } from '@/features/riskOfBias/RiskOfBiasPage'
 import { DataExtractionPage } from '@/features/dataExtraction/DataExtractionPage'
 import { ExtractionConflictsPage } from '@/features/dataExtraction/ExtractionConflictsPage'
 import { ExtractionFieldsTab } from '@/features/projects/settings/ExtractionFieldsTab'
+import { AiProviderTab } from '@/features/projects/settings/AiProviderTab'
+import { AiAuditPage } from '@/features/aiAudit/AiAuditPage'
 import { EnvSetupNotice } from '@/components/EnvSetupNotice'
 
 function App() {
@@ -72,6 +74,7 @@ function App() {
               <Route path="risk-of-bias" element={<RiskOfBiasPage />} />
               <Route path="data-extraction" element={<DataExtractionPage />} />
               <Route path="data-extraction/conflicts" element={<ExtractionConflictsPage />} />
+              <Route path="ai-audit" element={<AiAuditPage />} />
               <Route path="prisma" element={<PrismaPage />} />
               <Route path="settings" element={<ProjectSettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
@@ -83,6 +86,7 @@ function App() {
                 <Route path="extraction-fields" element={<ExtractionFieldsTab />} />
                 <Route path="members" element={<MembersTab />} />
                 <Route path="ai-setup" element={<AiSetupPage />} />
+                <Route path="ai-provider" element={<AiProviderTab />} />
               </Route>
             </Route>
             <Route path="/" element={<Navigate to="/projects" replace />} />

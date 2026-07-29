@@ -7,16 +7,26 @@ import { Button } from '@/components/ui/Button'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUpdateProjectSettings } from '../hooks'
 import { BackupPanel } from '@/features/backup/BackupPanel'
+import { useAiProviderConfig } from '@/features/aiProvider/hooks'
+import { useAuth } from '@/features/auth/useAuth'
 import type { ScreeningStage } from '@/types/domain'
 
 export function GeneralTab() {
   const { project } = useOutletContext<ProjectOutletContext>()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isOwner = project.ownerId === user?.id
   const updateSettings = useUpdateProjectSettings(project.id)
   const archiveProject = useArchiveProject()
   const unarchiveProject = useUnarchiveProject()
   const deleteProject = useDeleteProject()
+  // v_project_ai_config is owner-only (RLS) — a reviewer would just see no
+  // row regardless of whether a provider is actually configured, so this
+  // check (and the resulting disabled state below) only applies when the
+  // current user is the owner; reviewers keep the toggle as before.
+  const { data: aiProviderConfig } = useAiProviderConfig(project.id)
+  const aiProviderMissing = isOwner && !aiProviderConfig
   const [deleteConfirmName, setDeleteConfirmName] = useState('')
 
   const [name, setName] = useState(project.name)
@@ -89,19 +99,25 @@ export function GeneralTab() {
           />
           {t('settingsGeneral.autoAdvance')}
         </label>
-        <label className="flex items-center gap-2 text-sm text-fg">
-          <input
-            type="checkbox"
-            checked={settings.ai_screening_enabled}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                ai_screening_enabled: e.target.checked,
-                ai_counts_as_reviewer: e.target.checked ? settings.ai_counts_as_reviewer : false,
-              })
-            }
-          />
-          {t('settingsGeneral.aiScreeningEnabled')}
+        <label className="flex flex-col gap-1 text-sm text-fg">
+          <span className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={settings.ai_screening_enabled}
+              disabled={aiProviderMissing}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  ai_screening_enabled: e.target.checked,
+                  ai_counts_as_reviewer: e.target.checked ? settings.ai_counts_as_reviewer : false,
+                })
+              }
+            />
+            {t('settingsGeneral.aiScreeningEnabled')}
+          </span>
+          {aiProviderMissing && (
+            <span className="text-xs text-uncertain">{t('settingsGeneral.aiProviderRequiredHint')}</span>
+          )}
         </label>
         {settings.ai_screening_enabled && (
           <label className="ml-6 flex flex-col gap-1 text-sm text-fg">

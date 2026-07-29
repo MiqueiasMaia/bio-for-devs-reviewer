@@ -112,22 +112,35 @@ pelo app em si (que continua falando com o Supabase via
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-   - `ANTHROPIC_API_KEY` (server-only, necessária apenas se a triagem por IA
-     estiver habilitada)
-   - `ANTHROPIC_MODEL` (server-only, ex: `claude-opus-4-8`)
+   - `AI_KEY_ENCRYPTION_SECRET` (server-only, necessária apenas se algum
+     projeto for habilitar triagem por IA — ver seção abaixo)
 4. Clique **Deploy**. Nenhuma alteração de código é necessária após as
    variáveis de ambiente estarem configuradas.
 
 ### Triagem assistida por IA (`/api/ai-screen`)
 
-Desabilitada por padrão (`settings.ai_screening_enabled = false`). Para
-habilitar em um projeto: defina `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` nas
-variáveis de ambiente da Vercel, depois ative o toggle em **Configurações →
-Geral** do projeto. A função lê os critérios/PICOTS armazenados no banco (via
+Desabilitada por padrão (`settings.ai_screening_enabled = false`). Diferente
+de uma chave global do servidor, **cada projeto configura seu próprio
+provedor, modelo e chave de API** na aba **Configurações → IA / Provedor**
+(só o(a) proprietário(a) do projeto vê essa aba) — a chave fica criptografada
+no banco (`pgp_sym_encrypt`) e só é decriptada dentro de uma function
+server-side no momento da chamada. Provedores suportados: Google Gemini,
+Groq, OpenRouter e Anthropic Claude — ver
+[`docs/ai-providers.md`](docs/ai-providers.md) para onde obter cada chave e
+recomendações de modelo (vários têm free tier). A única variável de ambiente
+do servidor necessária pra isso é `AI_KEY_ENCRYPTION_SECRET` (uma string
+aleatória qualquer, só usada como segredo simétrico — nunca fica no banco).
+Depois de configurar um provedor, ative o toggle em **Configurações →
+Geral** do projeto (fica desabilitado até haver um provedor configurado). A
+função lê os critérios/PICOTS armazenados no banco (via
 `SUPABASE_SERVICE_ROLE_KEY`) e monta o prompt inteiramente a partir deles —
-nada específico do tema da revisão fica no código. Para testar `/api`
-localmente, use `vercel dev` (o `npm run dev` padrão só serve o SPA, sem as
-Vercel Functions).
+nada específico do tema da revisão fica no código. Cada chamada registra
+tokens consumidos e custo estimado (tabela `ai_pricing`, editável direto no
+banco), visíveis na mesma aba, e o painel de auditoria em **Auditoria de
+IA** (também owner-only) mostra decisão/critérios/justificativa por artigo,
+estatísticas agregadas exportáveis e concordância com os revisores humanos.
+Para testar `/api` localmente, use `vercel dev` (o `npm run dev` padrão só
+serve o SPA, sem as Vercel Functions).
 
 ## Scripts
 
@@ -159,8 +172,11 @@ legacy/           # app original de referência (não faz parte do build)
 
 ## Segurança
 
-- A `SUPABASE_SERVICE_ROLE_KEY` e a `ANTHROPIC_API_KEY` **nunca** são
+- A `SUPABASE_SERVICE_ROLE_KEY` e a `AI_KEY_ENCRYPTION_SECRET` **nunca** são
   incluídas no bundle do cliente — são usadas apenas dentro de funções em
-  `/api`, executadas no servidor da Vercel.
+  `/api`, executadas no servidor da Vercel. As chaves de API de IA de cada
+  projeto ficam criptografadas no banco (`pgp_sym_encrypt`) e só são
+  decriptadas dentro dessas mesmas funções, nunca em uma query acessível
+  pelo client.
 - Toda tabela no Postgres tem Row Level Security habilitada; o acesso aos
   dados de um projeto é controlado por associação em `project_members`.

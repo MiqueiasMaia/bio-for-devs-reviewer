@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useOutletContext } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
+import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '../ProjectLayout'
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
@@ -11,7 +12,9 @@ const tabClass = ({ isActive }: { isActive: boolean }) =>
 
 export function ProjectSettingsLayout() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const context = useOutletContext<ProjectOutletContext>()
+  const isOwner = context.project.ownerId === user?.id
 
   return (
     <div>
@@ -40,6 +43,11 @@ export function ProjectSettingsLayout() {
         <NavLink to="ai-setup" className={tabClass}>
           {t('settingsNav.aiSetup')}
         </NavLink>
+        {isOwner && (
+          <NavLink to="ai-provider" className={tabClass}>
+            {t('settingsNav.aiProvider')}
+          </NavLink>
+        )}
       </nav>
       <Outlet context={context} />
     </div>
