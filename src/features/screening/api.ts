@@ -47,9 +47,13 @@ export async function listEligibleRecordIds(projectId: string, stage: ScreeningS
 
 /**
  * Assignment rule (documented in the UI too): a reviewer's queue at a stage
- * is every eligible record that (a) has fewer than
- * settings.reviewers_required_per_record screenings so far, from anyone,
- * and (b) this reviewer hasn't personally screened yet.
+ * is every eligible record that either (a) still needs more screenings
+ * than it has so far (fewer than settings.reviewers_required_per_record,
+ * from anyone) — new work — or (b) this reviewer has already screened it
+ * themselves, regardless of how many screenings it has in total — so a
+ * past decision is always reachable to reconsider, even after the record
+ * reached consensus. A record fully decided by *other* reviewers, that
+ * this one was never assigned to, still doesn't show up here.
  */
 export async function fetchQueue(
   projectId: string,
@@ -84,7 +88,7 @@ export async function fetchQueue(
       const reviewerIds = new Set(
         ((d?.reviewer_decisions ?? []) as { reviewer_id: string }[]).map((x) => x.reviewer_id),
       )
-      return reviewsCount < reviewersRequired && !reviewerIds.has(reviewerId)
+      return reviewsCount < reviewersRequired || reviewerIds.has(reviewerId)
     })
     .map((r) => ({
       id: r.id,

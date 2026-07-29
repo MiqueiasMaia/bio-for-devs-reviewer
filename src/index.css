@@ -45,4 +45,15 @@
     outline: 2px solid var(--color-include);
     outline-offset: 2px;
   }
+
+  /* Native checkboxes/radios/ranges otherwise render in the browser's
+   * default accent (usually system blue), which clashes against this
+   * palette's green/warm-brown/gray accents wherever a form uses more than
+   * one of them side by side (e.g. the dedup Auto Resolver's criteria
+   * checkboxes + similarity slider). */
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    accent-color: var(--color-include);
+  }
 }

@@ -26,7 +26,13 @@ export function AiSetupPage() {
   const [copied, setCopied] = useState(false)
   const [jsonInput, setJsonInput] = useState('')
   const [parseError, setParseError] = useState<string | null>(null)
-  const [importedSummary, setImportedSummary] = useState<{ criteria: number; highlightTerms: number; exclusionReasons: number } | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importedSummary, setImportedSummary] = useState<{
+    criteriaAdded: number
+    highlightTermsAdded: number
+    exclusionReasonsAdded: number
+    skipped: number
+  } | null>(null)
 
   function handleGeneratePrompt() {
     setPrompt(
@@ -46,6 +52,7 @@ export function AiSetupPage() {
 
   function handleImport() {
     setParseError(null)
+    setImportError(null)
     setImportedSummary(null)
     let raw: unknown
     try {
@@ -70,13 +77,12 @@ export function AiSetupPage() {
         },
       },
       {
-        onSuccess: () => {
-          setImportedSummary({
-            criteria: parsed.criteria.length,
-            highlightTerms: parsed.highlightTerms.length,
-            exclusionReasons: parsed.exclusionReasons.length,
-          })
+        onSuccess: (data) => {
+          setImportedSummary(data)
           setJsonInput('')
+        },
+        onError: () => {
+          setImportError(t('aiSetup.importError'))
         },
       },
     )
@@ -139,14 +145,22 @@ export function AiSetupPage() {
           />
         </div>
         {parseError && <p className="text-sm text-red-700">{parseError}</p>}
+        {importError && <p className="text-sm text-red-700">{importError}</p>}
         {importedSummary && (
-          <p className="text-sm text-include">
-            {t('aiSetup.importSuccess', {
-              criteria: importedSummary.criteria,
-              highlightTerms: importedSummary.highlightTerms,
-              exclusionReasons: importedSummary.exclusionReasons,
-            })}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-include">
+              {t('aiSetup.importSuccess', {
+                criteria: importedSummary.criteriaAdded,
+                highlightTerms: importedSummary.highlightTermsAdded,
+                exclusionReasons: importedSummary.exclusionReasonsAdded,
+              })}
+            </p>
+            {importedSummary.skipped > 0 && (
+              <p className="text-sm text-uncertain">
+                {t('aiSetup.importSkipped', { count: importedSummary.skipped })}
+              </p>
+            )}
+          </div>
         )}
         <Button
           className="self-start"

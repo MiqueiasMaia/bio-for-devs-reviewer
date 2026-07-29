@@ -430,6 +430,8 @@ export const ptBR = {
     importing: 'Importando…',
     invalidJson: 'JSON inválido — verifique se colou a resposta completa da IA.',
     importSuccess: '{{criteria}} critério(s), {{highlightTerms}} categoria(s) de destaque e {{exclusionReasons}} motivo(s) de exclusão adicionados.',
+    importSkipped: '{{count}} item(ns) ignorado(s) — já existiam ou eram inválidos.',
+    importError: 'Não foi possível importar o resultado. Tente novamente.',
   },
   dangerZone: {
     title: 'Zona de risco',
