@@ -54,7 +54,16 @@ export function useSaveScreening(projectId: string, stage: ScreeningStage, revie
       clearDraft(input.recordId, stage, reviewerId)
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queueKey(projectId, stage, reviewerId) })
+      // Deliberately NOT invalidating the queue here. fetchQueue excludes
+      // any record this reviewer has already screened, so invalidating it
+      // on every save yanks the record the reviewer is *currently looking
+      // at* out of the list mid-edit — e.g. marking EXCLUDE, then having
+      // the exclusion-reasons panel vanish before there's time to click a
+      // reason, because the list just reloaded without that record and the
+      // same numeric index now points at whatever used to be next. The
+      // queue re-syncs on its own via normal cache staleness (or a
+      // stage/filter change, or revisiting the page) — that's fine, it
+      // doesn't need to shrink instantly under the reviewer's cursor.
       qc.invalidateQueries({ queryKey: myScreeningsKey(projectId, stage, reviewerId) })
       qc.invalidateQueries({ queryKey: summaryKey(projectId, stage, reviewerId) })
     },
