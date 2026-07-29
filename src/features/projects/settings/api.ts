@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { CriterionKind, PicotsDimension, ProjectRole } from '@/types/domain'
+import type { CriterionKind, ExtractionFieldType, PicotsDimension, ProjectRole } from '@/types/domain'
 
 // Criteria -----------------------------------------------------------------
 export interface CriterionRow {
@@ -152,6 +152,79 @@ export async function updateExclusionReason(
 
 export async function deleteExclusionReason(id: string): Promise<void> {
   const { error } = await supabase.from('exclusion_reasons').delete().eq('id', id)
+  if (error) throw error
+}
+
+// Extraction fields ---------------------------------------------------------
+export interface ExtractionFieldRow {
+  id: string
+  key: string
+  label: string
+  fieldType: ExtractionFieldType
+  options: string[]
+  required: boolean
+  orderIndex: number
+}
+
+export async function listExtractionFields(projectId: string): Promise<ExtractionFieldRow[]> {
+  const { data, error } = await supabase
+    .from('extraction_fields')
+    .select('id, key, label, field_type, options, required, order_index')
+    .eq('project_id', projectId)
+    .order('order_index', { ascending: true })
+  if (error) throw error
+  return data.map((r) => ({
+    id: r.id,
+    key: r.key,
+    label: r.label,
+    fieldType: r.field_type,
+    options: r.options,
+    required: r.required,
+    orderIndex: r.order_index,
+  }))
+}
+
+export async function createExtractionField(
+  projectId: string,
+  input: {
+    key: string
+    label: string
+    fieldType: ExtractionFieldType
+    options: string[]
+    required: boolean
+    orderIndex: number
+  },
+): Promise<void> {
+  const { error } = await supabase.from('extraction_fields').insert({
+    project_id: projectId,
+    key: input.key,
+    label: input.label,
+    field_type: input.fieldType,
+    options: input.options,
+    required: input.required,
+    order_index: input.orderIndex,
+  })
+  if (error) throw error
+}
+
+export async function updateExtractionField(
+  id: string,
+  patch: { label?: string; fieldType?: ExtractionFieldType; options?: string[]; required?: boolean },
+): Promise<void> {
+  const { error } = await supabase
+    .from('extraction_fields')
+    .update({
+      ...(patch.label !== undefined ? { label: patch.label } : {}),
+      ...(patch.fieldType !== undefined ? { field_type: patch.fieldType } : {}),
+      ...(patch.options !== undefined ? { options: patch.options } : {}),
+      ...(patch.required !== undefined ? { required: patch.required } : {}),
+    })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteExtractionField(id: string): Promise<void> {
+  const { error } = await supabase.from('extraction_fields').delete().eq('id', id)
   if (error) throw error
 }
 

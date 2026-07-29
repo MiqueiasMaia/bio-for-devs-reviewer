@@ -71,6 +71,11 @@ export function ProjectLayout() {
               {t('projectNav.riskOfBias')}
             </NavLink>
           )}
+          {project.settings.data_extraction_enabled && (
+            <NavLink to="data-extraction" className={navLinkClass}>
+              {t('projectNav.dataExtraction')}
+            </NavLink>
+          )}
           <NavLink to="prisma" className={navLinkClass}>
             {t('projectNav.prisma')}
           </NavLink>

@@ -31,6 +31,9 @@ export function ProjectSettingsLayout() {
         <NavLink to="exclusion-reasons" className={tabClass}>
           {t('settingsNav.exclusionReasons')}
         </NavLink>
+        <NavLink to="extraction-fields" className={tabClass}>
+          {t('settingsNav.extractionFields')}
+        </NavLink>
         <NavLink to="members" className={tabClass}>
           {t('settingsNav.members')}
         </NavLink>

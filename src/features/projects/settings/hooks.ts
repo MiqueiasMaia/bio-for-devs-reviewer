@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from './api'
-import type { CriterionKind, PicotsDimension, ProjectRole } from '@/types/domain'
+import type { CriterionKind, ExtractionFieldType, PicotsDimension, ProjectRole } from '@/types/domain'
 
 const keys = {
   criteria: (projectId: string) => ['criteria', projectId] as const,
   highlightTerms: (projectId: string) => ['highlight_terms', projectId] as const,
   exclusionReasons: (projectId: string) => ['exclusion_reasons', projectId] as const,
+  extractionFields: (projectId: string) => ['extraction_fields', projectId] as const,
   members: (projectId: string) => ['project_members', projectId] as const,
   invites: (projectId: string) => ['project_invites', projectId] as const,
 }
@@ -89,6 +90,43 @@ export function useExclusionReasonMutations(projectId: string) {
     }),
     remove: useMutation({
       mutationFn: (id: string) => api.deleteExclusionReason(id),
+      onSuccess: invalidate,
+    }),
+  }
+}
+
+// Extraction fields -----------------------------------------------------
+export function useExtractionFields(projectId: string) {
+  return useQuery({
+    queryKey: keys.extractionFields(projectId),
+    queryFn: () => api.listExtractionFields(projectId),
+  })
+}
+
+export function useExtractionFieldMutations(projectId: string) {
+  const qc = useQueryClient()
+  const invalidate = () => qc.invalidateQueries({ queryKey: keys.extractionFields(projectId) })
+  return {
+    create: useMutation({
+      mutationFn: (input: {
+        key: string
+        label: string
+        fieldType: ExtractionFieldType
+        options: string[]
+        required: boolean
+        orderIndex: number
+      }) => api.createExtractionField(projectId, input),
+      onSuccess: invalidate,
+    }),
+    update: useMutation({
+      mutationFn: (args: {
+        id: string
+        patch: { label?: string; fieldType?: ExtractionFieldType; options?: string[]; required?: boolean }
+      }) => api.updateExtractionField(args.id, args.patch),
+      onSuccess: invalidate,
+    }),
+    remove: useMutation({
+      mutationFn: (id: string) => api.deleteExtractionField(id),
       onSuccess: invalidate,
     }),
   }

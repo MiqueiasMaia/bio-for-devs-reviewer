@@ -86,7 +86,7 @@ export async function fetchQueue(
       const d = decisionByRecord.get(r.id)
       const reviewsCount = d?.reviews_count ?? 0
       const reviewerIds = new Set(
-        ((d?.reviewer_decisions ?? []) as { reviewer_id: string }[]).map((x) => x.reviewer_id),
+        ((d?.reviewer_decisions ?? []) as { reviewer_id: string | null }[]).map((x) => x.reviewer_id),
       )
       return reviewsCount < reviewersRequired || reviewerIds.has(reviewerId)
     })

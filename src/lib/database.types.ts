@@ -5,6 +5,7 @@
 import type {
   CriterionKind,
   Decision,
+  ExtractionFieldType,
   ImportFormat,
   PicotsDimension,
   ProjectRole,
@@ -346,6 +347,80 @@ export interface Database {
           justification?: string
         }
       >
+      extraction_fields: Table<
+        {
+          id: string
+          project_id: string
+          key: string
+          label: string
+          field_type: ExtractionFieldType
+          options: string[]
+          required: boolean
+          order_index: number
+          created_at: string
+          updated_at: string
+        },
+        {
+          id?: string
+          project_id: string
+          key: string
+          label: string
+          field_type: ExtractionFieldType
+          options?: string[]
+          required?: boolean
+          order_index?: number
+        },
+        {
+          key?: string
+          label?: string
+          field_type?: ExtractionFieldType
+          options?: string[]
+          required?: boolean
+          order_index?: number
+        }
+      >
+      data_extractions: Table<
+        {
+          id: string
+          record_id: string
+          extractor_id: string
+          answers: Record<string, string | string[]>
+          notes: string
+          created_at: string
+          updated_at: string
+        },
+        {
+          id?: string
+          record_id: string
+          extractor_id: string
+          answers?: Record<string, string | string[]>
+          notes?: string
+        },
+        { answers?: Record<string, string | string[]>; notes?: string }
+      >
+      extraction_resolutions: Table<
+        {
+          id: string
+          record_id: string
+          field_key: string
+          resolved_value: string | string[]
+          resolved_by: string
+          rationale: string
+          resolved_at: string
+          created_at: string
+          updated_at: string
+        },
+        {
+          id?: string
+          record_id: string
+          field_key: string
+          resolved_value: string | string[]
+          resolved_by: string
+          rationale?: string
+          resolved_at?: string
+        },
+        { resolved_value?: string | string[]; rationale?: string; resolved_at?: string }
+      >
     }
     Views: {
       v_dedup_groups: View<{
@@ -360,7 +435,13 @@ export interface Database {
           record_id: string
           project_id: string
           stage: ScreeningStage
-          reviewer_decisions: { reviewer_id: string; decision: Decision; reasons: string[]; decided_at: string }[]
+          reviewer_decisions: {
+            reviewer_id: string | null
+            decision: Decision
+            reasons: string[]
+            decided_at: string
+            is_ai: boolean
+          }[]
           reviews_count: number
           distinct_decision_count: number
           first_decision: Decision | null
@@ -399,6 +480,17 @@ export interface Database {
           included_final: number
         }>
       v_fulltext_exclusion_reasons: View<{ project_id: string; reason_code: string; count: number }>
+      v_extraction_field_status: View<{
+          record_id: string
+          project_id: string
+          field_key: string
+          extractors_count: number
+          distinct_value_count: number
+          first_value: string | string[]
+          resolved_value: string | string[] | null
+          final_value: string | string[] | null
+          is_conflict: boolean
+        }>
     }
     Functions: {
       create_project: {

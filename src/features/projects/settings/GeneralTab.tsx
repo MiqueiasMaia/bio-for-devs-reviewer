@@ -93,10 +93,29 @@ export function GeneralTab() {
           <input
             type="checkbox"
             checked={settings.ai_screening_enabled}
-            onChange={(e) => setSettings({ ...settings, ai_screening_enabled: e.target.checked })}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                ai_screening_enabled: e.target.checked,
+                ai_counts_as_reviewer: e.target.checked ? settings.ai_counts_as_reviewer : false,
+              })
+            }
           />
           {t('settingsGeneral.aiScreeningEnabled')}
         </label>
+        {settings.ai_screening_enabled && (
+          <label className="ml-6 flex flex-col gap-1 text-sm text-fg">
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.ai_counts_as_reviewer}
+                onChange={(e) => setSettings({ ...settings, ai_counts_as_reviewer: e.target.checked })}
+              />
+              {t('settingsGeneral.aiCountsAsReviewer')}
+            </span>
+            <span className="text-xs text-mut">{t('settingsGeneral.aiCountsAsReviewerHint')}</span>
+          </label>
+        )}
         <label className="flex items-center gap-2 text-sm text-fg">
           <input
             type="checkbox"
@@ -104,6 +123,14 @@ export function GeneralTab() {
             onChange={(e) => setSettings({ ...settings, risk_of_bias_enabled: e.target.checked })}
           />
           {t('settingsGeneral.riskOfBiasEnabled')}
+        </label>
+        <label className="flex items-center gap-2 text-sm text-fg">
+          <input
+            type="checkbox"
+            checked={settings.data_extraction_enabled}
+            onChange={(e) => setSettings({ ...settings, data_extraction_enabled: e.target.checked })}
+          />
+          {t('settingsGeneral.dataExtractionEnabled')}
         </label>
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-fg">{t('settingsGeneral.stagesEnabled')}</legend>
