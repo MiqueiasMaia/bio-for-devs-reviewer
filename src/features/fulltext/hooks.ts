@@ -20,5 +20,11 @@ export function useFulltextMutations(recordId: string, projectId: string) {
       mutationFn: (doc: api.FulltextDoc) => api.deleteFulltextDoc(doc.id, doc.storagePath),
       onSuccess: invalidate,
     }),
+    fetchOpenAccess: useMutation({
+      mutationFn: (doi: string) => api.fetchOpenAccessPdf(projectId, recordId, doi),
+      onSuccess: (result) => {
+        if (result.attached) invalidate()
+      },
+    }),
   }
 }

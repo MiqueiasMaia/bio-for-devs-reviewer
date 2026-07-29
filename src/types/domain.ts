@@ -24,6 +24,7 @@ export interface ProjectSettings {
   dedup: ProjectDedupSettings
   ui_locale: string
   ai_screening_enabled: boolean
+  risk_of_bias_enabled: boolean
 }
 
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
@@ -34,4 +35,11 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   dedup: { on_doi: true, on_normalized_title: true, title_similarity_threshold: 0.92 },
   ui_locale: 'pt-BR',
   ai_screening_enabled: false,
+  risk_of_bias_enabled: false,
 }
+
+export type RobDomain = 'participants' | 'predictors' | 'outcome' | 'analysis' | 'overall'
+
+export type RobAnswer = 'yes' | 'probably_yes' | 'probably_no' | 'no' | 'no_information'
+
+export type RobJudgment = 'low' | 'high' | 'unclear'

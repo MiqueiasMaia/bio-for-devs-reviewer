@@ -344,7 +344,7 @@ export function ScreeningWorkspacePage() {
 
               {stage === 'full_text' && (
                 <div className="mt-3">
-                  <FulltextPanel recordId={current.id} projectId={project.id} />
+                  <FulltextPanel recordId={current.id} projectId={project.id} doi={current.doi} />
                 </div>
               )}
 

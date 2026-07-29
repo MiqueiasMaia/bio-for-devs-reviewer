@@ -9,6 +9,9 @@ import type {
   PicotsDimension,
   ProjectRole,
   ProjectSettings,
+  RobAnswer,
+  RobDomain,
+  RobJudgment,
   ScreeningStage,
 } from '../types/domain.js'
 
@@ -304,6 +307,38 @@ export interface Database {
           resolved_at?: string
         },
         { resolved_decision?: Decision; rationale?: string; resolved_at?: string }
+      >
+      risk_of_bias_assessments: Table<
+        {
+          id: string
+          record_id: string
+          assessor_id: string
+          tool: 'probast'
+          domain: RobDomain
+          answers: Record<string, RobAnswer>
+          risk_judgment: RobJudgment | null
+          applicability_judgment: RobJudgment | null
+          justification: string
+          created_at: string
+          updated_at: string
+        },
+        {
+          id?: string
+          record_id: string
+          assessor_id: string
+          tool?: 'probast'
+          domain: RobDomain
+          answers?: Record<string, RobAnswer>
+          risk_judgment?: RobJudgment | null
+          applicability_judgment?: RobJudgment | null
+          justification?: string
+        },
+        {
+          answers?: Record<string, RobAnswer>
+          risk_judgment?: RobJudgment | null
+          applicability_judgment?: RobJudgment | null
+          justification?: string
+        }
       >
     }
     Views: {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
@@ -39,6 +39,7 @@ export function ImportWizardPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const runImport = useRunImport(project.id)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [sourceName, setSourceName] = useState('')
   const [file, setFile] = useState<File | null>(null)
@@ -118,17 +119,20 @@ export function ImportWizardPage() {
           onChange={(e) => setSourceName(e.target.value)}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-fg" htmlFor="import-file">
-            {t('importWizard.chooseFile')}
-          </label>
+          <span className="text-sm font-medium text-fg">{t('importWizard.chooseFile')}</span>
           <input
-            id="import-file"
+            ref={fileInputRef}
             type="file"
             accept=".ris,.nbib,.csv,.txt"
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-            className="text-sm"
+            className="hidden"
           />
-          {!file && <p className="text-sm text-mut">{t('importWizard.noFile')}</p>}
+          <div className="flex items-center gap-3">
+            <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
+              {t('importWizard.chooseFile')}
+            </Button>
+            <span className="text-sm text-mut">{file ? file.name : t('importWizard.noFile')}</span>
+          </div>
           {parseError && <p className="text-sm text-red-600">{parseError}</p>}
           {format && (
             <p className="text-sm text-mut">

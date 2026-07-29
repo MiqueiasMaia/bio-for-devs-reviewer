@@ -92,6 +92,14 @@ export function GeneralTab() {
           />
           {t('settingsGeneral.aiScreeningEnabled')}
         </label>
+        <label className="flex items-center gap-2 text-sm text-fg">
+          <input
+            type="checkbox"
+            checked={settings.risk_of_bias_enabled}
+            onChange={(e) => setSettings({ ...settings, risk_of_bias_enabled: e.target.checked })}
+          />
+          {t('settingsGeneral.riskOfBiasEnabled')}
+        </label>
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-fg">{t('settingsGeneral.stagesEnabled')}</legend>
           <label className="flex items-center gap-2 text-sm text-fg">

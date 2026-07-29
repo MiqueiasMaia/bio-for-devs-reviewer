@@ -16,6 +16,7 @@ const validBackup: ProjectBackup = {
       dedup: { on_doi: true, on_normalized_title: true, title_similarity_threshold: 0.92 },
       ui_locale: 'pt-BR',
       ai_screening_enabled: false,
+      risk_of_bias_enabled: false,
     },
   },
   criteria: [],

@@ -20,6 +20,7 @@ import { DedupReviewPage } from '@/features/imports/DedupReviewPage'
 import { ScreeningWorkspacePage } from '@/features/screening/ScreeningWorkspacePage'
 import { ConflictsPage } from '@/features/conflicts/ConflictsPage'
 import { PrismaPage } from '@/features/prisma/PrismaPage'
+import { RiskOfBiasPage } from '@/features/riskOfBias/RiskOfBiasPage'
 import { EnvSetupNotice } from '@/components/EnvSetupNotice'
 
 function App() {
@@ -55,10 +56,12 @@ function App() {
               <Route path="duplicates" element={<DedupReviewPage />} />
               <Route path="screening" element={<ScreeningWorkspacePage />} />
               <Route path="conflicts" element={<ConflictsPage />} />
+              <Route path="risk-of-bias" element={<RiskOfBiasPage />} />
               <Route path="prisma" element={<PrismaPage />} />
               <Route path="settings" element={<ProjectSettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
                 <Route path="general" element={<GeneralTab />} />
+                <Route path="import" element={<ImportWizardPage />} />
                 <Route path="criteria" element={<CriteriaTab />} />
                 <Route path="picots" element={<PicotsTab />} />
                 <Route path="exclusion-reasons" element={<ExclusionReasonsTab />} />

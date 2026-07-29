@@ -53,18 +53,17 @@ export function ProjectLayout() {
           <NavLink to="" end className={navLinkClass}>
             {t('projectNav.overview')}
           </NavLink>
-          <NavLink to="import" className={navLinkClass}>
-            {t('projectNav.import')}
-          </NavLink>
-          <NavLink to="duplicates" className={navLinkClass}>
-            {t('projectNav.duplicates')}
-          </NavLink>
           <NavLink to="screening" className={navLinkClass}>
             {t('projectNav.screening')}
           </NavLink>
           <NavLink to="conflicts" className={navLinkClass}>
             {t('projectNav.conflicts')}
           </NavLink>
+          {project.settings.risk_of_bias_enabled && (
+            <NavLink to="risk-of-bias" className={navLinkClass}>
+              {t('projectNav.riskOfBias')}
+            </NavLink>
+          )}
           <NavLink to="prisma" className={navLinkClass}>
             {t('projectNav.prisma')}
           </NavLink>

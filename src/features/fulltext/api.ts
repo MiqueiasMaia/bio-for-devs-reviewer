@@ -51,3 +51,37 @@ export async function deleteFulltextDoc(id: string, storagePath: string): Promis
   const { error } = await supabase.from('fulltext_docs').delete().eq('id', id)
   if (error) throw error
 }
+
+export type OpenAccessFetchReason =
+  | 'not_found'
+  | 'lookup_failed'
+  | 'no_oa_pdf'
+  | 'download_failed'
+  | 'not_a_pdf'
+
+export type OpenAccessFetchResult = { attached: true } | { attached: false; reason: OpenAccessFetchReason }
+
+/** Looks up a legally open-access copy of the PDF via Unpaywall (by DOI) and,
+ * if found, downloads and attaches it the same way a manual upload would —
+ * server-side, via /api/unpaywall-fetch, since Unpaywall + arbitrary
+ * publisher PDF URLs aren't reliably fetchable from the browser. */
+export async function fetchOpenAccessPdf(
+  projectId: string,
+  recordId: string,
+  doi: string,
+): Promise<OpenAccessFetchResult> {
+  const { data: sessionData } = await supabase.auth.getSession()
+  const accessToken = sessionData.session?.access_token
+  if (!accessToken) throw new Error('No active session')
+
+  const res = await fetch('/api/unpaywall-fetch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ projectId, recordId, doi }),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `Request failed with status ${res.status}`)
+  }
+  return (await res.json()) as OpenAccessFetchResult
+}

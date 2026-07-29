@@ -19,6 +19,9 @@ export function ProjectSettingsLayout() {
         <NavLink to="general" className={tabClass}>
           {t('settingsNav.general')}
         </NavLink>
+        <NavLink to="import" className={tabClass}>
+          {t('settingsNav.import')}
+        </NavLink>
         <NavLink to="criteria" className={tabClass}>
           {t('settingsNav.criteria')}
         </NavLink>
