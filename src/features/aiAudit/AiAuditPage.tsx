@@ -159,15 +159,30 @@ export function AiAuditPage() {
                 </div>
                 {current.rationale && <p className="text-sm text-fg">{current.rationale}</p>}
                 <div className="flex flex-col gap-1.5">
-                  {current.criteriaDetail.map((c, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <span className={c.met ? 'text-include' : 'text-red-700'}>{c.met ? '✓' : '✗'}</span>
-                      <div>
-                        <p className="text-fg">{c.criterion}</p>
-                        {c.note && <p className="text-xs text-mut">{c.note}</p>}
+                  {current.criteriaDetail.map((c, i) => {
+                    // `met` means "this criterion, as stated, applies to the
+                    // study" — for an EXCLUSION criterion that's bad news
+                    // (met=true should exclude it), the opposite of an
+                    // inclusion criterion (met=true is good). Showing ✗/red
+                    // whenever met=false, regardless of kind, made a
+                    // correctly-non-applicable exclusion criterion (the
+                    // desired outcome) look like a failure.
+                    const isGood = c.kind === 'exclusion' ? !c.met : c.met
+                    return (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <span className={isGood ? 'text-include' : 'text-red-700'}>{isGood ? '✓' : '✗'}</span>
+                        <div>
+                          <p className="text-fg">
+                            {c.criterion}{' '}
+                            <span className="text-[11px] font-normal text-mut">
+                              ({c.kind === 'exclusion' ? t('criteria.exclusion') : t('criteria.inclusion')})
+                            </span>
+                          </p>
+                          {c.note && <p className="text-xs text-mut">{c.note}</p>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </Card>
             )}
