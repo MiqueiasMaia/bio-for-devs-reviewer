@@ -18,7 +18,7 @@ function DedupGroupCard({ projectId, group }: { projectId: string; group: DedupG
         <div key={r.id} className="flex flex-col gap-2 border-b border-line py-2 last:border-b-0">
           <div className="flex items-start gap-3">
             <span
-              className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+              className={`mt-0.5 shrink-0 border px-2 py-0.5 text-[11px] font-semibold ${
                 r.dedupPrimary
                   ? 'border-include text-include'
                   : 'border-line text-mut'

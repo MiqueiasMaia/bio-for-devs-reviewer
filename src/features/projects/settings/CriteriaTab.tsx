@@ -23,7 +23,7 @@ function CriterionEditor({
   return (
     <div className="flex items-start gap-2 border-b border-line py-3 last:border-b-0">
       <textarea
-        className="min-h-10 flex-1 rounded-md border border-line px-3 py-2 text-sm"
+        className="min-h-10 flex-1 border border-line px-3 py-2 text-sm"
         defaultValue={criterion.text}
         onBlur={(e) => {
           if (e.target.value !== criterion.text) onUpdate({ text: e.target.value })

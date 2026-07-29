@@ -48,7 +48,7 @@ export function GeneralTab() {
           </label>
           <textarea
             id="description"
-            className="min-h-20 rounded-md border border-line px-3 py-2 text-sm"
+            className="min-h-20 border border-line px-3 py-2 text-sm"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />

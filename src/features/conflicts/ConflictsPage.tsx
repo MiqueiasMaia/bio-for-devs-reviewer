@@ -44,7 +44,7 @@ function ConflictCard({ conflict, stage, projectId }: { conflict: ConflictSummar
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {conflict.reviewerDecisions.map((rd) => (
-          <div key={rd.reviewerId} className={clsx('rounded-md border-2 p-3 text-sm', DECISION_COLOR[rd.decision])}>
+          <div key={rd.reviewerId} className={clsx('border-2 p-3 text-sm', DECISION_COLOR[rd.decision])}>
             <p className="font-semibold">{rd.reviewerName} — {t(decisionLabelKey(rd.decision))}</p>
             {rd.reasons.length > 0 && (
               <p className="mt-1 text-xs text-fg">
@@ -57,7 +57,7 @@ function ConflictCard({ conflict, stage, projectId }: { conflict: ConflictSummar
       </div>
 
       {conflict.aiScreening && (
-        <div className="rounded-md border border-uncertain bg-[#fbefdc] p-3 text-sm">
+        <div className="border border-uncertain bg-[#fbefdc] p-3 text-sm">
           <p className="font-semibold text-uncertain">
             {t('conflicts.aiDecision')} ({conflict.aiScreening.modelName}):{' '}
             {t(decisionLabelKey(conflict.aiScreening.decision))}
@@ -70,7 +70,7 @@ function ConflictCard({ conflict, stage, projectId }: { conflict: ConflictSummar
         value={rationale}
         onChange={(e) => setRationale(e.target.value)}
         placeholder={t('conflicts.rationalePlaceholder')}
-        className="min-h-10 rounded-md border border-line px-3 py-2 text-sm"
+        className="min-h-10 border border-line px-3 py-2 text-sm"
       />
 
       <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ export function ConflictsPage() {
               key={s}
               onClick={() => setStage(s)}
               className={clsx(
-                'rounded-md px-3 py-1.5 text-sm font-medium',
+                'px-3 py-1.5 text-sm font-medium',
                 stage === s ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
               )}
             >

@@ -22,7 +22,7 @@ function HighlightTermEditor({
     <div className="flex flex-col gap-2 border-b border-line py-4 last:border-b-0">
       <div className="flex items-center gap-2">
         <span
-          className="inline-block h-4 w-4 shrink-0 rounded-full border border-line"
+          className="inline-block h-4 w-4 shrink-0 border border-line"
           style={{ backgroundColor: term.color }}
         />
         <input
@@ -47,7 +47,7 @@ function HighlightTermEditor({
       </div>
       <textarea
         aria-label={t('picots.terms')}
-        className="min-h-16 rounded-md border border-line px-3 py-2 text-sm"
+        className="min-h-16 border border-line px-3 py-2 text-sm"
         defaultValue={term.terms.join(', ')}
         onBlur={(e) => {
           const terms = e.target.value

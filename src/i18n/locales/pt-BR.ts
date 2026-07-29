@@ -349,6 +349,11 @@ export const ptBR = {
     exportBibtex: 'Exportar BibTeX (incluídos)',
     noIncluded: 'Nenhum estudo incluído ainda.',
   },
+  footer: {
+    tagline: 'Revisão sistemática, sem fricção.',
+    madeBy: 'Feito por',
+    author: 'Manoel Miqueias Maia',
+  },
   members: {
     title: 'Membros do projeto',
     subtitle: 'Quem pode ver e revisar este projeto.',

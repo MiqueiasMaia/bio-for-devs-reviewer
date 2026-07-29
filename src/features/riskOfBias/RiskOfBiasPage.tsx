@@ -98,7 +98,7 @@ function DomainBlock({
         value={justification}
         onChange={(e) => setJustification(e.target.value)}
         placeholder={t('riskOfBias.justificationPlaceholder')}
-        className="min-h-16 w-full rounded-md border border-line px-3 py-2 text-sm"
+        className="min-h-16 w-full border border-line px-3 py-2 text-sm"
       />
       <div className="flex items-center gap-3">
         <Button onClick={handleSave} disabled={save.isPending}>
@@ -152,7 +152,7 @@ function OverallBlock({
         value={justification}
         onChange={(e) => setJustification(e.target.value)}
         placeholder={t('riskOfBias.justificationPlaceholder')}
-        className="min-h-16 w-full rounded-md border border-line px-3 py-2 text-sm"
+        className="min-h-16 w-full border border-line px-3 py-2 text-sm"
       />
       <div className="flex items-center gap-3">
         <Button onClick={handleSave} disabled={save.isPending}>
@@ -202,7 +202,7 @@ export function RiskOfBiasPage() {
                 type="button"
                 onClick={() => setSelectedId(r.id)}
                 className={clsx(
-                  'rounded-md border px-3 py-2 text-left text-sm cursor-pointer',
+                  'border px-3 py-2 text-left text-sm cursor-pointer',
                   selectedId === r.id ? 'border-include bg-include/5' : 'border-line hover:bg-bg',
                 )}
               >

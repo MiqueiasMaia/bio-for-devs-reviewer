@@ -27,7 +27,7 @@ export function FulltextPanel({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-bg p-3">
+    <div className="border border-line bg-bg p-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-mut">{t('fulltext.title')}</h3>
         <div className="flex items-center gap-2">

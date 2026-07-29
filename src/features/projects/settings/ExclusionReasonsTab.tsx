@@ -34,7 +34,7 @@ export function ExclusionReasonsTab() {
         {reasons?.map((reason) => (
           <div key={reason.id} className="flex items-center gap-2 border-b border-line py-2 last:border-b-0">
             <input
-              className="w-40 rounded-md border border-line px-3 py-2 text-sm"
+              className="w-40 border border-line px-3 py-2 text-sm"
               defaultValue={reason.code}
               aria-label={t('exclusionReasons.code')}
               onBlur={(e) => {
@@ -42,7 +42,7 @@ export function ExclusionReasonsTab() {
               }}
             />
             <input
-              className="flex-1 rounded-md border border-line px-3 py-2 text-sm"
+              className="flex-1 border border-line px-3 py-2 text-sm"
               defaultValue={reason.label}
               aria-label={t('exclusionReasons.label')}
               onBlur={(e) => {

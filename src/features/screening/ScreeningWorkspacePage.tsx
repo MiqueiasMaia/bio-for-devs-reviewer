@@ -191,7 +191,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             <span>
               {summary.data.include + summary.data.uncertain + summary.data.exclude}/{summary.data.total}
             </span>
-            <div className="h-2 flex-1 min-w-24 overflow-hidden rounded-full bg-line">
+            <div className="h-2 flex-1 min-w-24 overflow-hidden bg-line">
               <div
                 className="h-full bg-include transition-[width]"
                 style={{
@@ -244,7 +244,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
       <p className="mb-4 text-xs text-mut">{t('screening.blindNotice')}</p>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
-        <div className="rounded-xl border border-line bg-white p-6">
+        <div className="border border-line bg-white p-6">
           {queue.isError ? (
             <ErrorState onRetry={() => queue.refetch()} />
           ) : !current ? (
@@ -308,7 +308,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                     aria-pressed={decisionDraft === d}
                     onClick={() => handleDecision(d)}
                     className={clsx(
-                      'flex-1 rounded-lg border-2 py-3 text-[15px] font-bold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
+                      'flex-1 border-2 py-3 text-[15px] font-bold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
                       DECISION_STYLES[d],
                     )}
                   >
@@ -321,7 +321,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
               </div>
 
               {decisionDraft === 'EXCLUDE' && (
-                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                <div className="mt-3 border border-red-200 bg-red-50 p-3">
                   <p className="mb-2 text-xs font-semibold text-red-800">{t('screening.reasonsLabel')}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {(exclusionReasons.data ?? []).map((r) => (
@@ -331,7 +331,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                         aria-pressed={reasonsDraft.includes(r.code)}
                         onClick={() => toggleReason(r.code)}
                         className={clsx(
-                          'rounded-full border px-2.5 py-1 text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
+                          'border px-2.5 py-1 text-xs font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
                           reasonsDraft.includes(r.code)
                             ? 'border-red-700 bg-red-700 text-white'
                             : 'border-red-300 text-red-700',
@@ -358,7 +358,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                 onChange={(e) => setNotesDraft(e.target.value)}
                 onBlur={handleNotesBlur}
                 placeholder={t('screening.notesPlaceholder')}
-                className="mt-3 min-h-12 w-full rounded-md border border-line px-3 py-2 text-sm"
+                className="mt-3 min-h-12 w-full border border-line px-3 py-2 text-sm"
               />
 
               <div className="mt-4 flex items-center justify-between gap-3">
@@ -383,16 +383,16 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
               {summary.data && (
                 <div className="mt-3 flex flex-wrap gap-1.5 text-[11.5px]">
-                  <span className="rounded-full border border-line bg-[#e7f1f4] px-2 py-0.5 font-semibold text-include">
+                  <span className="border border-line bg-[#e7f1f4] px-2 py-0.5 font-semibold text-include">
                     {t('screening.include')} {summary.data.include}
                   </span>
-                  <span className="rounded-full border border-line bg-[#fbefdc] px-2 py-0.5 font-semibold text-uncertain">
+                  <span className="border border-line bg-[#fbefdc] px-2 py-0.5 font-semibold text-uncertain">
                     {t('screening.uncertain')} {summary.data.uncertain}
                   </span>
-                  <span className="rounded-full border border-line bg-[#eef1f3] px-2 py-0.5 font-semibold text-mut">
+                  <span className="border border-line bg-[#eef1f3] px-2 py-0.5 font-semibold text-mut">
                     {t('screening.exclude')} {summary.data.exclude}
                   </span>
-                  <span className="rounded-full border border-line px-2 py-0.5 font-semibold text-red-700">
+                  <span className="border border-line px-2 py-0.5 font-semibold text-red-700">
                     {t('screening.filterUndecided')} {summary.data.undecided}
                   </span>
                 </div>
@@ -401,7 +401,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           )}
         </div>
 
-        <aside className="h-fit rounded-xl border border-line bg-white p-4 text-[12.5px]">
+        <aside className="h-fit border border-line bg-white p-4 text-[12.5px]">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mut">PICOTS</h2>
           <div className="mb-3">
             <p className="mb-1 font-bold text-include">{t('criteria.inclusion')}</p>

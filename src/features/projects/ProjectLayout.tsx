@@ -12,7 +12,7 @@ export interface ProjectOutletContext {
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   clsx(
-    'rounded-md px-3 py-1.5 text-sm font-medium',
+    'px-3 py-1.5 text-sm font-medium',
     isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
   )
 

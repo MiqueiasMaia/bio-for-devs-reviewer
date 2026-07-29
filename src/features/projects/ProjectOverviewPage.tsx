@@ -43,7 +43,7 @@ export function ProjectOverviewPage() {
               key={s}
               onClick={() => setStage(s)}
               className={clsx(
-                'rounded-md px-3 py-1.5 text-sm font-medium',
+                'px-3 py-1.5 text-sm font-medium',
                 stage === s ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
               )}
             >

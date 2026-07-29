@@ -16,7 +16,7 @@ export function TextField({ label, id, className, ...props }: TextFieldProps) {
       <input
         id={inputId}
         className={clsx(
-          'rounded-md border border-line px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-include',
+          'border border-line px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-include',
           className,
         )}
         {...props}

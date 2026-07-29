@@ -15,7 +15,7 @@ export function Button({ variant = 'primary', className, ...props }: ButtonProps
   return (
     <button
       className={clsx(
-        'rounded-md border px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
+        'border px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
         variantClasses[variant],
         className,
       )}

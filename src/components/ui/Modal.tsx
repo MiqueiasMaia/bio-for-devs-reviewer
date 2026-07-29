@@ -32,7 +32,7 @@ export function Modal({ open, onClose, title, children, size = 'default' }: Moda
         aria-modal="true"
         aria-label={title}
         className={clsx(
-          'max-h-[85vh] w-full overflow-y-auto rounded-xl border border-line bg-white p-6 shadow-lg',
+          'max-h-[85vh] w-full overflow-y-auto border border-line bg-white p-6 shadow-lg',
           size === 'wide' ? 'max-w-3xl' : 'max-w-lg',
         )}
       >
@@ -42,7 +42,7 @@ export function Modal({ open, onClose, title, children, size = 'default' }: Moda
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-md p-1 text-mut hover:bg-bg focus-visible:outline-2 focus-visible:outline-include"
+            className="p-1 text-mut hover:bg-bg focus-visible:outline-2 focus-visible:outline-include"
           >
             ✕
           </button>
