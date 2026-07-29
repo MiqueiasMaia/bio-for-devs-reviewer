@@ -11,12 +11,15 @@ export interface QueueRecord {
   journal: string | null
   doi: string | null
   sourceDb: string | null
+  titleTranslated: string | null
+  abstractTranslated: string | null
 }
 
 export interface ScreeningState {
   decision: Decision | null
   reasons: string[]
   notes: string
+  decidedAt: string
 }
 
 export async function listEligibleRecordIds(projectId: string, stage: ScreeningStage): Promise<Set<string>> {
@@ -66,7 +69,9 @@ export async function fetchQueue(
 
   const { data: records, error: recordsError } = await supabase
     .from('records')
-    .select('id, human_ref, title, authors, abstract, year, journal, doi, source_db')
+    .select(
+      'id, human_ref, title, authors, abstract, year, journal, doi, source_db, title_translated, abstract_translated',
+    )
     .eq('project_id', projectId)
     .order('human_ref', { ascending: true })
   if (recordsError) throw recordsError
@@ -100,6 +105,8 @@ export async function fetchQueue(
       journal: r.journal,
       doi: r.doi,
       sourceDb: r.source_db,
+      titleTranslated: r.title_translated,
+      abstractTranslated: r.abstract_translated,
     }))
 }
 
@@ -114,12 +121,15 @@ export async function fetchMyScreenings(
   // harmless since callers only ever look up ids from their own queue.
   const { data, error } = await supabase
     .from('screenings')
-    .select('record_id, decision, reasons, notes')
+    .select('record_id, decision, reasons, notes, decided_at')
     .eq('reviewer_id', reviewerId)
     .eq('stage', stage)
   if (error) throw error
   return new Map(
-    data.map((s) => [s.record_id, { decision: s.decision, reasons: s.reasons, notes: s.notes }]),
+    data.map((s) => [
+      s.record_id,
+      { decision: s.decision, reasons: s.reasons, notes: s.notes, decidedAt: s.decided_at },
+    ]),
   )
 }
 

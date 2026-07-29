@@ -192,6 +192,9 @@ export interface Database {
           dedup_primary: boolean
           dedup_confirmed: boolean
           human_ref: string
+          title_translated: string | null
+          abstract_translated: string | null
+          translated_at: string | null
           created_at: string
           updated_at: string
         },
@@ -214,6 +217,9 @@ export interface Database {
           dedup_primary?: boolean
           dedup_confirmed?: boolean
           human_ref?: string
+          title_translated?: string | null
+          abstract_translated?: string | null
+          translated_at?: string | null
         },
         {
           doi?: string | null
@@ -221,6 +227,9 @@ export interface Database {
           is_duplicate?: boolean
           dedup_primary?: boolean
           dedup_confirmed?: boolean
+          title_translated?: string | null
+          abstract_translated?: string | null
+          translated_at?: string | null
         }
       >
       record_counters: Table<

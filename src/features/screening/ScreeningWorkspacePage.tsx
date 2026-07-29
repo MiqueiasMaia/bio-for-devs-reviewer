@@ -13,6 +13,8 @@ import type { Decision, ScreeningStage } from '@/types/domain'
 import { useQueue, useMyScreenings, useQueueSummary, useSaveScreening, useReconcileDrafts } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
 import { downloadCsv, exportDecisionsCsv, importLegacyDecisionsCsv } from './csvRoundTrip'
+import { getDailyGoal, getLastPosition, saveLastPosition, setDailyGoal } from './sessionTracker'
+import { useTranslateRecord } from '@/features/translation/hooks'
 import { FulltextPanel } from '@/features/fulltext/FulltextPanel'
 import { ErrorState } from '@/components/ErrorState'
 
@@ -38,6 +40,10 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const [reasonsDraft, setReasonsDraft] = useState<string[]>([])
   const [notesDraft, setNotesDraft] = useState('')
   const [importMessage, setImportMessage] = useState<string | null>(null)
+  const [showTranslation, setShowTranslation] = useState(false)
+  const [showResumedNote, setShowResumedNote] = useState(false)
+  const [editingGoal, setEditingGoal] = useState(false)
+  const [dailyGoal, setDailyGoalState] = useState(() => getDailyGoal(reviewerId, stage, project.id))
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const queue = useQueue(project.id, stage, reviewerId, reviewersRequired)
@@ -47,7 +53,33 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const exclusionReasons = useExclusionReasons(project.id)
   const criteria = useCriteria(project.id)
   const saveScreening = useSaveScreening(project.id, stage, reviewerId)
+  const translateRecord = useTranslateRecord()
   useReconcileDrafts(stage, reviewerId, saveScreening)
+
+  // "Decisions this session" / "decisions today" — derived from
+  // myScreenings' own decidedAt timestamps rather than any new tracking
+  // table, per the "só decisões e %, sem tempo" call: no session/time
+  // infrastructure in the backend, just a client-side reading of data
+  // already fetched for other reasons.
+  const sessionStartAtRef = useRef(Date.now())
+  const resumedRef = useRef(false)
+
+  const sessionCount = useMemo(() => {
+    let count = 0
+    for (const s of myScreenings.data?.values() ?? []) {
+      if (new Date(s.decidedAt).getTime() >= sessionStartAtRef.current) count++
+    }
+    return count
+  }, [myScreenings.data])
+
+  const todayCount = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    let count = 0
+    for (const s of myScreenings.data?.values() ?? []) {
+      if (s.decidedAt.slice(0, 10) === today) count++
+    }
+    return count
+  }, [myScreenings.data])
 
   // Keeps whichever record is currently open on screen from disappearing out
   // from under the reviewer the instant a decision is saved for it — e.g.
@@ -72,6 +104,22 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
     setIndex(0)
   }, [filter, stage])
 
+  // Picks up where the reviewer left off, once, the first time the queue
+  // loads — localStorage only (see sessionTracker.ts), so it's just a UX
+  // convenience local to this browser, not a fact worth syncing anywhere.
+  useEffect(() => {
+    if (resumedRef.current || !queue.data || queue.data.length === 0) return
+    resumedRef.current = true
+    const lastId = getLastPosition(reviewerId, stage, project.id)
+    if (!lastId) return
+    const idx = filteredQueue.findIndex((r) => r.id === lastId)
+    if (idx >= 0) {
+      setIndex(idx)
+      setShowResumedNote(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue.data])
+
   const current = filteredQueue[index]
   const currentState = current ? myScreenings.data?.get(current.id) : undefined
 
@@ -80,6 +128,8 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
     setDecisionDraft(currentState?.decision ?? null)
     setReasonsDraft(currentState?.reasons ?? [])
     setNotesDraft(currentState?.notes ?? '')
+    setShowTranslation(false)
+    if (current) saveLastPosition(reviewerId, stage, project.id, current.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id])
 
@@ -180,6 +230,30 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
     }
   }
 
+  async function handleTranslate() {
+    if (!current) return
+    if (current.titleTranslated) {
+      setShowTranslation((v) => !v)
+      return
+    }
+    try {
+      await translateRecord.mutateAsync({ id: current.id, title: current.title, abstract: current.abstract })
+      await queue.refetch()
+      setShowTranslation(true)
+    } catch {
+      setImportMessage(t('screening.translateError'))
+    }
+  }
+
+  function handleSetGoal(value: string) {
+    const goal = Number(value)
+    if (Number.isFinite(goal) && goal > 0) {
+      setDailyGoal(reviewerId, stage, project.id, goal)
+      setDailyGoalState(goal)
+    }
+    setEditingGoal(false)
+  }
+
   const inclusionCriteria = criteria.data?.filter((c) => c.kind === 'inclusion') ?? []
   const exclusionCriteria = criteria.data?.filter((c) => c.kind === 'exclusion') ?? []
 
@@ -201,6 +275,27 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             </div>
           </div>
         )}
+        <div className="flex items-center gap-2 text-xs text-mut">
+          <span>{t('screening.sessionCount', { count: sessionCount })}</span>
+          <span>·</span>
+          {editingGoal ? (
+            <input
+              type="number"
+              min={1}
+              autoFocus
+              defaultValue={dailyGoal ?? ''}
+              onBlur={(e) => handleSetGoal(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSetGoal((e.target as HTMLInputElement).value)
+              }}
+              className="w-14 border border-line px-1 py-0.5 text-xs"
+            />
+          ) : (
+            <button type="button" className="cursor-pointer underline" onClick={() => setEditingGoal(true)}>
+              {dailyGoal ? t('screening.todayProgress', { count: todayCount, goal: dailyGoal }) : t('screening.setGoal')}
+            </button>
+          )}
+        </div>
         <Select label="" aria-label="filtro" value={filter} onChange={(e) => setFilter(e.target.value as FilterValue)}>
           <option value="all">{t('screening.filterAll')}</option>
           <option value="undecided">{t('screening.filterUndecided')}</option>
@@ -239,6 +334,15 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
         </Button>
       </div>
 
+      {showResumedNote && (
+        <p className="mb-3 flex items-center justify-between text-xs text-mut">
+          <span>{t('screening.resumedNote')}</span>
+          <button type="button" className="cursor-pointer underline" onClick={() => setShowResumedNote(false)}>
+            ✕
+          </button>
+        </p>
+      )}
+
       {importMessage && <p className="mb-3 text-sm text-include">{importMessage}</p>}
 
       <p className="mb-4 text-xs text-mut">{t('screening.blindNotice')}</p>
@@ -253,16 +357,41 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             </p>
           ) : (
             <>
-              <div className="mb-1 text-xs text-mut">
-                {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
+              <div className="mb-1 flex items-center justify-between gap-2 text-xs text-mut">
+                <span>
+                  {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
+                </span>
+                <button
+                  type="button"
+                  className="cursor-pointer whitespace-nowrap underline disabled:cursor-wait disabled:opacity-50"
+                  disabled={translateRecord.isPending}
+                  onClick={handleTranslate}
+                >
+                  {translateRecord.isPending
+                    ? t('screening.translating')
+                    : showTranslation
+                      ? t('screening.viewOriginal')
+                      : t('screening.translate')}
+                </button>
               </div>
+              {showTranslation && current.titleTranslated && (
+                <p className="mb-1 text-[11px] text-mut">{t('screening.translatedLabel')}</p>
+              )}
               <p className="mb-2 text-xl font-semibold leading-snug text-fg">
-                <HighlightedText text={current.title || t('common.untitled')} termSets={termSets} enabled={hlOn} />
+                <HighlightedText
+                  text={(showTranslation && current.titleTranslated) || current.title || t('common.untitled')}
+                  termSets={termSets}
+                  enabled={hlOn}
+                />
               </p>
               <div className="mb-4 text-sm italic text-mut">{current.authors}</div>
               {current.abstract ? (
                 <div className="whitespace-pre-wrap text-[15px] text-fg">
-                  <HighlightedText text={current.abstract} termSets={termSets} enabled={hlOn} />
+                  <HighlightedText
+                    text={(showTranslation && current.abstractTranslated) || current.abstract}
+                    termSets={termSets}
+                    enabled={hlOn}
+                  />
                 </div>
               ) : (
                 <div className="italic text-red-700">{t('screening.emptyAbstract')}</div>
