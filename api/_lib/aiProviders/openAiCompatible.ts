@@ -4,6 +4,13 @@ import type { AIProviderCallArgs, AIProviderResult } from './types.js'
 export const GROQ_BASE_URL = 'https://api.groq.com/openai/v1'
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 
+// OpenAI-compatible APIs (Groq, OpenRouter) reject response_format:
+// json_object with a 400 unless the word "json" literally appears
+// somewhere in the messages — this isn't optional, so it's appended to
+// every call, not just the retry.
+const JSON_MODE_NOTE =
+  'Responda apenas com um objeto JSON válido, com exatamente estes campos: decision (string: "INCLUDE", "UNCERTAIN" ou "EXCLUDE"), confidence (número entre 0 e 1), rationale (string), criteria (array de objetos com criterion, kind, met, note). Sem texto fora do JSON, sem markdown, sem blocos de código.'
+
 const RETRY_NOTE =
   'Sua resposta anterior não era um JSON válido. Responda APENAS com um JSON válido no formato pedido — sem texto adicional, sem markdown, sem blocos de código.'
 
@@ -54,7 +61,9 @@ async function chatCompletion(
  * (the caller already tolerates that — same shape as any other failure).
  */
 export async function callOpenAiCompatible(baseUrl: string, args: AIProviderCallArgs): Promise<AIProviderResult> {
-  let response = await chatCompletion(baseUrl, args.apiKey, args.model, args.systemPrompt, args.userMessage)
+  const systemPromptWithJsonNote = `${args.systemPrompt}\n\n${JSON_MODE_NOTE}`
+
+  let response = await chatCompletion(baseUrl, args.apiKey, args.model, systemPromptWithJsonNote, args.userMessage)
   let content = response.choices?.[0]?.message?.content ?? ''
 
   let parsed = tryParse(content)
@@ -63,7 +72,7 @@ export async function callOpenAiCompatible(baseUrl: string, args: AIProviderCall
       baseUrl,
       args.apiKey,
       args.model,
-      `${args.systemPrompt}\n\n${RETRY_NOTE}`,
+      `${systemPromptWithJsonNote}\n\n${RETRY_NOTE}`,
       args.userMessage,
     )
     content = response.choices?.[0]?.message?.content ?? ''
