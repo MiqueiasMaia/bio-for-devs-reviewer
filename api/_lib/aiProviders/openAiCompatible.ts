@@ -7,9 +7,30 @@ export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 // OpenAI-compatible APIs (Groq, OpenRouter) reject response_format:
 // json_object with a 400 unless the word "json" literally appears
 // somewhere in the messages — this isn't optional, so it's appended to
-// every call, not just the retry.
-const JSON_MODE_NOTE =
-  'Responda apenas com um objeto JSON válido, com exatamente estes campos: decision (string: "INCLUDE", "UNCERTAIN" ou "EXCLUDE"), confidence (número entre 0 e 1), rationale (string), criteria (array de objetos com criterion, kind, met, note). Sem texto fora do JSON, sem markdown, sem blocos de código.'
+// every call, not just the retry. The concrete example (not just a prose
+// description) matters a lot for smaller free models: without it, a
+// model answering in Portuguese tends to translate enum-like fields too
+// ("kind": "Inclusão" instead of "inclusion", "met": "Metade" instead of
+// a strict boolean) even when the field names are in English — seen in
+// practice with Groq's Llama models. normalizeCriteria() below is a
+// second line of defense for whatever still slips through.
+const JSON_MODE_NOTE = [
+  'Responda APENAS com um objeto JSON válido, sem texto fora do JSON, sem markdown, sem blocos de código.',
+  'Os valores de "kind" e "met" devem ser EXATAMENTE como no exemplo abaixo (em inglês, "met" é um boolean literal, nunca um texto) — mesmo respondendo em português nos campos de texto livre (rationale, note):',
+  JSON.stringify(
+    {
+      decision: 'INCLUDE',
+      confidence: 0.8,
+      rationale: 'Texto livre em português explicando a decisão.',
+      criteria: [
+        { criterion: 'Nome do critério', kind: 'inclusion', met: true, note: 'Texto livre em português.' },
+        { criterion: 'Outro critério', kind: 'exclusion', met: false, note: 'Texto livre em português.' },
+      ],
+    },
+    null,
+    2,
+  ),
+].join('\n')
 
 const RETRY_NOTE =
   'Sua resposta anterior não era um JSON válido. Responda APENAS com um JSON válido no formato pedido — sem texto adicional, sem markdown, sem blocos de código.'
@@ -23,6 +44,55 @@ interface ChatCompletionResponse {
 function extractJsonBlock(text: string): string {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/)
   return fenced ? fenced[1].trim() : text.trim()
+}
+
+const KIND_ALIASES: Record<string, 'inclusion' | 'exclusion'> = {
+  inclusion: 'inclusion',
+  inclusão: 'inclusion',
+  inclusao: 'inclusion',
+  include: 'inclusion',
+  exclusion: 'exclusion',
+  exclusão: 'exclusion',
+  exclusao: 'exclusion',
+  exclude: 'exclusion',
+}
+
+const TRUE_ALIASES = new Set(['true', 'sim', 'yes', 'verdadeiro', 'atendido', 'atende'])
+const FALSE_ALIASES = new Set(['false', 'não', 'nao', 'no', 'falso', 'não atendido', 'nao atendido'])
+
+function normalizeKind(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  return KIND_ALIASES[value.trim().toLowerCase()] ?? value
+}
+
+function normalizeMet(value: unknown): unknown {
+  if (typeof value === 'boolean') return value
+  if (typeof value !== 'string') return value
+  const lower = value.trim().toLowerCase()
+  if (TRUE_ALIASES.has(lower)) return true
+  if (FALSE_ALIASES.has(lower)) return false
+  // Free-text/partial answers (e.g. "Metade") can't be expressed as a
+  // strict boolean — default to false (not clearly met) rather than
+  // guessing true, matching this app's "favor recall, prefer
+  // UNCERTAIN/false over a confident guess" stance elsewhere.
+  return false
+}
+
+/** Second line of defense after JSON_MODE_NOTE's example — normalizes the
+ * couple of fields free models most often answer in Portuguese/free text
+ * instead of the exact literal values the schema requires. */
+function normalizeCriteria(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw
+  const obj = raw as Record<string, unknown>
+  if (!Array.isArray(obj.criteria)) return raw
+  return {
+    ...obj,
+    criteria: obj.criteria.map((c) => {
+      if (!c || typeof c !== 'object') return c
+      const item = c as Record<string, unknown>
+      return { ...item, kind: normalizeKind(item.kind), met: normalizeMet(item.met) }
+    }),
+  }
 }
 
 async function chatCompletion(
@@ -109,7 +179,8 @@ function tryParse(content: string): ParseResult {
   let lastReason = 'empty response'
   for (const candidate of [content, extractJsonBlock(content)]) {
     try {
-      return { ok: true, value: ScreeningResultSchema.parse(JSON.parse(candidate)) }
+      const normalized = normalizeCriteria(JSON.parse(candidate))
+      return { ok: true, value: ScreeningResultSchema.parse(normalized) }
     } catch (err) {
       lastReason = err instanceof Error ? err.message : 'unknown parse error'
     }
