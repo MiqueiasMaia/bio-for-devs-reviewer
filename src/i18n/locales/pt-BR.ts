@@ -350,7 +350,7 @@ export const ptBR = {
     noIncluded: 'Nenhum estudo incluído ainda.',
   },
   footer: {
-    tagline: 'Revisão sistemática, sem fricção.',
+    tagline: 'Uma aplicação biofor.dev',
     madeBy: 'Feito por',
     author: 'Manoel Miqueias Maia',
   },
