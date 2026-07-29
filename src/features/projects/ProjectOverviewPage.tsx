@@ -15,6 +15,7 @@ import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { useQueueSummary, useProjectDecisionCounts } from '@/features/screening/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import { AiScreeningCard } from '@/features/aiScreening/AiScreeningCard'
+import { GetStartedWidget } from './GetStartedWidget'
 import type { ScreeningStage } from '@/types/domain'
 
 export function ProjectOverviewPage() {
@@ -39,6 +40,8 @@ export function ProjectOverviewPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <GetStartedWidget project={project} onReviewDuplicates={() => setDedupModalOpen(true)} />
+
       <div>
         <h2 className="mb-1 text-lg font-semibold text-fg">{t('dashboard.title')}</h2>
         {project.description && <p className="text-sm text-mut">{project.description}</p>}

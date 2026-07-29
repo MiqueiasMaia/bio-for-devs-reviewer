@@ -447,6 +447,17 @@ export const ptBR = {
     duplicatesCardHint: 'grupos de duplicatas pendentes',
     reviewDuplicates: 'Revisar duplicatas',
   },
+  getStarted: {
+    title: 'Primeiros passos',
+    collapse: 'Minimizar',
+    stepProjectCreated: 'Criar seu primeiro projeto',
+    stepAddReferences: 'Adicionar referências',
+    stepDetectDuplicates: 'Detectar duplicatas',
+    stepDefineCriteria: 'Definir critérios de elegibilidade',
+    stepInviteMembers: 'Convidar membros da equipe',
+    actionDefineCriteria: 'Definir critérios',
+    actionInviteMembers: 'Convidar membros',
+  },
   dataSummary: {
     title: 'Resumo dos dados',
     imported: 'Referências importadas',
