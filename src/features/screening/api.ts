@@ -30,13 +30,17 @@ export async function listEligibleRecordIds(projectId: string, stage: ScreeningS
     return new Set(data.map((r) => r.id))
   }
 
-  // full_text stage: only records that were INCLUDEd at title_abstract.
+  // full_text stage: only records that were UNCERTAIN at title_abstract.
+  // INCLUDE at title_abstract counts straight toward the final included
+  // total (see v_prisma_counts.included_final) instead of needing
+  // full-text re-confirmation; full-text is specifically for resolving the
+  // uncertain ones.
   const { data, error } = await supabase
     .from('v_record_final_decision')
     .select('record_id')
     .eq('project_id', projectId)
     .eq('stage', 'title_abstract')
-    .eq('final_decision', 'INCLUDE')
+    .eq('final_decision', 'UNCERTAIN')
   if (error) throw error
   return new Set(data.map((r) => r.record_id))
 }

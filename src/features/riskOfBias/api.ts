@@ -10,19 +10,22 @@ export interface RobEligibleRecord {
   doi: string | null
 }
 
-/** Records that count toward the review's final included set (full-text
- * INCLUDE) — the same set PRISMA reports as `includedFinal`. RoB has no
- * consensus logic of its own in this first pass; eligibility just reuses
- * the screening consensus already computed by v_record_final_decision. */
+/** Records that count toward the review's final included set — the same
+ * set PRISMA reports as `includedFinal`: INCLUDE at title/abstract (which
+ * now counts directly, no full-text re-confirmation needed) union INCLUDE
+ * at full-text (the outcome for records that were UNCERTAIN at
+ * title/abstract). RoB has no consensus logic of its own in this first
+ * pass; eligibility just reuses the screening consensus already computed
+ * by v_record_final_decision. */
 export async function listRobEligibleRecords(projectId: string): Promise<RobEligibleRecord[]> {
   const { data: finals, error: finalsError } = await supabase
     .from('v_record_final_decision')
-    .select('record_id')
+    .select('record_id, stage')
     .eq('project_id', projectId)
-    .eq('stage', 'full_text')
     .eq('final_decision', 'INCLUDE')
+    .in('stage', ['title_abstract', 'full_text'])
   if (finalsError) throw finalsError
-  const recordIds = finals.map((f) => f.record_id)
+  const recordIds = [...new Set(finals.map((f) => f.record_id))]
   if (recordIds.length === 0) return []
 
   const { data: records, error: recordsError } = await supabase

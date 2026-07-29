@@ -36,8 +36,12 @@ export function ProjectsDashboardPage() {
         // container) instead of separated, individually-bordered cards —
         // same "connected grid" look as the Biofor Devs site's audience
         // cards, done with grid gap instead of negative margins so it stays
-        // correct at every column count (1/2/3) without per-breakpoint math.
-        <div className="grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+        // correct at every column count without per-breakpoint math.
+        // auto-fit (not a fixed sm:/lg: column count) collapses empty
+        // tracks to zero width — with just 1-2 projects, the card(s)
+        // stretch to fill the row instead of leaving blank reserved
+        // columns showing the bg-line filler.
+        <div className="grid gap-px border border-line bg-line grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
           {projects.map((project) => (
             <Link
               key={project.id}
