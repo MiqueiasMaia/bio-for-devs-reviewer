@@ -36,6 +36,8 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const [filter, setFilter] = useState<FilterValue>('all')
   const [index, setIndex] = useState(0)
   const [hlOn, setHlOn] = useState(true)
+  const [showInclusionCriteria, setShowInclusionCriteria] = useState(true)
+  const [showExclusionCriteria, setShowExclusionCriteria] = useState(true)
   const [decisionDraft, setDecisionDraft] = useState<Decision | null>(null)
   const [reasonsDraft, setReasonsDraft] = useState<string[]>([])
   const [notesDraft, setNotesDraft] = useState('')
@@ -537,20 +539,40 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
         <aside className="h-fit border border-line bg-white p-4 text-[12.5px]">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mut">PICOTS</h2>
           <div className="mb-3">
-            <p className="mb-1 font-bold text-include">{t('criteria.inclusion')}</p>
-            <ul className="ml-4 list-disc space-y-0.5 text-mut">
-              {inclusionCriteria.map((c) => (
-                <li key={c.id}>{c.text}</li>
-              ))}
-            </ul>
+            <button
+              type="button"
+              className="mb-1 flex w-full cursor-pointer items-center justify-between font-bold text-include"
+              onClick={() => setShowInclusionCriteria((v) => !v)}
+              aria-expanded={showInclusionCriteria}
+            >
+              {t('criteria.inclusion')}
+              <span className="text-xs">{showInclusionCriteria ? '▾' : '▸'}</span>
+            </button>
+            {showInclusionCriteria && (
+              <ul className="ml-4 list-disc space-y-0.5 text-mut">
+                {inclusionCriteria.map((c) => (
+                  <li key={c.id}>{c.text}</li>
+                ))}
+              </ul>
+            )}
           </div>
           <div>
-            <p className="mb-1 font-bold text-red-700">{t('criteria.exclusion')}</p>
-            <ul className="ml-4 list-disc space-y-0.5 text-mut">
-              {exclusionCriteria.map((c) => (
-                <li key={c.id}>{c.text}</li>
-              ))}
-            </ul>
+            <button
+              type="button"
+              className="mb-1 flex w-full cursor-pointer items-center justify-between font-bold text-red-700"
+              onClick={() => setShowExclusionCriteria((v) => !v)}
+              aria-expanded={showExclusionCriteria}
+            >
+              {t('criteria.exclusion')}
+              <span className="text-xs">{showExclusionCriteria ? '▾' : '▸'}</span>
+            </button>
+            {showExclusionCriteria && (
+              <ul className="ml-4 list-disc space-y-0.5 text-mut">
+                {exclusionCriteria.map((c) => (
+                  <li key={c.id}>{c.text}</li>
+                ))}
+              </ul>
+            )}
           </div>
         </aside>
       </div>

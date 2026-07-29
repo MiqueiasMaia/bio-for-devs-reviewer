@@ -546,6 +546,10 @@ export const ptBR = {
     perArticleTitle: 'Detalhe por artigo',
     empty: 'Nenhum registro triado pela IA nesta etapa ainda.',
     confidence: 'Confiança',
+    filterDecision: 'Filtrar por decisão',
+    filterMinConfidence: 'Confiança mínima: {{value}}%',
+    filterCount: '{{count}} de {{total}} artigos',
+    noneMatchFilter: 'Nenhum artigo corresponde aos filtros selecionados.',
   },
   dangerZone: {
     title: 'Zona de risco',
