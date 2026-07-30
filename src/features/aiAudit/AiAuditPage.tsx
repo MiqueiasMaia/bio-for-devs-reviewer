@@ -6,7 +6,9 @@ import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
+import { DownloadIcon } from '@/components/ui/icons'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
 import { decisionLabelKey } from '@/lib/decisionLabel'
@@ -81,9 +83,12 @@ export function AiAuditPage() {
       <Card className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-fg">{t('aiAudit.statsTitle')}</h3>
-          <Button variant="secondary" onClick={handleExportStats} disabled={!stats || stats.length === 0}>
-            {t('aiAudit.exportCsv')}
-          </Button>
+          <IconButton
+            icon={<DownloadIcon />}
+            label={t('aiAudit.exportCsv')}
+            onClick={handleExportStats}
+            disabled={!stats || stats.length === 0}
+          />
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>

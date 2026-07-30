@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
+import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useExclusionReasons, useExclusionReasonMutations } from './hooks'
 
@@ -49,17 +50,24 @@ export function ExclusionReasonsTab() {
                 if (e.target.value !== reason.label) mutations.update.mutate({ id: reason.id, patch: { label: e.target.value } })
               }}
             />
-            <Button variant="ghost" onClick={() => mutations.remove.mutate(reason.id)} aria-label={t('common.delete')}>
-              ✕
-            </Button>
+            <IconButton
+              icon={<TrashIcon />}
+              label={t('common.delete')}
+              variant="ghost"
+              onClick={() => mutations.remove.mutate(reason.id)}
+            />
           </div>
         ))}
         <div className="mt-4 flex items-end gap-2">
           <TextField label={t('exclusionReasons.code')} value={code} onChange={(e) => setCode(e.target.value)} />
           <TextField label={t('exclusionReasons.label')} value={label} onChange={(e) => setLabel(e.target.value)} />
-          <Button onClick={handleAdd} disabled={!code.trim() || !label.trim()}>
-            {t('exclusionReasons.add')}
-          </Button>
+          <IconButton
+            icon={<PlusIcon />}
+            label={t('exclusionReasons.add')}
+            variant="primary"
+            onClick={handleAdd}
+            disabled={!code.trim() || !label.trim()}
+          />
         </div>
       </Card>
     </div>

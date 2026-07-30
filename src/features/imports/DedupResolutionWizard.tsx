@@ -3,6 +3,8 @@ import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { ChevronLeftIcon, ChevronRightIcon, SplitIcon } from '@/components/ui/icons'
 import { normalizeTitle } from '@/domain/dedup/normalize'
 import { jaroWinklerSimilarity } from '@/domain/dedup/jaroWinkler'
 import { useDedupGroups, useDedupMutations } from './hooks'
@@ -77,9 +79,13 @@ export function DedupResolutionWizard({ projectId }: { projectId: string }) {
 
       {pending.length > 0 && (
         <div className="flex items-center justify-between gap-4 border-t border-line pt-3">
-          <Button variant="ghost" disabled={index === 0} onClick={() => setIndex((i) => Math.max(0, i - 1))}>
-            ← {t('common.previous')}
-          </Button>
+          <IconButton
+            icon={<ChevronLeftIcon />}
+            label={t('common.previous')}
+            variant="ghost"
+            disabled={index === 0}
+            onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          />
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-mut">
               {t('dedupWizard.doneCount', { count: resolvedCount })} ·{' '}
@@ -92,13 +98,13 @@ export function DedupResolutionWizard({ projectId }: { projectId: string }) {
               />
             </div>
           </div>
-          <Button
+          <IconButton
+            icon={<ChevronRightIcon />}
+            label={t('common.next')}
             variant="ghost"
             disabled={index >= pending.length - 1}
             onClick={() => setIndex((i) => Math.min(pending.length - 1, i + 1))}
-          >
-            {t('common.next')} →
-          </Button>
+          />
         </div>
       )}
 
@@ -135,9 +141,7 @@ function GroupComparison({
         <span className="text-xs uppercase tracking-wide text-mut">
           {t('duplicates.groupLabel')} · {group.records.length}
         </span>
-        <Button variant="ghost" onClick={onNotDuplicates}>
-          {t('dedupWizard.notDuplicates')}
-        </Button>
+        <IconButton icon={<SplitIcon />} label={t('dedupWizard.notDuplicates')} variant="ghost" onClick={onNotDuplicates} />
       </div>
 
       <div

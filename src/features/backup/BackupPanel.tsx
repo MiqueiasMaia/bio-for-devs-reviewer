@@ -4,6 +4,9 @@ import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { Tooltip } from '@/components/ui/Tooltip'
+import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
 import type { ProjectSettings } from '@/types/domain'
 import { downloadJson, exportProjectBackup } from './api'
 import { useImportBackup } from './hooks'
@@ -80,9 +83,16 @@ export function BackupPanel({ projectId, settings }: { projectId: string; settin
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={handleExportJson}>
-          {t('backup.exportJson')}
-        </Button>
+        <Tooltip label={t('backup.exportJson')} side="top">
+          <Button
+            variant="secondary"
+            onClick={handleExportJson}
+            aria-label={t('backup.exportJson')}
+            className="inline-flex items-center gap-1.5"
+          >
+            <DownloadIcon /> JSON
+          </Button>
+        </Tooltip>
         <input
           ref={fileInputRef}
           type="file"
@@ -94,15 +104,32 @@ export function BackupPanel({ projectId, settings }: { projectId: string; settin
             e.target.value = ''
           }}
         />
-        <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={importBackup.isPending}>
-          {importBackup.isPending ? t('backup.importing') : t('backup.importJson')}
-        </Button>
-        <Button variant="secondary" onClick={handleExportRis}>
-          {t('backup.exportRis')}
-        </Button>
-        <Button variant="secondary" onClick={handleExportBibtex}>
-          {t('backup.exportBibtex')}
-        </Button>
+        <IconButton
+          icon={<UploadIcon />}
+          label={importBackup.isPending ? t('backup.importing') : t('backup.importJson')}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importBackup.isPending}
+        />
+        <Tooltip label={t('backup.exportRis')} side="top">
+          <Button
+            variant="secondary"
+            onClick={handleExportRis}
+            aria-label={t('backup.exportRis')}
+            className="inline-flex items-center gap-1.5"
+          >
+            <DownloadIcon /> RIS
+          </Button>
+        </Tooltip>
+        <Tooltip label={t('backup.exportBibtex')} side="top">
+          <Button
+            variant="secondary"
+            onClick={handleExportBibtex}
+            aria-label={t('backup.exportBibtex')}
+            className="inline-flex items-center gap-1.5"
+          >
+            <DownloadIcon /> BibTeX
+          </Button>
+        </Tooltip>
       </div>
 
       {importBackup.isSuccess && (

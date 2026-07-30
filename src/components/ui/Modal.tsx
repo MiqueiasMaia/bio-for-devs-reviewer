@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
+import { useTranslation } from '@/i18n'
 
 interface ModalProps {
   open: boolean
@@ -14,6 +15,7 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children, size = 'default' }: ModalProps) {
+  const { t } = useTranslation()
   useEffect(() => {
     if (!open) return
     function onKeyDown(e: KeyboardEvent) {
@@ -41,7 +43,7 @@ export function Modal({ open, onClose, title, children, size = 'default' }: Moda
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar"
+            aria-label={t('common.close')}
             className="p-1 text-mut hover:bg-bg focus-visible:outline-2 focus-visible:outline-include"
           >
             ✕

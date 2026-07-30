@@ -5,8 +5,9 @@ import { useTranslation, type TranslationKey } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
+import { SaveIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { PROBAST_DOMAINS, ROB_ANSWER_OPTIONS, ROB_JUDGMENT_OPTIONS, type ProbastDomainConfig } from '@/domain/riskOfBias/probast'
 import type { RobAnswer, RobJudgment } from '@/types/domain'
@@ -102,9 +103,13 @@ function DomainBlock({
         className="min-h-16 w-full border border-line px-3 py-2 text-sm"
       />
       <div className="flex items-center gap-3">
-        <Button onClick={handleSave} disabled={save.isPending}>
-          {save.isPending ? t('common.saving') : t('common.save')}
-        </Button>
+        <IconButton
+          icon={<SaveIcon />}
+          label={save.isPending ? t('common.saving') : t('common.save')}
+          variant="primary"
+          onClick={handleSave}
+          disabled={save.isPending}
+        />
         {save.isSuccess && <span className="text-sm text-include">{t('common.saved')}</span>}
       </div>
     </Card>
@@ -156,9 +161,13 @@ function OverallBlock({
         className="min-h-16 w-full border border-line px-3 py-2 text-sm"
       />
       <div className="flex items-center gap-3">
-        <Button onClick={handleSave} disabled={save.isPending}>
-          {save.isPending ? t('common.saving') : t('common.save')}
-        </Button>
+        <IconButton
+          icon={<SaveIcon />}
+          label={save.isPending ? t('common.saving') : t('common.save')}
+          variant="primary"
+          onClick={handleSave}
+          disabled={save.isPending}
+        />
         {save.isSuccess && <span className="text-sm text-include">{t('common.saved')}</span>}
       </div>
     </Card>

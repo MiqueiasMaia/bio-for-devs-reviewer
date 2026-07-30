@@ -4,10 +4,11 @@ import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { Modal } from '@/components/ui/Modal'
 import { DecisionDonut } from '@/components/ui/DecisionDonut'
 import { Avatar } from '@/components/ui/Avatar'
-import { CheckCircleIcon, SplitIcon, TrashIcon } from '@/components/ui/icons'
+import { CheckCircleIcon, PlusIcon, SplitIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from './ProjectLayout'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useOpenConflictCount, useReviewerProgress } from '@/features/dashboard/hooks'
@@ -75,20 +76,17 @@ export function ProjectOverviewPage() {
           <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.imported')}</p>
             <p className="font-mono text-2xl font-bold text-fg">{counts?.recordsIdentified ?? '—'}</p>
-            <Button variant="secondary" onClick={() => navigate('import')}>
-              {t('dashboard.addReferences')}
-            </Button>
+            <IconButton icon={<PlusIcon />} label={t('dashboard.addReferences')} onClick={() => navigate('import')} />
           </Card>
           <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.totalDuplicates')}</p>
             <p className="font-mono text-2xl font-bold text-fg">{counts?.duplicatesRemoved ?? '—'}</p>
-            <Button
-              variant="secondary"
+            <IconButton
+              icon={<SplitIcon />}
+              label={t('dashboard.reviewDuplicates')}
               onClick={() => setDedupModalOpen(true)}
               disabled={!dedupSummary || dedupSummary.unresolved === 0}
-            >
-              {t('dashboard.reviewDuplicates')}
-            </Button>
+            />
           </Card>
           <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.unresolved')}</p>

@@ -5,9 +5,10 @@ import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
 import { Select } from '@/components/ui/Select'
+import { DownloadIcon, SaveIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { useExtractionFields } from '@/features/projects/settings/hooks'
 import type { ExtractionFieldRow } from '@/features/projects/settings/api'
@@ -129,9 +130,13 @@ function ExtractionForm({
         className="min-h-16 w-full border border-line px-3 py-2 text-sm"
       />
       <div className="flex items-center gap-3">
-        <Button onClick={handleSave} disabled={save.isPending}>
-          {save.isPending ? t('common.saving') : t('common.save')}
-        </Button>
+        <IconButton
+          icon={<SaveIcon />}
+          label={save.isPending ? t('common.saving') : t('common.save')}
+          variant="primary"
+          onClick={handleSave}
+          disabled={save.isPending}
+        />
         {save.isSuccess && <span className="text-sm text-include">{t('common.saved')}</span>}
         {missingRequired && <span className="text-xs text-uncertain">{t('dataExtraction.missingRequired')}</span>}
       </div>
@@ -184,9 +189,7 @@ export function DataExtractionPage() {
             <p className="text-sm text-mut">{t('dataExtraction.subtitle')}</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="secondary" onClick={handleExport}>
-              {t('dataExtraction.exportCsv')}
-            </Button>
+            <IconButton icon={<DownloadIcon />} label={t('dataExtraction.exportCsv')} onClick={handleExport} />
             <Link to="conflicts" className="text-sm text-include">
               {t('dataExtraction.viewConflicts', { count: conflicts?.length ?? 0 })} →
             </Link>

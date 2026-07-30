@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation, type TranslationKey } from '@/i18n'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { PlusIcon, SplitIcon } from '@/components/ui/icons'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useCriteria, useMembers } from './settings/hooks'
 import type { ProjectDetail } from './api'
@@ -47,7 +49,7 @@ export function GetStartedWidget({ project, onReviewDuplicates }: { project: Pro
       done: hasReferences,
       action: !hasReferences && (
         <Link to="import">
-          <Button variant="secondary">{t('dashboard.addReferences')}</Button>
+          <IconButton icon={<PlusIcon />} label={t('dashboard.addReferences')} />
         </Link>
       ),
     },
@@ -59,9 +61,7 @@ export function GetStartedWidget({ project, onReviewDuplicates }: { project: Pro
       // there's no separate manual detection step in this app.
       done: hasReferences,
       action: !hasReferences && (
-        <Button variant="secondary" onClick={onReviewDuplicates}>
-          {t('dashboard.reviewDuplicates')}
-        </Button>
+        <IconButton icon={<SplitIcon />} label={t('dashboard.reviewDuplicates')} onClick={onReviewDuplicates} />
       ),
     },
     {

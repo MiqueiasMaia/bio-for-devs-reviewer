@@ -3,10 +3,11 @@ import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
 import { Select } from '@/components/ui/Select'
 import { Avatar } from '@/components/ui/Avatar'
+import { PlusIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useInvites, useMemberMutations, useMembers } from './hooks'
 import type { ProjectRole } from '@/types/domain'
@@ -186,9 +187,7 @@ export function MembersTab() {
               </option>
             ))}
           </Select>
-          <Button type="submit" disabled={!email.trim()}>
-            {t('common.add')}
-          </Button>
+          <IconButton icon={<PlusIcon />} label={t('common.add')} type="submit" disabled={!email.trim()} />
         </form>
       </Card>
     </div>

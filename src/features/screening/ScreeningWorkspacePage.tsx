@@ -7,9 +7,10 @@ import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { useCriteria, useExclusionReasons, useHighlightTerms } from '@/features/projects/settings/hooks'
 import { HighlightedText } from '@/components/HighlightedText'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
 import { TextField } from '@/components/ui/TextField'
-import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
+import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UploadIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { getApplicableStages, getNextStage, isStageUnlocked } from '@/domain/stageLock/stageLock'
 import { useUnlockStage } from '@/features/projects/hooks'
@@ -412,24 +413,8 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             e.target.value = ''
           }}
         />
-        <Button
-          variant="secondary"
-          className="p-2"
-          title={t('screening.importCsv')}
-          aria-label={t('screening.importCsv')}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <UploadIcon />
-        </Button>
-        <Button
-          variant="secondary"
-          className="p-2"
-          title={t('screening.exportCsv')}
-          aria-label={t('screening.exportCsv')}
-          onClick={handleExport}
-        >
-          <DownloadIcon />
-        </Button>
+        <IconButton icon={<UploadIcon />} label={t('screening.importCsv')} onClick={() => fileInputRef.current?.click()} />
+        <IconButton icon={<DownloadIcon />} label={t('screening.exportCsv')} onClick={handleExport} />
       </div>
 
       {showResumedNote && (
@@ -666,22 +651,19 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
               />
 
               <div className="mt-4 flex items-center justify-between gap-3">
-                <Button variant="secondary" onClick={() => go(-1)} disabled={index === 0}>
-                  ← {t('screening.prev')}
-                </Button>
+                <IconButton icon={<ChevronLeftIcon />} label={t('screening.prev')} onClick={() => go(-1)} disabled={index === 0} />
                 <span className="text-sm text-mut">
                   {index + 1} {t('screening.counter')} {filteredQueue.length}
                 </span>
                 <Button variant="secondary" onClick={jumpUndecided}>
                   {t('screening.jumpUndecided')}
                 </Button>
-                <Button
-                  variant="secondary"
+                <IconButton
+                  icon={<ChevronRightIcon />}
+                  label={t('screening.next')}
                   onClick={() => go(1)}
                   disabled={index >= filteredQueue.length - 1}
-                >
-                  {t('screening.next')} →
-                </Button>
+                />
               </div>
               <p className="mt-2 text-center text-[11px] text-mut">{t('screening.autosaved')}</p>
 

@@ -12,7 +12,7 @@ export function Tooltip({
   children,
 }: {
   label: string
-  side?: 'right' | 'top'
+  side?: 'right' | 'top' | 'bottom'
   /** Stretch the wrapper to its container's width instead of shrink-wrapping
    * to the trigger's content — needed when the trigger itself relies on
    * `w-full` to center/lay out within a block-level ancestor (e.g. a
@@ -38,7 +38,9 @@ export function Tooltip({
         id={id}
         className={clsx(
           'pointer-events-none absolute z-20 whitespace-nowrap border border-line bg-fg px-2 py-1 text-xs font-medium text-white transition-opacity duration-150',
-          side === 'right' ? 'left-full top-1/2 ml-2 -translate-y-1/2' : 'bottom-full left-1/2 mb-2 -translate-x-1/2',
+          side === 'right' && 'left-full top-1/2 ml-2 -translate-y-1/2',
+          side === 'top' && 'bottom-full left-1/2 mb-2 -translate-x-1/2',
+          side === 'bottom' && 'top-full left-1/2 mt-2 -translate-x-1/2',
           visible ? 'opacity-100' : 'opacity-0',
         )}
       >

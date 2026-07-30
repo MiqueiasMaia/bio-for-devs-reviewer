@@ -4,9 +4,10 @@ import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
 import { Select } from '@/components/ui/Select'
+import { CheckIcon, SaveIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { CURATED_MODELS, MODEL_TIER_LABELS, PROVIDER_LABELS, PROVIDER_ORDER } from '@/domain/aiProvider/models'
 import { PROVIDER_SETUP_INSTRUCTIONS } from '@/domain/aiProvider/setupInstructions'
@@ -65,9 +66,12 @@ function ProviderConfigCard({
           )}
         </div>
         {config && !config.isActive && (
-          <Button variant="secondary" onClick={() => activate.mutate(provider)} disabled={activate.isPending}>
-            {activate.isPending ? t('common.saving') : t('aiProvider.useThisProvider')}
-          </Button>
+          <IconButton
+            icon={<CheckIcon />}
+            label={activate.isPending ? t('common.saving') : t('aiProvider.useThisProvider')}
+            onClick={() => activate.mutate(provider)}
+            disabled={activate.isPending}
+          />
         )}
       </div>
 
@@ -125,20 +129,24 @@ function ProviderConfigCard({
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={handleSave} disabled={save.isPending || (needsKeyNow && !apiKey)}>
-          {save.isPending ? t('common.saving') : t('common.save')}
-        </Button>
+        <IconButton
+          icon={<SaveIcon />}
+          label={save.isPending ? t('common.saving') : t('common.save')}
+          variant="primary"
+          onClick={handleSave}
+          disabled={save.isPending || (needsKeyNow && !apiKey)}
+        />
         {save.isSuccess && <span className="text-sm text-include">{t('common.saved')}</span>}
         {save.isError && <span className="text-sm text-red-600">{save.error.message}</span>}
         {hasConfig && (
-          <Button
+          <IconButton
+            icon={<TrashIcon />}
+            label={t('aiProvider.removeConfig')}
             variant="danger"
             className="ml-auto"
             onClick={() => remove.mutate(provider)}
             disabled={remove.isPending}
-          >
-            {t('aiProvider.removeConfig')}
-          </Button>
+          />
         )}
       </div>
     </Card>

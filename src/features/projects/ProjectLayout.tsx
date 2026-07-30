@@ -1,6 +1,7 @@
 import { Link, Outlet, useParams } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { ChevronLeftIcon } from '@/components/ui/icons'
 import { useProject } from './hooks'
 import type { ProjectDetail } from './api'
 
@@ -18,7 +19,7 @@ export function ProjectLayout() {
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="text-sm font-medium text-red-700">{t('common.error')}</p>
         <Link to="/projects">
-          <Button variant="secondary">{t('common.back')}</Button>
+          <IconButton icon={<ChevronLeftIcon />} label={t('common.back')} />
         </Link>
       </div>
     )

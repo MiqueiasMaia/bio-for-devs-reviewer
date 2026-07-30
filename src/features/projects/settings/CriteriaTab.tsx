@@ -1,8 +1,9 @@
 import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
+import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useCriteria, useCriteriaMutations } from './hooks'
 import type { CriterionKind, PicotsDimension } from '@/types/domain'
@@ -45,9 +46,7 @@ function CriterionEditor({
           </option>
         ))}
       </Select>
-      <Button variant="ghost" onClick={onDelete} aria-label={t('common.delete')}>
-        ✕
-      </Button>
+      <IconButton icon={<TrashIcon />} label={t('common.delete')} variant="ghost" onClick={onDelete} />
     </div>
   )
 }
@@ -71,9 +70,11 @@ function CriteriaSection({ kind }: { kind: CriterionKind }) {
         <h3 className="text-sm font-semibold text-fg">
           {kind === 'inclusion' ? t('criteria.inclusion') : t('criteria.exclusion')}
         </h3>
-        <Button variant="secondary" onClick={handleAdd}>
-          {kind === 'inclusion' ? t('criteria.addInclusion') : t('criteria.addExclusion')}
-        </Button>
+        <IconButton
+          icon={<PlusIcon />}
+          label={kind === 'inclusion' ? t('criteria.addInclusion') : t('criteria.addExclusion')}
+          onClick={handleAdd}
+        />
       </div>
       {rows.length === 0 && <p className="text-sm text-mut">{t('criteria.empty')}</p>}
       {rows.map((c) => (

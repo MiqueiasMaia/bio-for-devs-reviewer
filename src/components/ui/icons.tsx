@@ -205,6 +205,67 @@ export function PinIcon({ className }: IconProps) {
   )
 }
 
+export function SaveIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M4.5 3.5h9L16 6.9V16a.6.6 0 0 1-.6.6H4.6a.6.6 0 0 1-.6-.6V4.1a.6.6 0 0 1 .6-.6Z" />
+      <path d="M6.5 3.5V8h6V3.5M6.5 16.5V11h7v5.5" />
+    </svg>
+  )
+}
+
+export function XIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="m5 5 10 10M15 5 5 15" />
+    </svg>
+  )
+}
+
+export function CopyIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="7.5" y="7.5" width="8" height="9" rx="1" />
+      <path d="M12.5 7.5V4.6a1 1 0 0 0-1-1H5.1a1 1 0 0 0-1 1v8.4a1 1 0 0 0 1 1h2.4" />
+    </svg>
+  )
+}
+
+export function RefreshIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M15.5 8.5a5.5 5.5 0 1 0-1.2 4.6M15.5 4.5v4h-4" />
+    </svg>
+  )
+}
+
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="m4.5 10.5 3.5 3.5 7.5-8" />
+    </svg>
+  )
+}
+
+export function ArchiveIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="3.5" y="4" width="13" height="3.2" rx="0.6" />
+      <path d="M4.5 7.2v8.2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V7.2M8.2 10.5h3.6" />
+    </svg>
+  )
+}
+
+export function UnarchiveIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="3.5" y="4" width="13" height="3.2" rx="0.6" />
+      <path d="M4.5 7.2v8.2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V7.2" />
+      <path d="M10 14.5V10M8 12l2-2 2 2" />
+    </svg>
+  )
+}
+
 /** Generic (monochrome, currentColor) provider glyphs for the disabled
  * "coming soon" sign-in buttons — not brand-accurate logomarks, just
  * recognizable enough to read as "Google" / "GitHub" / "ORCID" at a glance. */

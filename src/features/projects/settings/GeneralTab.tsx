@@ -4,6 +4,8 @@ import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { TextField } from '@/components/ui/TextField'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { ArchiveIcon, SaveIcon, UnarchiveIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useArchiveProject, useDeleteProject, useUnarchiveProject, useUnlockStage, useUpdateProjectSettings } from '../hooks'
 import { BackupPanel } from '@/features/backup/BackupPanel'
@@ -251,9 +253,13 @@ export function GeneralTab() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button type="submit" disabled={updateSettings.isPending}>
-            {updateSettings.isPending ? t('common.saving') : t('common.save')}
-          </Button>
+          <IconButton
+            icon={<SaveIcon />}
+            label={updateSettings.isPending ? t('common.saving') : t('common.save')}
+            variant="primary"
+            type="submit"
+            disabled={updateSettings.isPending}
+          />
           {updateSettings.isSuccess && <span className="text-sm text-include">{t('common.saved')}</span>}
         </div>
       </form>
@@ -274,21 +280,19 @@ export function GeneralTab() {
           <p className="text-xs text-mut">{t('dangerZone.archiveHint')}</p>
         </div>
         {project.archivedAt ? (
-          <Button
-            variant="secondary"
+          <IconButton
+            icon={<UnarchiveIcon />}
+            label={t('dangerZone.unarchive')}
             disabled={unarchiveProject.isPending}
             onClick={() => unarchiveProject.mutate(project.id)}
-          >
-            {t('dangerZone.unarchive')}
-          </Button>
+          />
         ) : (
-          <Button
-            variant="secondary"
+          <IconButton
+            icon={<ArchiveIcon />}
+            label={t('dangerZone.archive')}
             disabled={archiveProject.isPending}
             onClick={() => archiveProject.mutate(project.id)}
-          >
-            {t('dangerZone.archive')}
-          </Button>
+          />
         )}
       </div>
 

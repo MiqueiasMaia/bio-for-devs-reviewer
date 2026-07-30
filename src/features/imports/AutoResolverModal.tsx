@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { XIcon } from '@/components/ui/icons'
 import type { AutoResolveCriteria } from '@/domain/dedup/autoResolve'
 import { useAutoResolveDedup } from './hooks'
 
@@ -55,9 +57,7 @@ export function AutoResolverModal({
         <div className="flex flex-col gap-4">
           <p className="text-sm text-include">{t('dedupWizard.resolvedCount', { count: resolvedCount })}</p>
           <div className="flex justify-end">
-            <Button variant="secondary" onClick={handleClose}>
-              {t('common.close')}
-            </Button>
+            <IconButton icon={<XIcon />} label={t('common.close')} onClick={handleClose} />
           </div>
         </div>
       ) : (
@@ -99,9 +99,7 @@ export function AutoResolverModal({
           <p className="text-xs text-mut">{t('dedupWizard.autoResolverSafetyNote')}</p>
 
           <div className="flex justify-end gap-2 border-t border-line pt-4">
-            <Button variant="secondary" onClick={handleClose}>
-              {t('common.cancel')}
-            </Button>
+            <IconButton icon={<XIcon />} label={t('common.cancel')} onClick={handleClose} />
             <Button disabled={!anyCriterionSelected} onClick={() => setConfirmOpen(true)}>
               {t('dedupWizard.autoResolve')}
             </Button>
@@ -113,9 +111,7 @@ export function AutoResolverModal({
         <div className="flex flex-col gap-4">
           <p className="text-sm text-fg">{t('dedupWizard.confirmBody')}</p>
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
-              {t('common.cancel')}
-            </Button>
+            <IconButton icon={<XIcon />} label={t('common.cancel')} onClick={() => setConfirmOpen(false)} />
             <Button onClick={handleResolve} disabled={autoResolve.isPending}>
               {autoResolve.isPending ? t('dedupWizard.resolving') : t('dedupWizard.autoResolve')}
             </Button>

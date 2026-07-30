@@ -3,6 +3,8 @@ import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { CheckIcon, CopyIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../projects/ProjectLayout'
 import { useCriteria, useExclusionReasons, useHighlightTerms } from '@/features/projects/settings/hooks'
 import { buildAiSetupPrompt } from '@/domain/aiSetup/promptBuilder'
@@ -120,9 +122,11 @@ export function AiSetupPage() {
               <label htmlFor="generated-prompt" className="text-sm font-medium text-fg">
                 {t('aiSetup.generatedPromptLabel')}
               </label>
-              <Button variant="secondary" onClick={handleCopy}>
-                {copied ? t('aiSetup.copied') : t('aiSetup.copy')}
-              </Button>
+              <IconButton
+                icon={copied ? <CheckIcon /> : <CopyIcon />}
+                label={copied ? t('aiSetup.copied') : t('aiSetup.copy')}
+                onClick={handleCopy}
+              />
             </div>
             <textarea id="generated-prompt" readOnly className="min-h-64 border border-line px-3 py-2 font-mono text-xs" value={prompt} />
           </div>

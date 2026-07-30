@@ -4,8 +4,9 @@ import { useTranslation } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
+import { CheckIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { useExtractionConflicts, useResolveExtractionField } from './hooks'
 import type { ExtractionConflictDetail } from './api'
@@ -45,9 +46,12 @@ function ExtractionConflictCard({ conflict, projectId }: { conflict: ExtractionC
           <div key={v.extractorId} className="flex flex-col gap-2 border-2 border-line p-3 text-sm">
             <p className="font-semibold text-fg">{v.extractorName}</p>
             <p className="text-fg">{formatValue(v.value)}</p>
-            <Button variant="secondary" disabled={resolve.isPending} onClick={() => handleResolve(v.value)}>
-              {t('dataExtraction.useThisValue')}
-            </Button>
+            <IconButton
+              icon={<CheckIcon />}
+              label={t('dataExtraction.useThisValue')}
+              disabled={resolve.isPending}
+              onClick={() => handleResolve(v.value)}
+            />
           </div>
         ))}
       </div>
@@ -56,13 +60,12 @@ function ExtractionConflictCard({ conflict, projectId }: { conflict: ExtractionC
         <p className="text-xs text-mut">{t('dataExtraction.orCustomValue')}</p>
         <div className="flex items-end gap-2">
           <TextField label="" aria-label={t('dataExtraction.customValue')} value={customValue} onChange={(e) => setCustomValue(e.target.value)} />
-          <Button
-            variant="secondary"
+          <IconButton
+            icon={<CheckIcon />}
+            label={t('dataExtraction.useThisValue')}
             disabled={resolve.isPending || !customValue.trim()}
             onClick={() => handleResolve(customValue.trim())}
-          >
-            {t('dataExtraction.useThisValue')}
-          </Button>
+          />
         </div>
       </div>
 

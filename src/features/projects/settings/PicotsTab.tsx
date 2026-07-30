@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
+import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useHighlightTerms, useHighlightTermMutations } from './hooks'
 import type { HighlightTermRow } from './api'
@@ -41,9 +42,7 @@ function HighlightTermEditor({
             if (e.target.value !== term.category) onUpdate({ category: e.target.value })
           }}
         />
-        <Button variant="ghost" onClick={onDelete} aria-label={t('common.delete')} className="ml-auto">
-          ✕
-        </Button>
+        <IconButton icon={<TrashIcon />} label={t('common.delete')} variant="ghost" onClick={onDelete} className="ml-auto" />
       </div>
       <textarea
         aria-label={t('picots.terms')}
@@ -102,9 +101,13 @@ export function PicotsTab() {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
           />
-          <Button onClick={handleAdd} disabled={!newCategory.trim()}>
-            {t('picots.addCategory')}
-          </Button>
+          <IconButton
+            icon={<PlusIcon />}
+            label={t('picots.addCategory')}
+            variant="primary"
+            onClick={handleAdd}
+            disabled={!newCategory.trim()}
+          />
         </div>
       </Card>
     </div>

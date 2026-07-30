@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '@/i18n'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/TextField'
 import { Select } from '@/components/ui/Select'
+import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useExtractionFields, useExtractionFieldMutations } from './hooks'
 import type { ExtractionFieldRow } from './api'
@@ -53,9 +54,7 @@ function ExtractionFieldEditor({
           <input type="checkbox" checked={field.required} onChange={(e) => onUpdate({ required: e.target.checked })} />
           {t('extractionFields.required')}
         </label>
-        <Button variant="ghost" onClick={onDelete} aria-label={t('common.delete')} className="ml-auto">
-          ✕
-        </Button>
+        <IconButton icon={<TrashIcon />} label={t('common.delete')} variant="ghost" onClick={onDelete} className="ml-auto" />
       </div>
       {CHOICE_TYPES.includes(field.fieldType) && (
         <TextField
@@ -126,9 +125,13 @@ export function ExtractionFieldsTab() {
             value={newLabel}
             onChange={(e) => setNewLabel(e.target.value)}
           />
-          <Button onClick={handleAdd} disabled={!newKey.trim() || !newLabel.trim()}>
-            {t('extractionFields.add')}
-          </Button>
+          <IconButton
+            icon={<PlusIcon />}
+            label={t('extractionFields.add')}
+            variant="primary"
+            onClick={handleAdd}
+            disabled={!newKey.trim() || !newLabel.trim()}
+          />
         </div>
       </Card>
     </div>
