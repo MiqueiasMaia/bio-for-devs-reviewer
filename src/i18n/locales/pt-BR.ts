@@ -335,6 +335,8 @@ export const ptBR = {
     filterFulltextAttached: 'Anexado',
     filterFulltextMissing: 'Não anexado',
     clearFilters: 'Limpar filtros',
+    articlesHeading: 'Artigos',
+    showingCount: 'Mostrando {{shown}} de {{total}}',
   },
   conflicts: {
     title: 'Resolução de conflitos',

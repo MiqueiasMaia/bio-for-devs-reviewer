@@ -445,109 +445,65 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
       <p className="mb-4 text-xs text-mut">{t('screening.blindNotice')}</p>
 
-      {/* Capped width here (unlike the rest of the now-fluid app shell) —
-          this is the one screen dominated by long-form reading (title +
-          abstract), and letting it stretch edge-to-edge on wide monitors
-          would make lines uncomfortably long. Filters live in the left
-          column instead of a top bar — this screen has lateral room to
-          spare (like the PICOTS column on the right) and vertical room is
-          what's actually scarce while screening. */}
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 lg:grid-cols-[260px_1fr_300px]">
-        <aside className="h-fit border border-line bg-white p-4 text-[12.5px]">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-mut">{t('screening.moreFilters')}</h2>
-          <div className="flex flex-col gap-3">
-            <Select label="" aria-label="filtro" value={filter} onChange={(e) => setFilter(e.target.value as FilterValue)}>
-              <option value="all">{t('screening.filterAll')}</option>
-              <option value="undecided">{t('screening.filterUndecided')}</option>
-              <option value="INCLUDE">{t('screening.filterInclude')}</option>
-              <option value="UNCERTAIN">{t('screening.filterUncertain')}</option>
-              <option value="EXCLUDE">{t('screening.filterExclude')}</option>
-            </Select>
-            <TextField
-              label={t('screening.searchTitle')}
-              placeholder={t('screening.searchTitlePlaceholder')}
-              value={titleSearch}
-              onChange={(e) => setTitleSearch(e.target.value)}
-              className="w-full"
-            />
-            <TextField
-              label={t('screening.searchAuthor')}
-              placeholder={t('screening.searchAuthorPlaceholder')}
-              value={authorSearch}
-              onChange={(e) => setAuthorSearch(e.target.value)}
-              className="w-full"
-            />
-            <Select
-              label={t('screening.filterSourceDb')}
-              value={sourceDbFilter}
-              onChange={(e) => setSourceDbFilter(e.target.value)}
-              className="w-full"
-            >
-              <option value="all">{t('screening.filterAll')}</option>
-              {sourceDbOptions.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label={t('screening.filterJournal')}
-              value={journalFilter}
-              onChange={(e) => setJournalFilter(e.target.value)}
-              className="w-full"
-            >
-              <option value="all">{t('screening.filterAll')}</option>
-              {journalOptions.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label={t('screening.filterYear')}
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value)}
-              className="w-full"
-            >
-              <option value="all">{t('screening.filterAll')}</option>
-              {yearOptions.map((y) => (
-                <option key={y} value={String(y)}>
-                  {y}
-                </option>
-              ))}
-            </Select>
-            {(exclusionReasons.data ?? []).length > 0 && (
-              <Select
-                label={t('screening.filterExclusionReason')}
-                value={exclusionReasonFilter}
-                onChange={(e) => setExclusionReasonFilter(e.target.value)}
-                className="w-full"
-              >
-                <option value="all">{t('screening.filterAll')}</option>
-                {exclusionReasons.data!.map((r) => (
-                  <option key={r.id} value={r.code}>
-                    {r.label}
-                  </option>
-                ))}
-              </Select>
-            )}
-            {stage === 'full_text' && (
-              <Select
-                label={t('screening.filterFulltext')}
-                value={fulltextFilter}
-                onChange={(e) => setFulltextFilter(e.target.value as FulltextFilterValue)}
-                className="w-full"
-              >
-                <option value="all">{t('screening.filterAll')}</option>
-                <option value="attached">{t('screening.filterFulltextAttached')}</option>
-                <option value="missing">{t('screening.filterFulltextMissing')}</option>
-              </Select>
-            )}
-            {activeExtraFilterCount > 0 && (
-              <Button variant="ghost" onClick={clearExtraFilters}>
-                {t('screening.clearFilters')}
-              </Button>
-            )}
+      {/* Fluid, edge-to-edge like the rest of the app shell — the reading
+          column (title/abstract) caps its own width below for comfortable
+          line length, but the surrounding chrome (article list, filters,
+          decision controls) uses the full available width. */}
+      <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-[300px_1fr_320px]">
+        <aside className="flex max-h-[calc(100vh-8rem)] flex-col border border-line bg-white p-4 text-[12.5px] lg:sticky lg:top-4">
+          <h2 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-mut">
+            {t('screening.articlesHeading')}
+          </h2>
+          <Select
+            label=""
+            aria-label="filtro"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as FilterValue)}
+            className="shrink-0"
+          >
+            <option value="all">{t('screening.filterAll')}</option>
+            <option value="undecided">{t('screening.filterUndecided')}</option>
+            <option value="INCLUDE">{t('screening.filterInclude')}</option>
+            <option value="UNCERTAIN">{t('screening.filterUncertain')}</option>
+            <option value="EXCLUDE">{t('screening.filterExclude')}</option>
+          </Select>
+          <p className="mt-2 shrink-0 text-xs text-mut">
+            {t('screening.showingCount', { shown: filteredQueue.length, total: queue.data?.length ?? 0 })}
+          </p>
+          <div className="mt-2 flex-1 divide-y divide-line overflow-y-auto -mx-4 px-4">
+            {filteredQueue.map((r, i) => {
+              const decision = myScreenings.data?.get(r.id)?.decision
+              const isCurrent = current?.id === r.id
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-current={isCurrent ? 'true' : undefined}
+                  className={clsx('flex w-full flex-col gap-1 py-2 text-left', isCurrent ? 'bg-bg' : 'hover:bg-bg')}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[11px] text-mut">{r.humanRef}</span>
+                    {decision && (
+                      <span
+                        data-sel="true"
+                        className={clsx('border px-1.5 py-0.5 text-[10px] font-semibold', DECISION_STYLES[decision])}
+                      >
+                        {decision === 'INCLUDE'
+                          ? t('screening.include')
+                          : decision === 'UNCERTAIN'
+                            ? t('screening.uncertain')
+                            : t('screening.exclude')}
+                      </span>
+                    )}
+                  </div>
+                  <p className={clsx('line-clamp-2 text-[13px] leading-snug', isCurrent ? 'font-semibold text-fg' : 'text-fg')}>
+                    {r.title || t('common.untitled')}
+                  </p>
+                </button>
+              )
+            })}
+            {filteredQueue.length === 0 && <p className="py-4 text-center text-mut">{t('screening.noRecords')}</p>}
           </div>
         </aside>
 
@@ -560,6 +516,11 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             </p>
           ) : (
             <>
+              {/* Capped so long-form reading (title + abstract) doesn't stretch
+                  edge-to-edge on wide monitors — the surrounding chrome
+                  (decision buttons, notes, nav below) still uses the full
+                  fluid column width. */}
+              <div className="max-w-3xl">
               <div className="mb-1 flex items-center justify-between gap-2 text-xs text-mut">
                 <span className="flex items-center gap-2">
                   {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
@@ -640,6 +601,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                   </button>
                 </div>
               )}
+              </div>
 
               <div className="mt-6 flex gap-2.5">
                 {(['INCLUDE', 'UNCERTAIN', 'EXCLUDE'] as Decision[]).map((d) => (
@@ -792,6 +754,97 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                   <li key={c.id}>{c.text}</li>
                 ))}
               </ul>
+            )}
+          </div>
+
+          <hr className="my-4 border-line" />
+
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-mut">{t('screening.moreFilters')}</h2>
+          <div className="flex flex-col gap-3">
+            <TextField
+              label={t('screening.searchTitle')}
+              placeholder={t('screening.searchTitlePlaceholder')}
+              value={titleSearch}
+              onChange={(e) => setTitleSearch(e.target.value)}
+              className="w-full"
+            />
+            <TextField
+              label={t('screening.searchAuthor')}
+              placeholder={t('screening.searchAuthorPlaceholder')}
+              value={authorSearch}
+              onChange={(e) => setAuthorSearch(e.target.value)}
+              className="w-full"
+            />
+            <Select
+              label={t('screening.filterSourceDb')}
+              value={sourceDbFilter}
+              onChange={(e) => setSourceDbFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {sourceDbOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={t('screening.filterJournal')}
+              value={journalFilter}
+              onChange={(e) => setJournalFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {journalOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={t('screening.filterYear')}
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {yearOptions.map((y) => (
+                <option key={y} value={String(y)}>
+                  {y}
+                </option>
+              ))}
+            </Select>
+            {(exclusionReasons.data ?? []).length > 0 && (
+              <Select
+                label={t('screening.filterExclusionReason')}
+                value={exclusionReasonFilter}
+                onChange={(e) => setExclusionReasonFilter(e.target.value)}
+                className="w-full"
+              >
+                <option value="all">{t('screening.filterAll')}</option>
+                {exclusionReasons.data!.map((r) => (
+                  <option key={r.id} value={r.code}>
+                    {r.label}
+                  </option>
+                ))}
+              </Select>
+            )}
+            {stage === 'full_text' && (
+              <Select
+                label={t('screening.filterFulltext')}
+                value={fulltextFilter}
+                onChange={(e) => setFulltextFilter(e.target.value as FulltextFilterValue)}
+                className="w-full"
+              >
+                <option value="all">{t('screening.filterAll')}</option>
+                <option value="attached">{t('screening.filterFulltextAttached')}</option>
+                <option value="missing">{t('screening.filterFulltextMissing')}</option>
+              </Select>
+            )}
+            {activeExtraFilterCount > 0 && (
+              <Button variant="ghost" onClick={clearExtraFilters}>
+                {t('screening.clearFilters')}
+              </Button>
             )}
           </div>
         </aside>
