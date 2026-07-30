@@ -178,8 +178,8 @@ function ModuleRow({
   onToggle: () => void
 }) {
   const rowClass = clsx(
-    'flex w-full items-center gap-2.5 pr-1.5 transition-colors',
-    collapsed ? 'justify-center py-2' : 'py-2 pl-2.5',
+    'flex w-full items-center gap-2.5 py-2 transition-colors',
+    collapsed ? 'justify-center' : 'justify-start pl-2.5 pr-1.5',
     isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg hover:text-fg',
   )
   const content = (
@@ -202,7 +202,13 @@ function ModuleRow({
     </Link>
   )
 
-  return collapsed ? <Tooltip label={label}>{row}</Tooltip> : row
+  return collapsed ? (
+    <Tooltip label={label} fullWidth>
+      {row}
+    </Tooltip>
+  ) : (
+    row
+  )
 }
 
 export function Sidebar({

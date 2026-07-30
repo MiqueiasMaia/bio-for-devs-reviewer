@@ -381,3 +381,47 @@ PROBAST, CHARMS) que pré-preenche `extraction_fields` e os domínios de
 `risk_of_bias_assessments` na criação do projeto, conforme o tipo de
 revisão escolhido — projeto continua livre para editar tudo depois, nada
 fica fixo no código.
+
+## 8. Recomendação de periódicos para publicação (base CAPES)
+
+Levantado em 2026-07-30 a partir de
+`base_periodicos_acordos_capes_2026.csv`/`.xlsx`, já copiada para
+`supabase/seed-data/` dentro do projeto (cópia idêntica ao arquivo original
+de `phd/dev/`, ainda não versionada no git). Base com 5.049 periódicos
+elegíveis para publicação com **APC 100% coberto** por acordos
+transformativos vigentes da CAPES (Springer Nature, Elsevier, Wiley, IEEE,
+ACS, ACM, Royal Society), compilada em 11/07/2026 — Fator de Impacto e
+quartil JIF usam dados de 2024 publicados no JCR 2025 (série completa mais
+recente disponível nas listas públicas/editoras na data da compilação).
+Colunas relevantes: `Periódico`, `ISSN`/`eISSN`, `Editora ou imprint`,
+`Campo principal`, `Assuntos ou subcampos`, `Fator de impacto`, `Fator de
+impacto, 5 anos`, `Quartil JIF`, `URL do periódico`, `URL da
+elegibilidade`.
+
+**Funcionalidade**: ao concluir (ou durante) a revisão, sugerir periódicos
+candidatos para submissão do manuscrito, rankeados por um índice — não é um
+"melhor journal" genérico, é "melhor encaixe temático + qualidade, dentro
+do universo de periódicos onde o pesquisador não paga APC do próprio
+bolso". Como toda a base já é 100% APC coberto, o índice não precisa pesar
+custo (constante); o diferencial é aderência temática + qualidade.
+
+**Para implementar**:
+1. Importar `supabase/seed-data/base_periodicos_acordos_capes_2026.csv`
+   como tabela (`capes_journals`), guardando `data_compilacao` (2026-07-11)
+   e `ano_dados_jif` (2024/JCR 2025) como metadados — a base muda quando a
+   CAPES publica nova lista, então precisa ser reimportável, não hardcoded.
+2. Calcular aderência temática comparando o texto do projeto (título,
+   critérios de elegibilidade, PICOTS, palavras-chave dos estudos
+   incluídos) contra `Campo principal`/`Assuntos ou subcampos` de cada
+   periódico via embeddings — mesma abordagem de similaridade semântica do
+   item 6.7 (deduplicação).
+3. Compor um índice combinando aderência temática (maior peso), quartil JIF
+   e fator de impacto normalizado dentro da área — fórmula e pesos a
+   definir, mas deve ficar visível/explicável na UI (mostrar os
+   componentes do score, não só o número final).
+4. Nova tela no painel do projeto (ex. "Publicação") com a lista rankeada,
+   filtros por área/quartil/editora, e link direto para `URL do periódico`
+   e `URL da elegibilidade` de cada linha.
+5. Sinalizar na UI quando a base estiver desatualizada (ex.: mais de 12
+   meses da `data_compilacao`) e apontar para reimportação — acordos e
+   quartis mudam ano a ano.

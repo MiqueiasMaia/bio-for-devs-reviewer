@@ -9,7 +9,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 py-6 text-xs text-mut sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex w-full flex-col items-center gap-3 px-6 py-6 text-xs text-mut sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col items-center gap-1.5 sm:items-start">
           <span className="inline-flex items-center gap-1.5 font-brand text-sm font-bold text-include">
             <BioforMark size={16} />

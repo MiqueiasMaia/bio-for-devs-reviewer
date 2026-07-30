@@ -8,10 +8,17 @@ import clsx from 'clsx'
 export function Tooltip({
   label,
   side = 'right',
+  fullWidth = false,
   children,
 }: {
   label: string
   side?: 'right' | 'top'
+  /** Stretch the wrapper to its container's width instead of shrink-wrapping
+   * to the trigger's content — needed when the trigger itself relies on
+   * `w-full` to center/lay out within a block-level ancestor (e.g. a
+   * full-width sidebar row), since `inline-flex` alone won't hand that
+   * width down. */
+  fullWidth?: boolean
   children: ReactNode
 }) {
   const [visible, setVisible] = useState(false)
@@ -19,7 +26,7 @@ export function Tooltip({
 
   return (
     <span
-      className="relative inline-flex"
+      className={clsx('relative inline-flex', fullWidth && 'w-full')}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
       onFocus={() => setVisible(true)}
