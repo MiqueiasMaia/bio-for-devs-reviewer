@@ -536,6 +536,8 @@ export const ptBR = {
     includeAlreadyScreened: 'Reprocessar itens já avaliados pela IA (substitui a decisão anterior)',
     roundInfoEven: 'Todos os artigos já avaliados foram reprocessados {{count}}x. O próximo lote inicia a rodada {{count}}+1 — nenhum artigo avança de rodada antes que todos completem a atual.',
     roundInfoUneven: 'Reprocessamento em andamento: entre {{min}}x e {{max}}x por artigo. O próximo lote prioriza quem ainda está em {{min}}x, garantindo que ninguém avance de rodada antes dos demais.',
+    lastRunAt: 'Última execução: {{date}}',
+    neverRun: 'A triagem por IA ainda não foi executada nesta etapa.',
   },
   backup: {
     title: 'Backup do projeto',

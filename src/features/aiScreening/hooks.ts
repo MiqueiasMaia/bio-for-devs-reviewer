@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ScreeningStage } from '@/types/domain'
-import { fetchRescreenRoundInfo, listRecordIdsToScreen, listUnscreenedRecordIds, runAiScreening } from './api'
+import { fetchLastAiRunAt, fetchRescreenRoundInfo, listRecordIdsToScreen, listUnscreenedRecordIds, runAiScreening } from './api'
 
 export function useUnscreenedCount(projectId: string, stage: ScreeningStage) {
   return useQuery({
@@ -14,6 +14,13 @@ export function useRescreenRoundInfo(projectId: string, stage: ScreeningStage) {
   return useQuery({
     queryKey: ['ai_rescreen_round_info', projectId, stage],
     queryFn: () => fetchRescreenRoundInfo(projectId, stage),
+  })
+}
+
+export function useLastAiRunAt(projectId: string, stage: ScreeningStage) {
+  return useQuery({
+    queryKey: ['ai_last_run_at', projectId, stage],
+    queryFn: () => fetchLastAiRunAt(projectId, stage),
   })
 }
 
@@ -32,6 +39,7 @@ export function useRunAiScreening(projectId: string, stage: ScreeningStage) {
       qc.invalidateQueries({ queryKey: ['ai_human_divergences', projectId, stage] })
       qc.invalidateQueries({ queryKey: ['agreement', projectId] })
       qc.invalidateQueries({ queryKey: ['ai_rescreen_round_info', projectId, stage] })
+      qc.invalidateQueries({ queryKey: ['ai_last_run_at', projectId, stage] })
     },
   })
 }

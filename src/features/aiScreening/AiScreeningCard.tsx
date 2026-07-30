@@ -4,12 +4,13 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import type { ScreeningStage } from '@/types/domain'
-import { useRescreenRoundInfo, useRunAiScreening, useUnscreenedCount } from './hooks'
+import { useLastAiRunAt, useRescreenRoundInfo, useRunAiScreening, useUnscreenedCount } from './hooks'
 
 export function AiScreeningCard({ projectId, stage }: { projectId: string; stage: ScreeningStage }) {
   const { t } = useTranslation()
   const { data: pendingCount } = useUnscreenedCount(projectId, stage)
   const { data: roundInfo } = useRescreenRoundInfo(projectId, stage)
+  const { data: lastRunAt } = useLastAiRunAt(projectId, stage)
   const runScreening = useRunAiScreening(projectId, stage)
   const [batchSize, setBatchSize] = useState(10)
   const [includeAlreadyScreened, setIncludeAlreadyScreened] = useState(false)
@@ -20,6 +21,12 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
         <h3 className="text-sm font-semibold text-fg">{t('aiScreening.title')}</h3>
         <p className="text-xs text-mut">{t('aiScreening.subtitle')}</p>
       </div>
+
+      <p className="text-xs text-mut">
+        {lastRunAt
+          ? t('aiScreening.lastRunAt', { date: new Date(lastRunAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) })
+          : t('aiScreening.neverRun')}
+      </p>
 
       <p className="text-sm text-fg">
         {pendingCount === 0

@@ -44,16 +44,18 @@ cartão "Triagem assistida por IA" na Visão Geral do projeto como o lugar
 certo para isso. Só texto/rótulo — nenhuma lógica do `AgreementCard` foi
 alterada.
 
-## 4. Indicador de "última execução da IA"
+## 4. Indicador de "última execução da IA" — ✅ implementado (2026-07-30)
 
 Hoje não há, na interface, como saber se/quando a triagem por IA rodou
 pela última vez para um projeto, sem ir conferir em `ai_usage_log` ou na
 Auditoria de IA registro a registro.
 
-**Para implementar**: mostrar, no `AiScreeningCard` (Visão Geral) e/ou na
-aba de Auditoria de IA, um timestamp da última execução bem-sucedida
-(derivável de `MAX(created_at)` em `ai_usage_log` ou `ai_screenings` por
-projeto/etapa).
+Adicionado `fetchLastAiRunAt` (`features/aiScreening/api.ts`), que deriva o
+timestamp de `MAX(ai_screenings.updated_at)` por projeto/etapa (a coluna
+`stage` só existe em `ai_screenings`, não em `ai_usage_log`, daí a escolha
+entre as duas fontes citadas acima). Exibido tanto no `AiScreeningCard`
+(Visão Geral) quanto no cartão de estatísticas da Auditoria de IA, com
+mensagem própria para "ainda não executada".
 
 ## 5. Recursos que o Rayyan tem e o Biofor Reviewers ainda não
 

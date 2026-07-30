@@ -13,6 +13,7 @@ import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
 import { decisionLabelKey } from '@/lib/decisionLabel'
 import type { ScreeningStage } from '@/types/domain'
+import { useLastAiRunAt } from '@/features/aiScreening/hooks'
 import { useAiScreenedRecords, useAiScreeningStats, useAiHumanDivergences, useRerunAiScreening } from './hooks'
 import { buildAiScreeningStatsCsv } from './api'
 import { filterAiScreenedRecords, type DecisionFilter } from './filterRecords'
@@ -29,6 +30,7 @@ export function AiAuditPage() {
   const { data: records, isLoading } = useAiScreenedRecords(project.id, stage)
   const { data: stats } = useAiScreeningStats(project.id, stage)
   const { data: divergences } = useAiHumanDivergences(project.id, stage)
+  const { data: lastRunAt } = useLastAiRunAt(project.id, stage)
   const rerun = useRerunAiScreening(project.id, stage)
 
   const filteredRecords = useMemo(
@@ -90,6 +92,11 @@ export function AiAuditPage() {
             disabled={!stats || stats.length === 0}
           />
         </div>
+        <p className="text-xs text-mut">
+          {lastRunAt
+            ? t('aiScreening.lastRunAt', { date: new Date(lastRunAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) })
+            : t('aiScreening.neverRun')}
+        </p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>
             <p className="text-xs text-mut">{t('aiAudit.totalScreened')}</p>

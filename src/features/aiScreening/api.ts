@@ -85,6 +85,25 @@ export async function fetchRescreenRoundInfo(
   return { minCount: Math.min(...counts), maxCount: Math.max(...counts), screenedCount: data.length }
 }
 
+/** Last time the AI actually screened something in this project/stage —
+ * `ai_screenings.updated_at` ticks on every upsert (new screening or
+ * rescreen, via the set_updated_at trigger), so its max is the answer
+ * without a separate "last run" table. Surfaced in AiScreeningCard and the
+ * audit panel so a reviewer never has to go check ai_usage_log by hand to
+ * know if/when the AI last ran. */
+export async function fetchLastAiRunAt(projectId: string, stage: ScreeningStage): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('ai_screenings')
+    .select('updated_at, records!inner(project_id)')
+    .eq('records.project_id', projectId)
+    .eq('stage', stage)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data?.updated_at ?? null
+}
+
 export interface AiScreenResult {
   recordId: string
   decision?: Decision
