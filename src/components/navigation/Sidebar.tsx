@@ -184,20 +184,29 @@ function ModuleRow({
   // The icon lives in a fixed-width slot (56px = the rail's collapsed
   // content width, i.e. the 72px rail minus the <ul>'s 8px×2 padding) that
   // never changes size — so the icon's own position never moves when the
-  // rail expands/collapses. Only the trailing label area grows in from
-  // behind it (via max-width, clipped by overflow-hidden), which is what
-  // makes the open/close transition read as smooth instead of a jump-cut.
+  // rail expands/collapses.
+  //
+  // The label is a "veil" reveal, not a growing box: its own width never
+  // animates in sync with visibility, which is what caused text to look
+  // like it was being typed out letter-by-letter as the rail widened.
+  // Instead, on expand the label sits fully invisible (opacity 0) through
+  // most of the rail's width transition and only cross-fades in near the
+  // very end, once the space is already there — like lifting a cover off
+  // something already fully formed underneath. On collapse it fades out
+  // fast, before the rail has visibly finished shrinking, so it never
+  // looks squeezed. Plain CSS transition strings (not Tailwind's
+  // duration/delay utilities) because the two properties need different
+  // timing, which those utilities can't express independently.
+  const labelStyle = collapsed
+    ? { maxWidth: 0, opacity: 0, transition: 'max-width 300ms ease-out, opacity 120ms ease-out' }
+    : { maxWidth: 180, opacity: 1, transition: 'max-width 300ms ease-out, opacity 150ms ease-out 150ms' }
+
   const content = (
     <>
       <span className="flex w-14 shrink-0 items-center justify-center">
         <module.icon className="h-5 w-5 shrink-0" />
       </span>
-      <span
-        className={clsx(
-          'flex items-center gap-1.5 overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out',
-          collapsed ? 'max-w-0 opacity-0' : 'max-w-[180px] opacity-100',
-        )}
-      >
+      <span className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap" style={labelStyle}>
         <span className="min-w-0 flex-1 truncate pl-1 text-left text-sm font-medium">{label}</span>
         {expandable && (
           <ChevronRightIcon
@@ -320,10 +329,12 @@ export function Sidebar({
         >
           <PinIcon className="h-4 w-4 shrink-0" />
           <span
-            className={clsx(
-              'overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out',
-              collapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
-            )}
+            className="overflow-hidden whitespace-nowrap"
+            style={
+              collapsed
+                ? { maxWidth: 0, opacity: 0, transition: 'max-width 300ms ease-out, opacity 120ms ease-out' }
+                : { maxWidth: 160, opacity: 1, transition: 'max-width 300ms ease-out, opacity 150ms ease-out 150ms' }
+            }
           >
             {pinned ? t('sidebar.unpin') : t('sidebar.pin')}
           </span>
