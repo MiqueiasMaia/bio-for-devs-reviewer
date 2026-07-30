@@ -290,7 +290,7 @@ export function findModule(id: string | undefined): GlobalModule | undefined {
 }
 
 /** Which module a given relative pathname (inside `/projects/:projectId/*`) belongs to —
- * drives the Global Sidebar's active-state highlight from the current URL. */
+ * drives the sidebar's active-module highlight/auto-expand from the current URL. */
 export function moduleIdForPath(relativePath: string): string {
   if (relativePath === '' || relativePath === '/') return 'overview'
   const p = relativePath.replace(/^\//, '')

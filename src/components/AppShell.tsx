@@ -4,8 +4,7 @@ import { useTranslation, type TranslationKey } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { useProject } from '@/features/projects/hooks'
 import { Footer } from '@/components/Footer'
-import { GlobalSidebar } from '@/components/navigation/GlobalSidebar'
-import { ContextualSidebar } from '@/components/navigation/ContextualSidebar'
+import { Sidebar } from '@/components/navigation/Sidebar'
 import { Breadcrumb, type BreadcrumbItem } from '@/components/navigation/Breadcrumb'
 import { findModule, moduleIdForPath } from '@/components/navigation/navConfig'
 import { useNavStore } from '@/components/navigation/navStore'
@@ -50,10 +49,7 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen">
-      <GlobalSidebar projectId={projectId} activeModuleId={activeModuleId} />
-      {project && activeModule && (
-        <ContextualSidebar module={activeModule} project={project} isOwner={isOwner} />
-      )}
+      <Sidebar projectId={projectId} project={project} isOwner={isOwner} activeModuleId={activeModuleId} />
       <div className="flex min-w-0 flex-1 flex-col">
         {project && (
           <div className="border-b border-line px-6 py-3">

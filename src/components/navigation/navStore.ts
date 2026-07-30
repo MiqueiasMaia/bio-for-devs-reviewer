@@ -3,11 +3,9 @@ import { persist } from 'zustand/middleware'
 
 interface NavState {
   globalCollapsed: boolean
-  contextualCollapsed: boolean
   lastProjectId: string | null
   lastModuleByProject: Record<string, string>
   toggleGlobalCollapsed: () => void
-  toggleContextualCollapsed: () => void
   setLastProject: (projectId: string) => void
   setLastModule: (projectId: string, moduleId: string) => void
 }
@@ -19,14 +17,13 @@ interface NavState {
 export const useNavStore = create<NavState>()(
   persist(
     (set) => ({
-      // Global rail defaults to compact/icon-only (~72px, the spec's baseline
-      // width); Contextual sidebar defaults to fully expanded (280px).
-      globalCollapsed: true,
-      contextualCollapsed: false,
+      // Sidebar defaults to expanded (icons + labels, ~260px) so the
+      // accordion sub-items are visible out of the box; collapsing to the
+      // ~72px icon-only rail is an opt-in power-user toggle.
+      globalCollapsed: false,
       lastProjectId: null,
       lastModuleByProject: {},
       toggleGlobalCollapsed: () => set((s) => ({ globalCollapsed: !s.globalCollapsed })),
-      toggleContextualCollapsed: () => set((s) => ({ contextualCollapsed: !s.contextualCollapsed })),
       setLastProject: (projectId) => set({ lastProjectId: projectId }),
       setLastModule: (projectId, moduleId) =>
         set((s) => ({ lastModuleByProject: { ...s.lastModuleByProject, [projectId]: moduleId } })),
