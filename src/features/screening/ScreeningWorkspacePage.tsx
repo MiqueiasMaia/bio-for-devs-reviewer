@@ -41,7 +41,6 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const reviewersRequired = project.settings.reviewers_required_per_record
 
   const [filter, setFilter] = useState<FilterValue>('all')
-  const [showMoreFilters, setShowMoreFilters] = useState(false)
   const [titleSearch, setTitleSearch] = useState('')
   const [authorSearch, setAuthorSearch] = useState('')
   const [sourceDbFilter, setSourceDbFilter] = useState('all')
@@ -402,21 +401,6 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
             </button>
           )}
         </div>
-        <Select label="" aria-label="filtro" value={filter} onChange={(e) => setFilter(e.target.value as FilterValue)}>
-          <option value="all">{t('screening.filterAll')}</option>
-          <option value="undecided">{t('screening.filterUndecided')}</option>
-          <option value="INCLUDE">{t('screening.filterInclude')}</option>
-          <option value="UNCERTAIN">{t('screening.filterUncertain')}</option>
-          <option value="EXCLUDE">{t('screening.filterExclude')}</option>
-        </Select>
-        <Button
-          variant="secondary"
-          aria-expanded={showMoreFilters}
-          onClick={() => setShowMoreFilters((v) => !v)}
-        >
-          {t('screening.moreFilters')}
-          {activeExtraFilterCount > 0 ? ` (${activeExtraFilterCount})` : ''}
-        </Button>
         <input
           ref={fileInputRef}
           type="file"
@@ -448,90 +432,6 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
         </Button>
       </div>
 
-      {showMoreFilters && (
-        <div className="mb-4 flex flex-wrap items-end gap-3 border border-line bg-white p-3">
-          <TextField
-            label={t('screening.searchTitle')}
-            placeholder={t('screening.searchTitlePlaceholder')}
-            value={titleSearch}
-            onChange={(e) => setTitleSearch(e.target.value)}
-            className="w-48"
-          />
-          <TextField
-            label={t('screening.searchAuthor')}
-            placeholder={t('screening.searchAuthorPlaceholder')}
-            value={authorSearch}
-            onChange={(e) => setAuthorSearch(e.target.value)}
-            className="w-40"
-          />
-          <Select
-            label={t('screening.filterSourceDb')}
-            value={sourceDbFilter}
-            onChange={(e) => setSourceDbFilter(e.target.value)}
-            className="max-w-48"
-          >
-            <option value="all">{t('screening.filterAll')}</option>
-            {sourceDbOptions.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={t('screening.filterJournal')}
-            value={journalFilter}
-            onChange={(e) => setJournalFilter(e.target.value)}
-            className="max-w-48"
-          >
-            <option value="all">{t('screening.filterAll')}</option>
-            {journalOptions.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </Select>
-          <Select label={t('screening.filterYear')} value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
-            <option value="all">{t('screening.filterAll')}</option>
-            {yearOptions.map((y) => (
-              <option key={y} value={String(y)}>
-                {y}
-              </option>
-            ))}
-          </Select>
-          {(exclusionReasons.data ?? []).length > 0 && (
-            <Select
-              label={t('screening.filterExclusionReason')}
-              value={exclusionReasonFilter}
-              onChange={(e) => setExclusionReasonFilter(e.target.value)}
-              className="max-w-48"
-            >
-              <option value="all">{t('screening.filterAll')}</option>
-              {exclusionReasons.data!.map((r) => (
-                <option key={r.id} value={r.code}>
-                  {r.label}
-                </option>
-              ))}
-            </Select>
-          )}
-          {stage === 'full_text' && (
-            <Select
-              label={t('screening.filterFulltext')}
-              value={fulltextFilter}
-              onChange={(e) => setFulltextFilter(e.target.value as FulltextFilterValue)}
-            >
-              <option value="all">{t('screening.filterAll')}</option>
-              <option value="attached">{t('screening.filterFulltextAttached')}</option>
-              <option value="missing">{t('screening.filterFulltextMissing')}</option>
-            </Select>
-          )}
-          {activeExtraFilterCount > 0 && (
-            <Button variant="ghost" onClick={clearExtraFilters}>
-              {t('screening.clearFilters')}
-            </Button>
-          )}
-        </div>
-      )}
-
       {showResumedNote && (
         <p className="mb-3 flex items-center justify-between text-xs text-mut">
           <span>{t('screening.resumedNote')}</span>
@@ -548,8 +448,109 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
       {/* Capped width here (unlike the rest of the now-fluid app shell) —
           this is the one screen dominated by long-form reading (title +
           abstract), and letting it stretch edge-to-edge on wide monitors
-          would make lines uncomfortably long. */}
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
+          would make lines uncomfortably long. Filters live in the left
+          column instead of a top bar — this screen has lateral room to
+          spare (like the PICOTS column on the right) and vertical room is
+          what's actually scarce while screening. */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 lg:grid-cols-[260px_1fr_300px]">
+        <aside className="h-fit border border-line bg-white p-4 text-[12.5px]">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-mut">{t('screening.moreFilters')}</h2>
+          <div className="flex flex-col gap-3">
+            <Select label="" aria-label="filtro" value={filter} onChange={(e) => setFilter(e.target.value as FilterValue)}>
+              <option value="all">{t('screening.filterAll')}</option>
+              <option value="undecided">{t('screening.filterUndecided')}</option>
+              <option value="INCLUDE">{t('screening.filterInclude')}</option>
+              <option value="UNCERTAIN">{t('screening.filterUncertain')}</option>
+              <option value="EXCLUDE">{t('screening.filterExclude')}</option>
+            </Select>
+            <TextField
+              label={t('screening.searchTitle')}
+              placeholder={t('screening.searchTitlePlaceholder')}
+              value={titleSearch}
+              onChange={(e) => setTitleSearch(e.target.value)}
+              className="w-full"
+            />
+            <TextField
+              label={t('screening.searchAuthor')}
+              placeholder={t('screening.searchAuthorPlaceholder')}
+              value={authorSearch}
+              onChange={(e) => setAuthorSearch(e.target.value)}
+              className="w-full"
+            />
+            <Select
+              label={t('screening.filterSourceDb')}
+              value={sourceDbFilter}
+              onChange={(e) => setSourceDbFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {sourceDbOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={t('screening.filterJournal')}
+              value={journalFilter}
+              onChange={(e) => setJournalFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {journalOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label={t('screening.filterYear')}
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="w-full"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {yearOptions.map((y) => (
+                <option key={y} value={String(y)}>
+                  {y}
+                </option>
+              ))}
+            </Select>
+            {(exclusionReasons.data ?? []).length > 0 && (
+              <Select
+                label={t('screening.filterExclusionReason')}
+                value={exclusionReasonFilter}
+                onChange={(e) => setExclusionReasonFilter(e.target.value)}
+                className="w-full"
+              >
+                <option value="all">{t('screening.filterAll')}</option>
+                {exclusionReasons.data!.map((r) => (
+                  <option key={r.id} value={r.code}>
+                    {r.label}
+                  </option>
+                ))}
+              </Select>
+            )}
+            {stage === 'full_text' && (
+              <Select
+                label={t('screening.filterFulltext')}
+                value={fulltextFilter}
+                onChange={(e) => setFulltextFilter(e.target.value as FulltextFilterValue)}
+                className="w-full"
+              >
+                <option value="all">{t('screening.filterAll')}</option>
+                <option value="attached">{t('screening.filterFulltextAttached')}</option>
+                <option value="missing">{t('screening.filterFulltextMissing')}</option>
+              </Select>
+            )}
+            {activeExtraFilterCount > 0 && (
+              <Button variant="ghost" onClick={clearExtraFilters}>
+                {t('screening.clearFilters')}
+              </Button>
+            )}
+          </div>
+        </aside>
+
         <div className="border border-line bg-white p-6">
           {queue.isError ? (
             <ErrorState onRetry={() => queue.refetch()} />
