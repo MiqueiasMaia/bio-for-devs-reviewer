@@ -58,7 +58,7 @@ export function AppShell() {
     // whole page rather than scrolling in place.
     <div className="flex h-screen overflow-hidden">
       <Sidebar projectId={projectId} project={project} isOwner={isOwner} activeModuleId={activeModuleId} />
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
         {project && (
           <div className="border-b border-line px-6 py-3">
             <Breadcrumb items={breadcrumbItems} />

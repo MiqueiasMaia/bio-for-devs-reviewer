@@ -469,12 +469,12 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                   aria-current={isCurrent ? 'true' : undefined}
                   className={clsx('flex w-full flex-col gap-1 py-2 text-left', isCurrent ? 'bg-bg' : 'hover:bg-bg')}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-[11px] text-mut">{r.humanRef}</span>
+                  <div className="flex min-w-0 items-center justify-between gap-2">
+                    <span className="min-w-0 truncate font-mono text-[11px] text-mut">{r.humanRef}</span>
                     {decision && (
                       <span
                         data-sel="true"
-                        className={clsx('border px-1.5 py-0.5 text-[10px] font-semibold', DECISION_STYLES[decision])}
+                        className={clsx('shrink-0 border px-1.5 py-0.5 text-[10px] font-semibold', DECISION_STYLES[decision])}
                       >
                         {decision === 'INCLUDE'
                           ? t('screening.include')
@@ -484,7 +484,12 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                       </span>
                     )}
                   </div>
-                  <p className={clsx('line-clamp-2 text-[13px] leading-snug', isCurrent ? 'font-semibold text-fg' : 'text-fg')}>
+                  <p
+                    className={clsx(
+                      'line-clamp-2 break-words text-[13px] leading-snug',
+                      isCurrent ? 'font-semibold text-fg' : 'text-fg',
+                    )}
+                  >
                     {r.title || t('common.untitled')}
                   </p>
                 </button>
