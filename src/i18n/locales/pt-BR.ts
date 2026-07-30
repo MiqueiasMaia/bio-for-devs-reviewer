@@ -617,6 +617,8 @@ export const ptBR = {
     comingSoon: 'Em breve',
     collapse: 'Recolher',
     expand: 'Expandir',
+    pin: 'Fixar barra lateral',
+    unpin: 'Desafixar barra lateral',
     reviews: 'Revisões',
     studies: 'Estudos',
     screening: 'Triagem',

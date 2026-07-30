@@ -27,8 +27,8 @@ export interface NavItem {
   to: string
   isVisible?: (ctx: NavContext) => boolean
   isLocked?: (ctx: NavContext) => boolean
-  /** Key looked up against the badge values computed by `ContextualSidebar` — kept
-   * separate from this static config since badge values come from TanStack Query hooks. */
+  /** Key looked up against the badge values computed by `Sidebar` — kept separate
+   * from this static config since badge values come from TanStack Query hooks. */
   badgeKey?: 'imported' | 'duplicates' | 'conflicts'
   future?: boolean
 }
@@ -37,6 +37,17 @@ export interface NavGroup {
   id: string
   labelKey?: TranslationKey
   items: NavItem[]
+}
+
+/** Sub-item for modules that aren't project-scoped (currently just `reviews`) —
+ * a plain absolute path + label, no project context/predicates needed. Either
+ * navigates to `to`, or (for `action` items like "new review") triggers a
+ * side effect instead of a route change. */
+export interface StaticNavItem {
+  id: string
+  labelKey: TranslationKey
+  to?: string
+  action?: 'create-review'
 }
 
 export interface GlobalModule {
@@ -48,6 +59,7 @@ export interface GlobalModule {
   /** Whether this module needs an open review to make sense (hidden at `/projects`). */
   requiresProject: boolean
   groups?: (ctx: NavContext) => NavGroup[]
+  staticItems?: StaticNavItem[]
 }
 
 const stagesModuleVisible = (stage: 'title_abstract' | 'full_text') => (ctx: NavContext) =>
@@ -64,6 +76,11 @@ export const globalModules: GlobalModule[] = [
     labelKey: 'sidebar.reviews',
     icon: ReviewsIcon,
     requiresProject: false,
+    staticItems: [
+      { id: 'active', labelKey: 'projects.filterActive', to: '/projects' },
+      { id: 'archived', labelKey: 'projects.filterArchived', to: '/projects?archived=1' },
+      { id: 'create', labelKey: 'projects.newProject', action: 'create-review' },
+    ],
   },
   {
     id: 'overview',
@@ -287,6 +304,13 @@ export const globalModules: GlobalModule[] = [
 
 export function findModule(id: string | undefined): GlobalModule | undefined {
   return globalModules.find((m) => m.id === id)
+}
+
+/** Flattens + visibility-filters a module's items for the given context —
+ * shared by the sidebar (to decide whether a module has enough sub-items to
+ * be worth expanding) and the breadcrumb (to find the current item's label). */
+export function resolveModuleItems(module: GlobalModule, ctx: NavContext): NavItem[] {
+  return (module.groups?.(ctx) ?? []).flatMap((g) => g.items).filter((i) => !i.isVisible || i.isVisible(ctx))
 }
 
 /** Which module a given relative pathname (inside `/projects/:projectId/*`) belongs to —

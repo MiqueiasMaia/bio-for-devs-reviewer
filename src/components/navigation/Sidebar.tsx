@@ -1,20 +1,28 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation, type TranslationKey } from '@/i18n'
 import { useAuth } from '@/features/auth/useAuth'
 import { supabase } from '@/lib/supabase'
+import { useCreateProjectDialogStore } from '@/features/projects/createProjectDialogStore'
 import { Logo } from '@/components/Logo'
 import { BioforMark } from '@/components/BioforMark'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Tooltip } from '@/components/ui/Tooltip'
-import { ChevronLeftIcon, ChevronRightIcon, LockIcon } from '@/components/ui/icons'
+import { ChevronRightIcon, LockIcon, PinIcon, PlusIcon } from '@/components/ui/icons'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useOpenConflictCount } from '@/features/dashboard/hooks'
 import { useDedupSummary } from '@/features/imports/hooks'
 import type { ProjectDetail } from '@/features/projects/api'
-import { globalModules, type GlobalModule, type NavContext, type NavItem } from './navConfig'
+import {
+  globalModules,
+  resolveModuleItems,
+  type GlobalModule,
+  type NavContext,
+  type NavItem,
+  type StaticNavItem,
+} from './navConfig'
 import { useNavStore } from './navStore'
 
 /** Badge values only make sense once a project is loaded — kept in their
@@ -102,13 +110,61 @@ function ModuleGroups({ module, project, isOwner }: { module: GlobalModule; proj
   )
 }
 
+/** Renders a module's `staticItems` (currently just Reviews' Active/Archived
+ * and the "new review" action) — plain absolute links with no project
+ * context, so active state is derived from the URL's search string rather
+ * than `NavLink`'s pathname-only match. */
+function StaticNavItems({ items }: { items: StaticNavItem[] }) {
+  const { t } = useTranslation()
+  const location = useLocation()
+  const setWizardOpen = useCreateProjectDialogStore((s) => s.setOpen)
+
+  return (
+    <div className="flex flex-col py-1">
+      {items.map((item) => {
+        const label = t(item.labelKey as TranslationKey)
+
+        if (item.action === 'create-review') {
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setWizardOpen(true)}
+              className="flex items-center gap-1.5 py-1.5 pl-9 pr-3 text-left text-sm font-medium text-mut hover:bg-bg hover:text-fg"
+            >
+              <PlusIcon className="h-3.5 w-3.5 shrink-0" />
+              {label}
+            </button>
+          )
+        }
+
+        const [path, query] = (item.to ?? '').split('?')
+        const isActive = location.pathname === path && (location.search.replace(/^\?/, '') || '') === (query ?? '')
+        return (
+          <Link
+            key={item.id}
+            to={item.to ?? '#'}
+            aria-current={isActive ? 'page' : undefined}
+            className={clsx(
+              'py-1.5 pl-9 pr-3 text-sm font-medium transition-colors',
+              isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg hover:text-fg',
+            )}
+          >
+            {label}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
 function ModuleRow({
   module,
   to,
   label,
   isActive,
   expanded,
-  hasGroups,
+  expandable,
   collapsed,
   onToggle,
 }: {
@@ -117,34 +173,33 @@ function ModuleRow({
   label: string
   isActive: boolean
   expanded: boolean
-  hasGroups: boolean
+  expandable: boolean
   collapsed: boolean
   onToggle: () => void
 }) {
-  const { t } = useTranslation()
-  const row = (
-    <div
-      className={clsx(
-        'flex items-center gap-2.5 pr-1.5 transition-colors',
-        collapsed ? 'justify-center py-2' : 'py-2 pl-2.5',
-        isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg hover:text-fg',
+  const rowClass = clsx(
+    'flex w-full items-center gap-2.5 pr-1.5 transition-colors',
+    collapsed ? 'justify-center py-2' : 'py-2 pl-2.5',
+    isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg hover:text-fg',
+  )
+  const content = (
+    <>
+      <module.icon className="h-5 w-5 shrink-0" />
+      {!collapsed && <span className="min-w-0 flex-1 truncate text-left text-sm font-medium">{label}</span>}
+      {!collapsed && expandable && (
+        <ChevronRightIcon className={clsx('h-3.5 w-3.5 shrink-0 transition-transform duration-150', expanded && 'rotate-90')} />
       )}
-    >
-      <Link to={to} aria-current={isActive ? 'page' : undefined} className="flex min-w-0 flex-1 items-center gap-2.5">
-        <module.icon className="h-5 w-5 shrink-0" />
-        {!collapsed && <span className="truncate text-sm font-medium">{label}</span>}
-      </Link>
-      {!collapsed && hasGroups && (
-        <button
-          onClick={onToggle}
-          aria-label={`${expanded ? t('sidebar.collapse') : t('sidebar.expand')} ${label}`}
-          aria-expanded={expanded}
-          className={clsx('shrink-0 rounded p-0.5', isActive ? 'hover:bg-white/20' : 'hover:bg-line/60')}
-        >
-          <ChevronRightIcon className={clsx('h-3.5 w-3.5 transition-transform duration-150', expanded && 'rotate-90')} />
-        </button>
-      )}
-    </div>
+    </>
+  )
+
+  const row = expandable ? (
+    <button type="button" onClick={onToggle} aria-expanded={expanded} aria-label={label} className={rowClass}>
+      {content}
+    </button>
+  ) : (
+    <Link to={to} aria-current={isActive ? 'page' : undefined} className={rowClass}>
+      {content}
+    </Link>
   )
 
   return collapsed ? <Tooltip label={label}>{row}</Tooltip> : row
@@ -163,10 +218,13 @@ export function Sidebar({
 }) {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const collapsed = useNavStore((s) => s.globalCollapsed)
-  const toggleCollapsed = useNavStore((s) => s.toggleGlobalCollapsed)
+  const pinned = useNavStore((s) => s.pinned)
+  const togglePinned = useNavStore((s) => s.togglePinned)
+  const [hovering, setHovering] = useState(false)
   const [manuallyExpanded, setManuallyExpanded] = useState<Set<string>>(new Set())
 
+  const collapsed = !pinned && !hovering
+  const ctx: NavContext | undefined = project ? { project, isOwner } : undefined
   const modules = projectId ? globalModules : globalModules.filter((m) => !m.requiresProject)
 
   const toggleModule = (id: string) =>
@@ -180,6 +238,8 @@ export function Sidebar({
   return (
     <nav
       aria-label={t('sidebar.reviews')}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
       className={clsx(
         'flex shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200',
         collapsed ? 'w-[72px]' : 'w-[260px]',
@@ -194,8 +254,12 @@ export function Sidebar({
           const isActive = mod.id === 'reviews' ? !projectId : projectId != null && mod.id === activeModuleId
           const to = mod.id === 'reviews' || !projectId ? '/projects' : `/projects/${projectId}/${mod.to}`
           const label = t(mod.labelKey as TranslationKey)
-          const hasGroups = Boolean(project) && Boolean(mod.groups) && mod.id !== 'reviews'
-          const expanded = !collapsed && hasGroups && (isActive || manuallyExpanded.has(mod.id))
+          // A module is only worth expanding when it has more than one visible
+          // sub-item — otherwise expanding it would just duplicate the row's
+          // own label underneath (e.g. Overview, whose only "item" is itself).
+          const groupItemCount = ctx && mod.groups ? resolveModuleItems(mod, ctx).length : 0
+          const expandable = Boolean(mod.staticItems?.length) || groupItemCount > 1
+          const expanded = !collapsed && expandable && (isActive || manuallyExpanded.has(mod.id))
 
           return (
             <li key={mod.id}>
@@ -205,11 +269,12 @@ export function Sidebar({
                 label={label}
                 isActive={isActive}
                 expanded={expanded}
-                hasGroups={hasGroups}
+                expandable={expandable}
                 collapsed={collapsed}
                 onToggle={() => toggleModule(mod.id)}
               />
-              {expanded && project && <ModuleGroups module={mod} project={project} isOwner={isOwner} />}
+              {expanded && mod.staticItems && <StaticNavItems items={mod.staticItems} />}
+              {expanded && !mod.staticItems && project && <ModuleGroups module={mod} project={project} isOwner={isOwner} />}
             </li>
           )
         })}
@@ -217,11 +282,16 @@ export function Sidebar({
 
       <div className="border-t border-line p-2">
         <button
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
-          className="mb-2 flex w-full items-center justify-center py-1.5 text-mut hover:bg-bg hover:text-fg"
+          onClick={togglePinned}
+          aria-label={pinned ? t('sidebar.unpin') : t('sidebar.pin')}
+          aria-pressed={pinned}
+          className={clsx(
+            'mb-2 flex w-full items-center justify-center gap-1.5 py-1.5 text-sm',
+            pinned ? 'text-include' : 'text-mut hover:bg-bg hover:text-fg',
+          )}
         >
-          {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
+          <PinIcon className="h-4 w-4" />
+          {!collapsed && <span>{pinned ? t('sidebar.unpin') : t('sidebar.pin')}</span>}
         </button>
         {collapsed ? (
           <div className="flex justify-center">

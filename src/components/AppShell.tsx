@@ -6,8 +6,10 @@ import { useProject } from '@/features/projects/hooks'
 import { Footer } from '@/components/Footer'
 import { Sidebar } from '@/components/navigation/Sidebar'
 import { Breadcrumb, type BreadcrumbItem } from '@/components/navigation/Breadcrumb'
-import { findModule, moduleIdForPath } from '@/components/navigation/navConfig'
+import { findModule, moduleIdForPath, resolveModuleItems } from '@/components/navigation/navConfig'
 import { useNavStore } from '@/components/navigation/navStore'
+import { useCreateProjectDialogStore } from '@/features/projects/createProjectDialogStore'
+import { CreateProjectDialog } from '@/features/projects/CreateProjectDialog'
 
 function relativePath(pathname: string, projectId: string) {
   return pathname.replace(new RegExp(`^/projects/${projectId}/?`), '')
@@ -21,6 +23,8 @@ export function AppShell() {
   const { data: project } = useProject(projectId)
   const setLastProject = useNavStore((s) => s.setLastProject)
   const setLastModule = useNavStore((s) => s.setLastModule)
+  const wizardOpen = useCreateProjectDialogStore((s) => s.open)
+  const setWizardOpen = useCreateProjectDialogStore((s) => s.setOpen)
 
   const relPath = projectId ? relativePath(location.pathname, projectId) : ''
   const activeModuleId = projectId ? moduleIdForPath(relPath) : 'reviews'
@@ -40,8 +44,7 @@ export function AppShell() {
     items.push({ label: project.name, to: `/projects/${project.id}` })
 
     const ctx = { project, isOwner }
-    const groups = activeModule.groups?.(ctx) ?? []
-    const currentItem = groups.flatMap((g) => g.items).find((i) => i.to === relPath)
+    const currentItem = resolveModuleItems(activeModule, ctx).find((i) => i.to === relPath)
     const currentLabel = currentItem ? t(currentItem.labelKey as TranslationKey) : t(activeModule.labelKey as TranslationKey)
     items.push({ label: currentLabel })
     return items
@@ -61,6 +64,7 @@ export function AppShell() {
         </main>
         <Footer />
       </div>
+      <CreateProjectDialog open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   )
 }

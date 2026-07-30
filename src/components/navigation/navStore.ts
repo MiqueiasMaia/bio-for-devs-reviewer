@@ -2,28 +2,28 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface NavState {
-  globalCollapsed: boolean
+  /** When pinned, the sidebar stays expanded (icons + labels). When not
+   * pinned, it rests as a ~72px icon-only rail and only expands while the
+   * pointer is hovering it (see `Sidebar`'s local `hovering` state). */
+  pinned: boolean
   lastProjectId: string | null
   lastModuleByProject: Record<string, string>
-  toggleGlobalCollapsed: () => void
+  togglePinned: () => void
   setLastProject: (projectId: string) => void
   setLastModule: (projectId: string, moduleId: string) => void
 }
 
-/** Persists sidebar collapse state + "where was I" per project, same
- * zustand `create` pattern as `createProjectDialogStore.ts`, just with the
+/** Persists sidebar pin state + "where was I" per project, same zustand
+ * `create` pattern as `createProjectDialogStore.ts`, just with the
  * `persist` middleware (bundled with zustand, no new dependency) so it
  * survives reloads via localStorage. */
 export const useNavStore = create<NavState>()(
   persist(
     (set) => ({
-      // Sidebar defaults to expanded (icons + labels, ~260px) so the
-      // accordion sub-items are visible out of the box; collapsing to the
-      // ~72px icon-only rail is an opt-in power-user toggle.
-      globalCollapsed: false,
+      pinned: true,
       lastProjectId: null,
       lastModuleByProject: {},
-      toggleGlobalCollapsed: () => set((s) => ({ globalCollapsed: !s.globalCollapsed })),
+      togglePinned: () => set((s) => ({ pinned: !s.pinned })),
       setLastProject: (projectId) => set({ lastProjectId: projectId }),
       setLastModule: (projectId, moduleId) =>
         set((s) => ({ lastModuleByProject: { ...s.lastModuleByProject, [projectId]: moduleId } })),

@@ -1,35 +1,27 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 import { ErrorState } from '@/components/ErrorState'
 import { useProjects } from './hooks'
-import { useCreateProjectDialogStore } from './createProjectDialogStore'
-import { CreateProjectDialog } from './CreateProjectDialog'
 
 export function ProjectsDashboardPage() {
   const { t } = useTranslation()
-  const [archived, setArchived] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const archived = searchParams.get('archived') === '1'
   const { data: projects, isLoading, isError, refetch } = useProjects(archived)
-  const wizardOpen = useCreateProjectDialogStore((s) => s.open)
-  const setWizardOpen = useCreateProjectDialogStore((s) => s.setOpen)
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">{t('projects.title')}</h1>
-          <p className="text-sm text-mut">{t('projects.subtitle')}</p>
-        </div>
-        <Button onClick={() => setWizardOpen(true)}>{t('projects.newProject')}</Button>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold">{t('projects.title')}</h1>
+        <p className="text-sm text-mut">{t('projects.subtitle')}</p>
       </div>
 
       <div className="mb-4 flex gap-1">
         <button
-          onClick={() => setArchived(false)}
+          onClick={() => setSearchParams({})}
           className={clsx(
             'px-3 py-1.5 text-sm font-medium',
             !archived ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
@@ -38,7 +30,7 @@ export function ProjectsDashboardPage() {
           {t('projects.filterActive')}
         </button>
         <button
-          onClick={() => setArchived(true)}
+          onClick={() => setSearchParams({ archived: '1' })}
           className={clsx(
             'px-3 py-1.5 text-sm font-medium',
             archived ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
@@ -105,8 +97,6 @@ export function ProjectsDashboardPage() {
           ))}
         </div>
       )}
-
-      <CreateProjectDialog open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   )
 }

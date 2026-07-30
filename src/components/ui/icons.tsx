@@ -188,6 +188,23 @@ export function ChevronRightIcon({ className }: IconProps) {
   )
 }
 
+export function PlusIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M10 4.5v11M4.5 10h11" />
+    </svg>
+  )
+}
+
+export function PinIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M8 3.5h4l.6 4.8 2.4 2.2v1.5H5v-1.5l2.4-2.2L8 3.5Z" />
+      <path d="M10 12v4.5" />
+    </svg>
+  )
+}
+
 /** Generic (monochrome, currentColor) provider glyphs for the disabled
  * "coming soon" sign-in buttons — not brand-accurate logomarks, just
  * recognizable enough to read as "Google" / "GitHub" / "ORCID" at a glance. */

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import clsx from 'clsx'
 
 export interface BreadcrumbItem {
   label: string
@@ -7,16 +8,21 @@ export interface BreadcrumbItem {
 
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-sm text-mut">
+    <nav aria-label="breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm text-mut">
       {items.map((item, i) => (
-        <span key={i} className="flex items-center gap-1.5">
-          {i > 0 && <span className="text-line">/</span>}
+        <span key={i} className="flex min-w-0 items-center gap-1.5">
+          {i > 0 && <span className="shrink-0 text-line">/</span>}
           {item.to ? (
-            <Link to={item.to} className="hover:text-fg">
+            <Link to={item.to} title={item.label} className="min-w-0 max-w-[220px] truncate hover:text-fg">
               {item.label}
             </Link>
           ) : (
-            <span className={i === items.length - 1 ? 'font-medium text-fg' : undefined}>{item.label}</span>
+            <span
+              title={item.label}
+              className={clsx('min-w-0 max-w-[220px] truncate', i === items.length - 1 && 'font-medium text-fg')}
+            >
+              {item.label}
+            </span>
           )}
         </span>
       ))}

@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
-/** Lets the "Novo projeto" trigger and the dialog it opens (both on
- * ProjectsDashboardPage today) stay decoupled, in case another entry point
- * needs to open the same dialog later. */
+/** Lets the "Novo projeto" trigger (the sidebar's Reviews accordion) and the
+ * dialog it opens (mounted once in `AppShell`, reachable from any route)
+ * stay decoupled instead of threading the open state through props. */
 interface CreateProjectDialogState {
   open: boolean
   setOpen: (open: boolean) => void
