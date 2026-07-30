@@ -22,6 +22,20 @@ export async function listFulltextDocs(recordId: string): Promise<FulltextDoc[]>
   }))
 }
 
+/** For the "PDF anexado / não anexado" screening filter — one query for the
+ * whole project instead of one `listFulltextDocs` per record. Joined through
+ * `records` to scope by project since `fulltext_docs` has no project_id of
+ * its own, same pattern as `fetchAiMatchForStage` in `features/screening`. */
+export async function fetchAttachedRecordIds(projectId: string): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('fulltext_docs')
+    .select('record_id, records!inner(project_id)')
+    .eq('records.project_id', projectId)
+    .returns<{ record_id: string }[]>()
+  if (error) throw error
+  return new Set(data.map((d) => d.record_id))
+}
+
 export async function getSignedPdfUrl(storagePath: string): Promise<string> {
   const { data, error } = await supabase.storage.from('fulltext').createSignedUrl(storagePath, 3600)
   if (error) throw error

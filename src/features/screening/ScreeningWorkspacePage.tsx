@@ -8,6 +8,7 @@ import { useCriteria, useExclusionReasons, useHighlightTerms } from '@/features/
 import { HighlightedText } from '@/components/HighlightedText'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { TextField } from '@/components/ui/TextField'
 import { DownloadIcon, UploadIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { getApplicableStages, getNextStage, isStageUnlocked } from '@/domain/stageLock/stageLock'
@@ -20,9 +21,11 @@ import { downloadCsv, exportDecisionsCsv, importLegacyDecisionsCsv } from './csv
 import { getDailyGoal, getLastPosition, saveLastPosition, setDailyGoal } from './sessionTracker'
 import { useTranslateRecord } from '@/features/translation/hooks'
 import { FulltextPanel } from '@/features/fulltext/FulltextPanel'
+import { useFulltextAttachedRecordIds } from '@/features/fulltext/hooks'
 import { ErrorState } from '@/components/ErrorState'
 
 type FilterValue = 'all' | 'undecided' | Decision
+type FulltextFilterValue = 'all' | 'attached' | 'missing'
 
 const DECISION_STYLES: Record<Decision, string> = {
   INCLUDE: 'border-include text-include data-[sel=true]:bg-include data-[sel=true]:text-white',
@@ -38,6 +41,14 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const reviewersRequired = project.settings.reviewers_required_per_record
 
   const [filter, setFilter] = useState<FilterValue>('all')
+  const [showMoreFilters, setShowMoreFilters] = useState(false)
+  const [titleSearch, setTitleSearch] = useState('')
+  const [authorSearch, setAuthorSearch] = useState('')
+  const [sourceDbFilter, setSourceDbFilter] = useState('all')
+  const [journalFilter, setJournalFilter] = useState('all')
+  const [yearFilter, setYearFilter] = useState('all')
+  const [exclusionReasonFilter, setExclusionReasonFilter] = useState('all')
+  const [fulltextFilter, setFulltextFilter] = useState<FulltextFilterValue>('all')
   const [index, setIndex] = useState(0)
   const [hlOn, setHlOn] = useState(true)
   const [showInclusionCriteria, setShowInclusionCriteria] = useState(false)
@@ -73,6 +84,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const highlightTerms = useHighlightTerms(project.id)
   const exclusionReasons = useExclusionReasons(project.id)
   const criteria = useCriteria(project.id)
+  const fulltextAttachedIds = useFulltextAttachedRecordIds(project.id, stage === 'full_text')
   const saveScreening = useSaveScreening(project.id, stage, reviewerId)
   const translateRecord = useTranslateRecord()
   useReconcileDrafts(stage, reviewerId, saveScreening)
@@ -112,18 +124,90 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   // change and moves on the moment they navigate away on purpose.
   const pinnedIdRef = useRef<string | null>(null)
 
+  // Option lists for the source/journal/year selects come from whatever's
+  // actually in the queue (not a fixed list) — always computed from the full
+  // queue, not the already-filtered one, so picking one facet never makes
+  // another facet's options disappear.
+  const sourceDbOptions = useMemo(
+    () => Array.from(new Set((queue.data ?? []).map((r) => r.sourceDb).filter((v): v is string => Boolean(v)))).sort(),
+    [queue.data],
+  )
+  const journalOptions = useMemo(
+    () => Array.from(new Set((queue.data ?? []).map((r) => r.journal).filter((v): v is string => Boolean(v)))).sort(),
+    [queue.data],
+  )
+  const yearOptions = useMemo(
+    () =>
+      Array.from(new Set((queue.data ?? []).map((r) => r.year).filter((v): v is number => v != null))).sort(
+        (a, b) => b - a,
+      ),
+    [queue.data],
+  )
+
+  const activeExtraFilterCount =
+    (titleSearch.trim() ? 1 : 0) +
+    (authorSearch.trim() ? 1 : 0) +
+    [sourceDbFilter, journalFilter, yearFilter, exclusionReasonFilter, fulltextFilter].filter((v) => v !== 'all').length
+
+  function clearExtraFilters() {
+    setTitleSearch('')
+    setAuthorSearch('')
+    setSourceDbFilter('all')
+    setJournalFilter('all')
+    setYearFilter('all')
+    setExclusionReasonFilter('all')
+    setFulltextFilter('all')
+  }
+
   const filteredQueue = useMemo(() => {
     const base = queue.data ?? []
     const pinnedId = pinnedIdRef.current
-    if (filter === 'all') return base
-    if (filter === 'undecided') return base.filter((r) => r.id === pinnedId || !myScreenings.data?.get(r.id)?.decision)
-    return base.filter((r) => r.id === pinnedId || myScreenings.data?.get(r.id)?.decision === filter)
-  }, [queue.data, filter, myScreenings.data])
+    const titleQuery = titleSearch.trim().toLowerCase()
+    const authorQuery = authorSearch.trim().toLowerCase()
+
+    const matchesDecision = (r: (typeof base)[number]) => {
+      if (filter === 'all') return true
+      if (filter === 'undecided') return !myScreenings.data?.get(r.id)?.decision
+      return myScreenings.data?.get(r.id)?.decision === filter
+    }
+
+    const matches = (r: (typeof base)[number]) => {
+      if (!matchesDecision(r)) return false
+      if (titleQuery && !r.title.toLowerCase().includes(titleQuery)) return false
+      if (authorQuery && !r.authors.toLowerCase().includes(authorQuery)) return false
+      if (sourceDbFilter !== 'all' && r.sourceDb !== sourceDbFilter) return false
+      if (journalFilter !== 'all' && r.journal !== journalFilter) return false
+      if (yearFilter !== 'all' && String(r.year ?? '') !== yearFilter) return false
+      if (exclusionReasonFilter !== 'all' && !myScreenings.data?.get(r.id)?.reasons.includes(exclusionReasonFilter)) {
+        return false
+      }
+      if (fulltextFilter !== 'all') {
+        const attached = fulltextAttachedIds.data?.has(r.id) ?? false
+        if (fulltextFilter === 'attached' && !attached) return false
+        if (fulltextFilter === 'missing' && attached) return false
+      }
+      return true
+    }
+
+    return base.filter((r) => r.id === pinnedId || matches(r))
+  }, [
+    queue.data,
+    filter,
+    myScreenings.data,
+    titleSearch,
+    authorSearch,
+    sourceDbFilter,
+    journalFilter,
+    yearFilter,
+    exclusionReasonFilter,
+    fulltextFilter,
+    fulltextAttachedIds.data,
+  ])
 
   useEffect(() => {
     pinnedIdRef.current = null
     setIndex(0)
-  }, [filter, stage])
+  }, [filter, stage, titleSearch, authorSearch, sourceDbFilter, journalFilter, yearFilter, exclusionReasonFilter, fulltextFilter])
 
   // Picks up where the reviewer left off, once, the first time the queue
   // loads — localStorage only (see sessionTracker.ts), so it's just a UX
@@ -325,6 +409,14 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           <option value="UNCERTAIN">{t('screening.filterUncertain')}</option>
           <option value="EXCLUDE">{t('screening.filterExclude')}</option>
         </Select>
+        <Button
+          variant="secondary"
+          aria-expanded={showMoreFilters}
+          onClick={() => setShowMoreFilters((v) => !v)}
+        >
+          {t('screening.moreFilters')}
+          {activeExtraFilterCount > 0 ? ` (${activeExtraFilterCount})` : ''}
+        </Button>
         <input
           ref={fileInputRef}
           type="file"
@@ -355,6 +447,90 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           <DownloadIcon />
         </Button>
       </div>
+
+      {showMoreFilters && (
+        <div className="mb-4 flex flex-wrap items-end gap-3 border border-line bg-white p-3">
+          <TextField
+            label={t('screening.searchTitle')}
+            placeholder={t('screening.searchTitlePlaceholder')}
+            value={titleSearch}
+            onChange={(e) => setTitleSearch(e.target.value)}
+            className="w-48"
+          />
+          <TextField
+            label={t('screening.searchAuthor')}
+            placeholder={t('screening.searchAuthorPlaceholder')}
+            value={authorSearch}
+            onChange={(e) => setAuthorSearch(e.target.value)}
+            className="w-40"
+          />
+          <Select
+            label={t('screening.filterSourceDb')}
+            value={sourceDbFilter}
+            onChange={(e) => setSourceDbFilter(e.target.value)}
+            className="max-w-48"
+          >
+            <option value="all">{t('screening.filterAll')}</option>
+            {sourceDbOptions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label={t('screening.filterJournal')}
+            value={journalFilter}
+            onChange={(e) => setJournalFilter(e.target.value)}
+            className="max-w-48"
+          >
+            <option value="all">{t('screening.filterAll')}</option>
+            {journalOptions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </Select>
+          <Select label={t('screening.filterYear')} value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+            <option value="all">{t('screening.filterAll')}</option>
+            {yearOptions.map((y) => (
+              <option key={y} value={String(y)}>
+                {y}
+              </option>
+            ))}
+          </Select>
+          {(exclusionReasons.data ?? []).length > 0 && (
+            <Select
+              label={t('screening.filterExclusionReason')}
+              value={exclusionReasonFilter}
+              onChange={(e) => setExclusionReasonFilter(e.target.value)}
+              className="max-w-48"
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              {exclusionReasons.data!.map((r) => (
+                <option key={r.id} value={r.code}>
+                  {r.label}
+                </option>
+              ))}
+            </Select>
+          )}
+          {stage === 'full_text' && (
+            <Select
+              label={t('screening.filterFulltext')}
+              value={fulltextFilter}
+              onChange={(e) => setFulltextFilter(e.target.value as FulltextFilterValue)}
+            >
+              <option value="all">{t('screening.filterAll')}</option>
+              <option value="attached">{t('screening.filterFulltextAttached')}</option>
+              <option value="missing">{t('screening.filterFulltextMissing')}</option>
+            </Select>
+          )}
+          {activeExtraFilterCount > 0 && (
+            <Button variant="ghost" onClick={clearExtraFilters}>
+              {t('screening.clearFilters')}
+            </Button>
+          )}
+        </div>
+      )}
 
       {showResumedNote && (
         <p className="mb-3 flex items-center justify-between text-xs text-mut">
