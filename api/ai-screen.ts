@@ -172,7 +172,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           criteria_detail: result.criteria,
           stage,
         },
-        { onConflict: 'record_id,stage,model_name' },
+        { onConflict: 'record_id,stage' },
       )
       if (upsertError) return { recordId: record.id, error: upsertError.message }
 

@@ -9,7 +9,7 @@ import { DecisionDonut } from '@/components/ui/DecisionDonut'
 import type { ProjectOutletContext } from './ProjectLayout'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useOpenConflictCount, useReviewerProgress } from '@/features/dashboard/hooks'
-import { useDedupGroups, useDedupSummary } from '@/features/imports/hooks'
+import { useDedupSummary } from '@/features/imports/hooks'
 import { DedupResolutionWizard } from '@/features/imports/DedupResolutionWizard'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { useQueueSummary, useProjectDecisionCounts } from '@/features/screening/hooks'
@@ -30,7 +30,6 @@ export function ProjectOverviewPage() {
   const { data: counts } = usePrismaCounts(project.id)
   const { data: reviewerProgress } = useReviewerProgress(project.id, stage)
   const { data: conflictCount } = useOpenConflictCount(project.id, stage)
-  const { data: dedupGroups } = useDedupGroups(project.id)
   const { data: dedupSummary } = useDedupSummary(project.id)
   const { data: myProgress } = useQueueSummary(project.id, stage, user!.id)
   const { data: projectProgress } = useProjectDecisionCounts(project.id, stage)
@@ -82,7 +81,7 @@ export function ProjectOverviewPage() {
               variant="secondary"
               className="self-start"
               onClick={() => setDedupModalOpen(true)}
-              disabled={!dedupGroups || dedupGroups.length === 0}
+              disabled={!dedupSummary || dedupSummary.unresolved === 0}
             >
               {t('dashboard.reviewDuplicates')}
             </Button>
