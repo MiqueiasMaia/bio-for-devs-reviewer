@@ -15,6 +15,8 @@ interface UnpaywallResponse {
   best_oa_location: { url_for_pdf: string | null; url: string | null } | null
 }
 
+type UnpaywallFailureReason = 'not_found' | 'lookup_failed' | 'no_oa_pdf' | 'download_failed' | 'not_a_pdf'
+
 function isValidBody(body: unknown): body is { projectId: string; recordId: string; doi: string } {
   if (!body || typeof body !== 'object') return false
   const b = body as Record<string, unknown>
@@ -75,6 +77,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  // Any terminal outcome below (found or not) marks the record as checked,
+  // so the frontend's automatic lookup never fires twice for the same
+  // record. A config error (missing env var, auth/membership failure)
+  // returns earlier above and deliberately does NOT stamp this — those
+  // aren't "we looked and found nothing", they're "we couldn't look".
+  async function respond(body: { attached: boolean; reason?: UnpaywallFailureReason; storagePath?: string }) {
+    await admin.from('records').update({ unpaywall_checked_at: new Date().toISOString() }).eq('id', recordId)
+    res.status(200).json(body)
+  }
+
   let unpaywall: UnpaywallResponse
   try {
     const lookupRes = await fetch(
@@ -82,18 +94,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     )
     if (!lookupRes.ok) {
-      res.status(200).json({ attached: false, reason: 'not_found' })
+      await respond({ attached: false, reason: 'not_found' })
       return
     }
     unpaywall = (await lookupRes.json()) as UnpaywallResponse
   } catch {
-    res.status(200).json({ attached: false, reason: 'lookup_failed' })
+    await respond({ attached: false, reason: 'lookup_failed' })
     return
   }
 
   const pdfUrl = unpaywall.best_oa_location?.url_for_pdf ?? unpaywall.best_oa_location?.url ?? null
   if (!unpaywall.is_oa || !pdfUrl) {
-    res.status(200).json({ attached: false, reason: 'no_oa_pdf' })
+    await respond({ attached: false, reason: 'no_oa_pdf' })
     return
   }
 
@@ -101,7 +113,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const pdfRes = await fetch(pdfUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
     if (!pdfRes.ok) {
-      res.status(200).json({ attached: false, reason: 'download_failed' })
+      await respond({ attached: false, reason: 'download_failed' })
       return
     }
     pdfBuffer = Buffer.from(await pdfRes.arrayBuffer())
@@ -109,11 +121,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       (pdfRes.headers.get('content-type') ?? '').includes('pdf') ||
       pdfBuffer.subarray(0, 4).toString('latin1') === '%PDF'
     if (!looksLikePdf) {
-      res.status(200).json({ attached: false, reason: 'not_a_pdf' })
+      await respond({ attached: false, reason: 'not_a_pdf' })
       return
     }
   } catch {
-    res.status(200).json({ attached: false, reason: 'download_failed' })
+    await respond({ attached: false, reason: 'download_failed' })
     return
   }
 
@@ -134,5 +146,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  res.status(200).json({ attached: true, storagePath })
+  await respond({ attached: true, storagePath })
 }

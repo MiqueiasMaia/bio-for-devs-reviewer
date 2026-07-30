@@ -514,9 +514,11 @@ export const ptBR = {
     empty: 'Nenhum PDF anexado ainda.',
     reasonRequired: 'Selecione ao menos um motivo de exclusão para registros no texto completo.',
     searchOpenAccess: 'Buscar PDF em acesso aberto',
+    searchAgain: 'Buscar novamente',
     searching: 'Buscando…',
     oaAttached: 'PDF em acesso aberto encontrado e anexado.',
     oaNotFound: 'Nenhuma versão em acesso aberto encontrada — tente enviar manualmente.',
+    oaCheckedAutomatically: 'Verificação automática não encontrou versão em acesso aberto — tente novamente ou envie manualmente.',
     oaError: 'Erro ao buscar PDF em acesso aberto.',
   },
   aiScreening: {

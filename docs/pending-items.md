@@ -196,7 +196,7 @@ inicial.
 buscar citantes/citados de cada registro incluído e importá-los como novos
 `records` pendentes de triagem, marcados com a origem "snowballing".
 
-### 6.6 Recuperação automática de PDF via Unpaywall
+### 6.6 Recuperação automática de PDF via Unpaywall — ✅ implementado (2026-07-30)
 
 Antes de pedir upload manual em `fulltext`, tenta localizar automaticamente
 uma versão de acesso aberto do artigo via
@@ -204,9 +204,14 @@ uma versão de acesso aberto do artigo via
 ganho da extensão de navegador do Rayyan (item 5.2) sem precisar construir
 uma extensão própria.
 
-**Para implementar**: função serverless que consulta a Unpaywall API pelo
-DOI do registro e, se encontrar PDF de acesso aberto, anexa direto em
-`fulltext` — upload manual vira fallback só para os casos sem match.
+Função serverless (`api/unpaywall-fetch.ts`) já existia (commit `b33022f`,
+29/07) mas exigia clique manual no botão "Buscar PDF em acesso aberto" —
+não era automática de fato. Agora o `FulltextPanel` dispara a busca sozinho
+ao abrir um registro na triagem de texto completo sem PDF anexado, e a
+migração `0028_unpaywall_checked_at.sql` marca `records.unpaywall_checked_at`
+após a primeira tentativa (sucesso ou falha) para nunca repetir a consulta
+automaticamente no mesmo registro. O botão manual continua disponível como
+"Buscar novamente" (retry) e o upload manual como fallback final.
 
 ### 6.7 Deduplicação semântica por embeddings
 

@@ -13,6 +13,7 @@ export interface QueueRecord {
   sourceDb: string | null
   titleTranslated: string | null
   abstractTranslated: string | null
+  unpaywallCheckedAt: string | null
 }
 
 export interface ScreeningState {
@@ -70,7 +71,7 @@ export async function fetchQueue(
   const { data: records, error: recordsError } = await supabase
     .from('records')
     .select(
-      'id, human_ref, title, authors, abstract, year, journal, doi, source_db, title_translated, abstract_translated',
+      'id, human_ref, title, authors, abstract, year, journal, doi, source_db, title_translated, abstract_translated, unpaywall_checked_at',
     )
     .eq('project_id', projectId)
     .order('human_ref', { ascending: true })
@@ -107,6 +108,7 @@ export async function fetchQueue(
       sourceDb: r.source_db,
       titleTranslated: r.title_translated,
       abstractTranslated: r.abstract_translated,
+      unpaywallCheckedAt: r.unpaywall_checked_at,
     }))
 }
 

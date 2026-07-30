@@ -15,7 +15,8 @@ import { StageGate } from '@/components/StageGate'
 import { getApplicableStages, getNextStage, isStageUnlocked } from '@/domain/stageLock/stageLock'
 import { useUnlockStage } from '@/features/projects/hooks'
 import type { Decision, ScreeningStage } from '@/types/domain'
-import { useQueue, useMyScreenings, useQueueSummary, useAiMatchForStage, useSaveScreening, useReconcileDrafts } from './hooks'
+import { useQueryClient } from '@tanstack/react-query'
+import { useQueue, useMyScreenings, useQueueSummary, useAiMatchForStage, useSaveScreening, useReconcileDrafts, queueKey } from './hooks'
 import { saveNotesOnlyDraft } from './hooks'
 import { computeAiMatchBadge } from './aiMatchBadge'
 import { downloadCsv, exportDecisionsCsv, importLegacyDecisionsCsv } from './csvRoundTrip'
@@ -63,6 +64,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const [dailyGoal, setDailyGoalState] = useState(() => getDailyGoal(reviewerId, stage, project.id))
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const qc = useQueryClient()
   const queue = useQueue(project.id, stage, reviewerId, reviewersRequired)
   const myScreenings = useMyScreenings(project.id, stage, reviewerId)
   const summary = useQueueSummary(project.id, stage, reviewerId)
@@ -365,7 +367,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   return (
     <StageGate project={project} stage={stage}>
     <div>
-      <div className="sticky top-[57px] z-[5] -mx-6 mb-4 flex flex-wrap items-center gap-3 border-b border-line bg-bg/95 px-6 py-3 backdrop-blur">
+      <div className="sticky top-0 z-[5] -mx-6 mb-4 flex flex-wrap items-center gap-3 border-b border-line bg-bg/95 px-6 py-3 backdrop-blur">
         {summary.data && (
           <div className="flex flex-1 min-w-40 items-center gap-2 text-xs text-mut">
             <span>
@@ -434,8 +436,8 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           column (title/abstract) caps its own width below for comfortable
           line length, but the surrounding chrome (article list, filters,
           decision controls) uses the full available width. */}
-      <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-[300px_1fr_320px]">
-        <aside className="flex max-h-[calc(100vh-8rem)] flex-col border border-line bg-white p-4 text-[12.5px] lg:sticky lg:top-4">
+      <div className="grid w-full min-w-0 grid-cols-1 gap-5 lg:grid-cols-[300px_1fr_320px]">
+        <aside className="flex min-w-0 max-h-[calc(100vh-8rem)] flex-col border border-line bg-white p-4 text-[12.5px]">
           <h2 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-mut">
             {t('screening.articlesHeading')}
           </h2>
@@ -492,7 +494,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           </div>
         </aside>
 
-        <div className="border border-line bg-white p-6">
+        <div className="min-w-0 border border-line bg-white p-6">
           {queue.isError ? (
             <ErrorState onRetry={() => queue.refetch()} />
           ) : !current ? (
@@ -505,9 +507,9 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                   edge-to-edge on wide monitors — the surrounding chrome
                   (decision buttons, notes, nav below) still uses the full
                   fluid column width. */}
-              <div className="max-w-3xl">
+              <div className="min-w-0 max-w-3xl">
               <div className="mb-1 flex items-center justify-between gap-2 text-xs text-mut">
-                <span className="flex items-center gap-2">
+                <span className="flex min-w-0 items-center gap-2 break-words">
                   {current.humanRef} · {current.year ?? '—'} · fonte: {current.sourceDb ?? '—'}
                   {(() => {
                     const match = aiMatch.data?.get(current.id)
@@ -559,7 +561,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                 <div className="mt-3 text-xs">
                   DOI:{' '}
                   <a
-                    className="text-include"
+                    className="break-all text-include"
                     href={`https://doi.org/${current.doi}`}
                     target="_blank"
                     rel="noreferrer"
@@ -638,7 +640,13 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
               {stage === 'full_text' && (
                 <div className="mt-3">
-                  <FulltextPanel recordId={current.id} projectId={project.id} doi={current.doi} />
+                  <FulltextPanel
+                    recordId={current.id}
+                    projectId={project.id}
+                    doi={current.doi}
+                    unpaywallCheckedAt={current.unpaywallCheckedAt}
+                    onAutoCheckSettled={() => qc.invalidateQueries({ queryKey: queueKey(project.id, stage, reviewerId) })}
+                  />
                 </div>
               )}
 
@@ -700,7 +708,7 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
           )}
         </div>
 
-        <aside className="h-fit border border-line bg-white p-4 text-[12.5px]">
+        <aside className="h-fit min-w-0 border border-line bg-white p-4 text-[12.5px]">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mut">PICOTS</h2>
           <div className="mb-3">
             <button

@@ -12,7 +12,7 @@ export function saveNotesOnlyDraft(recordId: string, stage: ScreeningStage, revi
   saveDraft(recordId, stage, reviewerId, { decision: null, reasons: [], notes, savedAt: new Date().toISOString() })
 }
 
-const queueKey = (projectId: string, stage: ScreeningStage, reviewerId: string) =>
+export const queueKey = (projectId: string, stage: ScreeningStage, reviewerId: string) =>
   ['screening_queue', projectId, stage, reviewerId] as const
 const myScreeningsKey = (projectId: string, stage: ScreeningStage, reviewerId: string) =>
   ['my_screenings', projectId, stage, reviewerId] as const
