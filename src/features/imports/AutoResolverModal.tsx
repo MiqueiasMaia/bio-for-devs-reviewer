@@ -3,7 +3,7 @@ import { useTranslation } from '@/i18n'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
-import { XIcon } from '@/components/ui/icons'
+import { XIcon, ZapIcon } from '@/components/ui/icons'
 import type { AutoResolveCriteria } from '@/domain/dedup/autoResolve'
 import { useAutoResolveDedup } from './hooks'
 
@@ -100,8 +100,12 @@ export function AutoResolverModal({
 
           <div className="flex justify-end gap-2 border-t border-line pt-4">
             <IconButton icon={<XIcon />} label={t('common.cancel')} onClick={handleClose} />
-            <Button disabled={!anyCriterionSelected} onClick={() => setConfirmOpen(true)}>
-              {t('dedupWizard.autoResolve')}
+            <Button
+              className="inline-flex items-center gap-1.5"
+              disabled={!anyCriterionSelected}
+              onClick={() => setConfirmOpen(true)}
+            >
+              <ZapIcon className="h-4 w-4" /> {t('dedupWizard.autoResolve')}
             </Button>
           </div>
         </div>
@@ -112,8 +116,8 @@ export function AutoResolverModal({
           <p className="text-sm text-fg">{t('dedupWizard.confirmBody')}</p>
           <div className="flex justify-end gap-2">
             <IconButton icon={<XIcon />} label={t('common.cancel')} onClick={() => setConfirmOpen(false)} />
-            <Button onClick={handleResolve} disabled={autoResolve.isPending}>
-              {autoResolve.isPending ? t('dedupWizard.resolving') : t('dedupWizard.autoResolve')}
+            <Button className="inline-flex items-center gap-1.5" onClick={handleResolve} disabled={autoResolve.isPending}>
+              <ZapIcon className="h-4 w-4" /> {autoResolve.isPending ? t('dedupWizard.resolving') : t('dedupWizard.autoResolve')}
             </Button>
           </div>
         </div>

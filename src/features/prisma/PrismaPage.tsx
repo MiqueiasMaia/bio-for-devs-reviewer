@@ -4,6 +4,7 @@ import { useTranslation } from '@/i18n'
 import type { ProjectOutletContext } from '@/features/projects/ProjectLayout'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { DownloadIcon } from '@/components/ui/icons'
 import { ErrorState } from '@/components/ErrorState'
 import { useFulltextExclusionReasons, usePrismaCounts } from './hooks'
 import { PrismaDiagram } from './PrismaDiagram'
@@ -42,15 +43,21 @@ export function PrismaPage() {
         <div className="flex gap-2">
           <Button
             variant="secondary"
+            className="inline-flex items-center gap-1.5"
+            title={t('prisma.exportSvg')}
+            aria-label={t('prisma.exportSvg')}
             onClick={() => svgRef.current && downloadSvg(svgRef.current, `prisma_${project.id.slice(0, 8)}.svg`)}
           >
-            {t('prisma.exportSvg')}
+            <DownloadIcon className="h-4 w-4" /> SVG
           </Button>
           <Button
             variant="secondary"
+            className="inline-flex items-center gap-1.5"
+            title={t('prisma.exportPng')}
+            aria-label={t('prisma.exportPng')}
             onClick={() => svgRef.current && downloadPng(svgRef.current, `prisma_${project.id.slice(0, 8)}.png`)}
           >
-            {t('prisma.exportPng')}
+            <DownloadIcon className="h-4 w-4" /> PNG
           </Button>
         </div>
       </div>

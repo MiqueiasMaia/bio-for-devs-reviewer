@@ -1,4 +1,4 @@
-import type { Decision } from '@/types/domain'
+import type { Decision } from '../../types/domain.js'
 
 export interface ParsedRecord {
   title: string

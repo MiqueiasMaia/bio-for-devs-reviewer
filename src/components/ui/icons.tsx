@@ -239,6 +239,14 @@ export function RefreshIcon({ className }: IconProps) {
   )
 }
 
+export function ZapIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M11 3.5 5.5 11h3.3L8 16.5 14.5 9h-3.3L11 3.5Z" />
+    </svg>
+  )
+}
+
 export function CheckIcon({ className }: IconProps) {
   return (
     <svg {...shared} className={className}>

@@ -3,6 +3,7 @@ import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
+import { ZapIcon } from '@/components/ui/icons'
 import type { ScreeningStage } from '@/types/domain'
 import { useLastAiRunAt, useRescreenRoundInfo, useRunAiScreening, useUnscreenedCount } from './hooks'
 
@@ -62,10 +63,11 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
           className="max-w-32"
         />
         <Button
+          className="inline-flex items-center gap-1.5"
           onClick={() => runScreening.mutate({ limit: batchSize, includeAlreadyScreened })}
           disabled={runScreening.isPending || (pendingCount === 0 && !includeAlreadyScreened)}
         >
-          {runScreening.isPending ? t('aiScreening.running') : t('aiScreening.run')}
+          <ZapIcon className="h-4 w-4" /> {runScreening.isPending ? t('aiScreening.running') : t('aiScreening.run')}
         </Button>
       </div>
 

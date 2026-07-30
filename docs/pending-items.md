@@ -188,7 +188,7 @@ critérios/PICOTS do projeto e aplica as regras de tradução de sintaxe por
 base (sem mapear termos de indexação como MeSH↔Emtree, que o próprio
 Polyglot também não resolve).
 
-### 6.5 Expansão por citação (snowballing) semi-automática
+### 6.5 Expansão por citação (snowballing) semi-automática — ✅ implementado (2026-07-30)
 
 A partir dos artigos já incluídos, sugere artigos citados/citantes como
 candidatos extras para triagem — abordagem popularizada por
@@ -196,9 +196,21 @@ candidatos extras para triagem — abordagem popularizada por
 Hoje o Biofor não tem nenhuma forma de achar estudos fora da importação
 inicial.
 
-**Para implementar**: usar a API do OpenAlex (gratuita, cobre citações) para
-buscar citantes/citados de cada registro incluído e importá-los como novos
-`records` pendentes de triagem, marcados com a origem "snowballing".
+Implementado em `api/snowball.ts`: para cada registro já INCLUDE (em
+título/resumo ou texto completo) com DOI e ainda não expandido
+(`records.snowball_expanded_at`, migração 0029), busca na OpenAlex os
+trabalhos citados (`referenced_works`) e citantes (`filter=cites:`),
+descarta os que já têm DOI no projeto, e insere o restante como novos
+`records` com `source_db: 'snowballing'` — entram direto na fila de
+título/resumo, igual a qualquer registro importado. Cartão
+"Expansão por citação" na Visão Geral do projeto
+(`features/snowballing/SnowballingCard.tsx`), com lote configurável (padrão
+5, máx. 20 estudos incluídos por execução — cada seed processado só uma vez
+por design, então rodar de novo sempre cobre o que faltou, sem repetir
+trabalho). Parsing/reconstrução do abstract (a OpenAlex só devolve um índice
+invertido, não o texto) em `src/domain/import/openAlex.ts`, com testes.
+Requer `OPENALEX_EMAIL` no ambiente do servidor (mesma convenção do
+`UNPAYWALL_EMAIL`).
 
 ### 6.6 Recuperação automática de PDF via Unpaywall — ✅ implementado (2026-07-30)
 

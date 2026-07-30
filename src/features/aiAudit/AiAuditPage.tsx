@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
-import { DownloadIcon } from '@/components/ui/icons'
+import { DownloadIcon, RefreshIcon } from '@/components/ui/icons'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
 import { decisionLabelKey } from '@/lib/decisionLabel'
@@ -214,10 +214,11 @@ export function AiAuditPage() {
                       </div>
                       <Button
                         variant="secondary"
+                        className="inline-flex items-center gap-1.5"
                         onClick={() => rerun.mutate(current.id)}
                         disabled={rerun.isPending}
                       >
-                        {rerun.isPending ? t('aiAudit.rerunning') : t('aiAudit.rerun')}
+                        <RefreshIcon className="h-4 w-4" /> {rerun.isPending ? t('aiAudit.rerunning') : t('aiAudit.rerun')}
                       </Button>
                     </div>
                     {rerun.isError && <p className="text-sm text-red-600">{(rerun.error as Error).message}</p>}

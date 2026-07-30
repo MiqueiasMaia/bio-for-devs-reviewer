@@ -4,7 +4,7 @@ import { useTranslation } from '@/i18n'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
-import { ChevronLeftIcon, ChevronRightIcon, SplitIcon } from '@/components/ui/icons'
+import { ChevronLeftIcon, ChevronRightIcon, SplitIcon, ZapIcon } from '@/components/ui/icons'
 import { normalizeTitle } from '@/domain/dedup/normalize'
 import { jaroWinklerSimilarity } from '@/domain/dedup/jaroWinkler'
 import { useDedupGroups, useDedupMutations } from './hooks'
@@ -57,8 +57,8 @@ export function DedupResolutionWizard({ projectId }: { projectId: string }) {
             ? t('dedupWizard.groupOf', { current: index + 1, total: pending.length })
             : t('dedupWizard.allResolved')}
         </h3>
-        <Button variant="secondary" onClick={() => setAutoResolverOpen(true)}>
-          {t('dedupWizard.autoResolve')}
+        <Button variant="secondary" className="inline-flex items-center gap-1.5" onClick={() => setAutoResolverOpen(true)}>
+          <ZapIcon className="h-4 w-4" /> {t('dedupWizard.autoResolve')}
         </Button>
       </div>
 

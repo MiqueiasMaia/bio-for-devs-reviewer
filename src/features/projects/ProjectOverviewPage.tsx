@@ -19,6 +19,7 @@ import { useAgreement } from '@/features/agreement/hooks'
 import { useQueueSummary } from '@/features/screening/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import { AiScreeningCard } from '@/features/aiScreening/AiScreeningCard'
+import { SnowballingCard } from '@/features/snowballing/SnowballingCard'
 import { GetStartedWidget } from './GetStartedWidget'
 import type { ScreeningStage } from '@/types/domain'
 
@@ -224,6 +225,8 @@ export function ProjectOverviewPage() {
       <AgreementCard projectId={project.id} stage={stage} />
 
       {project.settings.ai_screening_enabled && <AiScreeningCard projectId={project.id} stage={stage} />}
+
+      <SnowballingCard projectId={project.id} />
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
