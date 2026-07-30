@@ -14,6 +14,7 @@ function record(overrides: Partial<AiScreenedRecord>): AiScreenedRecord {
     rationale: null,
     criteriaDetail: [],
     modelName: 'test-model',
+    rescreenCount: 1,
     ...overrides,
   }
 }

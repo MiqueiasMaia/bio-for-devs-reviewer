@@ -88,9 +88,9 @@ export function ImportWizardPage() {
   }, [format, fileText, isLegacy, csvRows, csvMapping])
 
   async function handleImport() {
-    if (!file || !format || !user) return
+    if (!file || !format || !user || !sourceName.trim()) return
     const result = await runImport.mutateAsync({
-      sourceName: sourceName || format.toUpperCase(),
+      sourceName: sourceName.trim(),
       file,
       format,
       records: parsedRecords,
@@ -113,11 +113,13 @@ export function ImportWizardPage() {
 
       <Card className="flex flex-col gap-4">
         <TextField
-          label={t('importWizard.sourceName')}
+          label={`${t('importWizard.sourceName')} *`}
           placeholder={t('importWizard.sourceNamePlaceholder')}
           value={sourceName}
           onChange={(e) => setSourceName(e.target.value)}
+          required
         />
+        {!sourceName.trim() && <p className="text-xs text-mut">{t('importWizard.sourceNameRequired')}</p>}
         <div className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-fg">{t('importWizard.chooseFile')}</span>
           <input
@@ -205,7 +207,7 @@ export function ImportWizardPage() {
           {runImport.isError && <p className="mt-3 text-sm text-red-600">{t('importWizard.importError')}</p>}
 
           <div className="mt-4 flex justify-end">
-            <Button onClick={handleImport} disabled={runImport.isPending}>
+            <Button onClick={handleImport} disabled={runImport.isPending || !sourceName.trim()}>
               {runImport.isPending ? t('importWizard.importing') : t('importWizard.import')}
             </Button>
           </div>

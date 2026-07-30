@@ -215,6 +215,7 @@ export const ptBR = {
     subtitle: 'Importe um arquivo RIS, NBIB (PubMed) ou CSV de uma base de dados bibliográfica.',
     sourceName: 'Base de dados',
     sourceNamePlaceholder: 'ex.: PubMed, Scopus, Web of Science…',
+    sourceNameRequired: 'Obrigatório — identifique de qual base estas referências vieram.',
     chooseFile: 'Escolher arquivo',
     noFile: 'Nenhum arquivo selecionado.',
     detectedFormat: 'Formato detectado',
@@ -514,6 +515,8 @@ export const ptBR = {
     doneSummary: '{{success}} concluído(s), {{failed}} com erro.',
     nothingPending: 'Todos os registros elegíveis já têm triagem por IA.',
     includeAlreadyScreened: 'Reprocessar itens já avaliados pela IA (substitui a decisão anterior)',
+    roundInfoEven: 'Todos os artigos já avaliados foram reprocessados {{count}}x. O próximo lote inicia a rodada {{count}}+1 — nenhum artigo avança de rodada antes que todos completem a atual.',
+    roundInfoUneven: 'Reprocessamento em andamento: entre {{min}}x e {{max}}x por artigo. O próximo lote prioriza quem ainda está em {{min}}x, garantindo que ninguém avance de rodada antes dos demais.',
   },
   backup: {
     title: 'Backup do projeto',
@@ -594,6 +597,7 @@ export const ptBR = {
     noneMatchFilter: 'Nenhum artigo corresponde aos filtros selecionados.',
     rerun: 'Reexecutar avaliação por IA',
     rerunning: 'Reexecutando…',
+    rescreenCount: 'Avaliado {{count}}x pela IA',
   },
   dangerZone: {
     title: 'Zona de risco',

@@ -12,6 +12,7 @@ export interface AiScreenedRecord {
   rationale: string | null
   criteriaDetail: AiCriterionDetail[]
   modelName: string
+  rescreenCount: number
 }
 
 interface AiScreeningQueryRow {
@@ -21,6 +22,7 @@ interface AiScreeningQueryRow {
   rationale: string | null
   criteria_detail: AiCriterionDetail[]
   model_name: string
+  rescreen_count: number
   records: { project_id: string; human_ref: string; title: string; authors: string; year: number | null }
 }
 
@@ -31,7 +33,7 @@ export async function listAiScreenedRecords(projectId: string, stage: ScreeningS
   const { data, error } = await supabase
     .from('ai_screenings')
     .select(
-      'record_id, decision, confidence, rationale, criteria_detail, model_name, records!inner(project_id, human_ref, title, authors, year)',
+      'record_id, decision, confidence, rationale, criteria_detail, model_name, rescreen_count, records!inner(project_id, human_ref, title, authors, year)',
     )
     .eq('stage', stage)
     .eq('records.project_id', projectId)
@@ -49,6 +51,7 @@ export async function listAiScreenedRecords(projectId: string, stage: ScreeningS
       rationale: r.rationale,
       criteriaDetail: r.criteria_detail,
       modelName: r.model_name,
+      rescreenCount: r.rescreen_count,
     }))
     .sort((a, b) => a.humanRef.localeCompare(b.humanRef))
 }

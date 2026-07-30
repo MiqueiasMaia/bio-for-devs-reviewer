@@ -4,11 +4,12 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import type { ScreeningStage } from '@/types/domain'
-import { useRunAiScreening, useUnscreenedCount } from './hooks'
+import { useRescreenRoundInfo, useRunAiScreening, useUnscreenedCount } from './hooks'
 
 export function AiScreeningCard({ projectId, stage }: { projectId: string; stage: ScreeningStage }) {
   const { t } = useTranslation()
   const { data: pendingCount } = useUnscreenedCount(projectId, stage)
+  const { data: roundInfo } = useRescreenRoundInfo(projectId, stage)
   const runScreening = useRunAiScreening(projectId, stage)
   const [batchSize, setBatchSize] = useState(10)
   const [includeAlreadyScreened, setIncludeAlreadyScreened] = useState(false)
@@ -34,6 +35,14 @@ export function AiScreeningCard({ projectId, stage }: { projectId: string; stage
         />
         {t('aiScreening.includeAlreadyScreened')}
       </label>
+
+      {includeAlreadyScreened && roundInfo && (
+        <p className="text-xs text-mut">
+          {roundInfo.minCount === roundInfo.maxCount
+            ? t('aiScreening.roundInfoEven', { count: roundInfo.minCount })
+            : t('aiScreening.roundInfoUneven', { min: roundInfo.minCount, max: roundInfo.maxCount })}
+        </p>
+      )}
 
       <div className="flex items-end gap-2">
         <TextField

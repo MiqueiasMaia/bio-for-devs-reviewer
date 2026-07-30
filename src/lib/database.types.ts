@@ -263,6 +263,7 @@ export interface Database {
           confidence: number | null
           stage: ScreeningStage
           criteria_detail: AiCriterionDetail[]
+          rescreen_count: number
           created_at: string
           updated_at: string
         },
@@ -275,6 +276,7 @@ export interface Database {
           confidence?: number | null
           stage: ScreeningStage
           criteria_detail?: AiCriterionDetail[]
+          rescreen_count?: number
         },
         Record<string, never>
       >

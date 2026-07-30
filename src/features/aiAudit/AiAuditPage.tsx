@@ -185,6 +185,7 @@ export function AiAuditPage() {
                       <span className="text-xs text-mut">
                         {r.humanRef} · {t(decisionLabelKey(r.decision))}
                         {r.confidence !== null && ` · ${(r.confidence * 100).toFixed(0)}%`}
+                        {r.rescreenCount > 1 && ` · ${t('aiAudit.rescreenCount', { count: r.rescreenCount })}`}
                       </span>
                     </button>
                   ))}
@@ -216,6 +217,7 @@ export function AiAuditPage() {
                         </span>
                       )}
                       <span className="text-xs text-mut">{current.modelName}</span>
+                      <span className="text-xs text-mut">{t('aiAudit.rescreenCount', { count: current.rescreenCount })}</span>
                     </div>
                     {current.rationale && <p className="text-sm text-fg">{current.rationale}</p>}
                     <div className="flex flex-col gap-1.5">
