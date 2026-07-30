@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 
-/** Lets the header's "Novo projeto" button (rendered in AppLayout, which
- * every authenticated page shares) open the dialog that actually lives on
- * ProjectsDashboardPage, without threading the state through props across
- * unrelated routes. */
+/** Lets the "Novo projeto" trigger and the dialog it opens (both on
+ * ProjectsDashboardPage today) stay decoupled, in case another entry point
+ * needs to open the same dialog later. */
 interface CreateProjectDialogState {
   open: boolean
   setOpen: (open: boolean) => void

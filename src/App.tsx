@@ -29,6 +29,7 @@ import { ExtractionFieldsTab } from '@/features/projects/settings/ExtractionFiel
 import { AiProviderTab } from '@/features/projects/settings/AiProviderTab'
 import { AiAuditPage } from '@/features/aiAudit/AiAuditPage'
 import { EnvSetupNotice } from '@/components/EnvSetupNotice'
+import { AppShell } from '@/components/AppShell'
 
 function App() {
   if (!isEnvConfigured) {
@@ -44,49 +45,43 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
-              path="/projects"
               element={
                 <ProtectedRoute>
-                  <ProjectsDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects/:projectId"
-              element={
-                <ProtectedRoute>
-                  <ProjectLayout />
+                  <AppShell />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<ProjectOverviewPage />} />
-              <Route path="import" element={<ImportWizardPage />} />
-              <Route path="duplicates" element={<DedupReviewPage />} />
-              <Route
-                path="screening/title-abstract"
-                element={<ScreeningWorkspacePage key="title_abstract" stage="title_abstract" />}
-              />
-              <Route
-                path="screening/full-text"
-                element={<ScreeningWorkspacePage key="full_text" stage="full_text" />}
-              />
-              <Route path="conflicts" element={<ConflictsPage />} />
-              <Route path="risk-of-bias" element={<RiskOfBiasPage />} />
-              <Route path="data-extraction" element={<DataExtractionPage />} />
-              <Route path="data-extraction/conflicts" element={<ExtractionConflictsPage />} />
-              <Route path="ai-audit" element={<AiAuditPage />} />
-              <Route path="prisma" element={<PrismaPage />} />
-              <Route path="settings" element={<ProjectSettingsLayout />}>
-                <Route index element={<Navigate to="general" replace />} />
-                <Route path="general" element={<GeneralTab />} />
+              <Route path="/projects" element={<ProjectsDashboardPage />} />
+              <Route path="/projects/:projectId" element={<ProjectLayout />}>
+                <Route index element={<ProjectOverviewPage />} />
                 <Route path="import" element={<ImportWizardPage />} />
-                <Route path="criteria" element={<CriteriaTab />} />
-                <Route path="picots" element={<PicotsTab />} />
-                <Route path="exclusion-reasons" element={<ExclusionReasonsTab />} />
-                <Route path="extraction-fields" element={<ExtractionFieldsTab />} />
-                <Route path="members" element={<MembersTab />} />
-                <Route path="ai-setup" element={<AiSetupPage />} />
-                <Route path="ai-provider" element={<AiProviderTab />} />
+                <Route path="duplicates" element={<DedupReviewPage />} />
+                <Route
+                  path="screening/title-abstract"
+                  element={<ScreeningWorkspacePage key="title_abstract" stage="title_abstract" />}
+                />
+                <Route
+                  path="screening/full-text"
+                  element={<ScreeningWorkspacePage key="full_text" stage="full_text" />}
+                />
+                <Route path="conflicts" element={<ConflictsPage />} />
+                <Route path="risk-of-bias" element={<RiskOfBiasPage />} />
+                <Route path="data-extraction" element={<DataExtractionPage />} />
+                <Route path="data-extraction/conflicts" element={<ExtractionConflictsPage />} />
+                <Route path="ai-audit" element={<AiAuditPage />} />
+                <Route path="prisma" element={<PrismaPage />} />
+                <Route path="settings" element={<ProjectSettingsLayout />}>
+                  <Route index element={<Navigate to="general" replace />} />
+                  <Route path="general" element={<GeneralTab />} />
+                  <Route path="import" element={<ImportWizardPage />} />
+                  <Route path="criteria" element={<CriteriaTab />} />
+                  <Route path="picots" element={<PicotsTab />} />
+                  <Route path="exclusion-reasons" element={<ExclusionReasonsTab />} />
+                  <Route path="extraction-fields" element={<ExtractionFieldsTab />} />
+                  <Route path="members" element={<MembersTab />} />
+                  <Route path="ai-setup" element={<AiSetupPage />} />
+                  <Route path="ai-provider" element={<AiProviderTab />} />
+                </Route>
               </Route>
             </Route>
             <Route path="/" element={<Navigate to="/projects" replace />} />

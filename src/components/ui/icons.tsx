@@ -76,6 +76,118 @@ export function TrashIcon({ className }: IconProps) {
   )
 }
 
+/** Global-sidebar module glyphs — same hand-drawn stroke style as the icons
+ * above, kept simple/geometric since they render at 20px in a narrow rail. */
+export function ReviewsIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="m10 3 6.5 3.6v6.8L10 17l-6.5-3.6V6.6L10 3Z" />
+      <path d="M10 3v14M3.5 6.6 10 10l6.5-3.4" />
+    </svg>
+  )
+}
+
+export function OverviewIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="3.2" y="3.2" width="6" height="6" rx="0.8" />
+      <rect x="10.8" y="3.2" width="6" height="6" rx="0.8" />
+      <rect x="3.2" y="10.8" width="6" height="6" rx="0.8" />
+      <rect x="10.8" y="10.8" width="6" height="6" rx="0.8" />
+    </svg>
+  )
+}
+
+export function StudiesIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M5 3.5h7.5l2.5 2.5v10.5H5V3.5Z" />
+      <path d="M12.5 3.5v2.5H15M7.3 9.5h5.4M7.3 12.3h5.4" />
+    </svg>
+  )
+}
+
+export function ScreeningIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <circle cx="8.7" cy="8.7" r="5" />
+      <path d="m16 16-3.8-3.8M6.7 8.7l1.4 1.4 2.8-2.8" />
+    </svg>
+  )
+}
+
+export function RiskOfBiasIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M10 3.2 4 5.6v4.4c0 4 2.6 6.4 6 7.8 3.4-1.4 6-3.8 6-7.8V5.6L10 3.2Z" />
+      <path d="M10 3.2v14.6" />
+    </svg>
+  )
+}
+
+export function ExtractionIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <rect x="3.5" y="3.5" width="13" height="13" rx="1" />
+      <path d="M3.5 8.2h13M8.2 8.2v8.3" />
+    </svg>
+  )
+}
+
+export function AnalyticsIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M4 16.5v-6M9.3 16.5V6M14.6 16.5v-3.8" />
+      <path d="M3.5 16.5h13" />
+    </svg>
+  )
+}
+
+export function AiIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M10 3v3M10 14v3M3 10h3M14 10h3" />
+      <rect x="6.2" y="6.2" width="7.6" height="7.6" rx="1.6" />
+    </svg>
+  )
+}
+
+export function TeamIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <circle cx="7.3" cy="7" r="2.3" />
+      <path d="M2.8 16.2c.5-2.6 2.2-4.2 4.5-4.2s4 1.6 4.5 4.2" />
+      <circle cx="14" cy="6.6" r="1.9" />
+      <path d="M12.6 11.8c1.9.2 3.2 1.5 3.6 3.6" />
+    </svg>
+  )
+}
+
+export function SettingsIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <circle cx="10" cy="10" r="2.6" />
+      <path d="M10 3.5v2M10 14.5v2M16.5 10h-2M5.5 10h-2M14.8 5.2l-1.4 1.4M6.6 13.4l-1.4 1.4M14.8 14.8l-1.4-1.4M6.6 6.6 5.2 5.2" />
+    </svg>
+  )
+}
+
+export function ChevronLeftIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="m12.5 4-6 6 6 6" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="m7.5 4 6 6-6 6" />
+    </svg>
+  )
+}
+
 /** Generic (monochrome, currentColor) provider glyphs for the disabled
  * "coming soon" sign-in buttons — not brand-accurate logomarks, just
  * recognizable enough to read as "Google" / "GitHub" / "ORCID" at a glance. */

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
-import { AppLayout } from '@/components/AppLayout'
+import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 import { ErrorState } from '@/components/ErrorState'
@@ -18,10 +18,13 @@ export function ProjectsDashboardPage() {
   const setWizardOpen = useCreateProjectDialogStore((s) => s.setOpen)
 
   return (
-    <AppLayout>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold">{t('projects.title')}</h1>
-        <p className="text-sm text-mut">{t('projects.subtitle')}</p>
+    <div>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">{t('projects.title')}</h1>
+          <p className="text-sm text-mut">{t('projects.subtitle')}</p>
+        </div>
+        <Button onClick={() => setWizardOpen(true)}>{t('projects.newProject')}</Button>
       </div>
 
       <div className="mb-4 flex gap-1">
@@ -104,6 +107,6 @@ export function ProjectsDashboardPage() {
       )}
 
       <CreateProjectDialog open={wizardOpen} onClose={() => setWizardOpen(false)} />
-    </AppLayout>
+    </div>
   )
 }
