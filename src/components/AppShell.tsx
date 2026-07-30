@@ -51,9 +51,14 @@ export function AppShell() {
   }, [project, activeModule, relPath, isOwner, t])
 
   return (
-    <div className="flex min-h-screen">
+    // Fixed to exactly the viewport height with overflow hidden — the two
+    // columns below manage their own scrolling independently instead of
+    // letting the document itself grow/scroll. Without this, a tall sidebar
+    // (many expanded modules) or a tall workspace page would stretch the
+    // whole page rather than scrolling in place.
+    <div className="flex h-screen overflow-hidden">
       <Sidebar projectId={projectId} project={project} isOwner={isOwner} activeModuleId={activeModuleId} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         {project && (
           <div className="border-b border-line px-6 py-3">
             <Breadcrumb items={breadcrumbItems} />

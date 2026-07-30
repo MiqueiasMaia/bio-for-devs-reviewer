@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 import { useTranslation, type TranslationKey } from '@/i18n'
@@ -178,17 +178,33 @@ function ModuleRow({
   onToggle: () => void
 }) {
   const rowClass = clsx(
-    'flex w-full items-center gap-2.5 py-2 transition-colors',
-    collapsed ? 'justify-center' : 'justify-start pl-2.5 pr-1.5',
+    'flex w-full items-center py-2 pr-1.5 transition-colors',
     isActive ? 'bg-fg text-white' : 'text-mut hover:bg-bg hover:text-fg',
   )
+  // The icon lives in a fixed-width slot (56px = the rail's collapsed
+  // content width, i.e. the 72px rail minus the <ul>'s 8px×2 padding) that
+  // never changes size — so the icon's own position never moves when the
+  // rail expands/collapses. Only the trailing label area grows in from
+  // behind it (via max-width, clipped by overflow-hidden), which is what
+  // makes the open/close transition read as smooth instead of a jump-cut.
   const content = (
     <>
-      <module.icon className="h-5 w-5 shrink-0" />
-      {!collapsed && <span className="min-w-0 flex-1 truncate text-left text-sm font-medium">{label}</span>}
-      {!collapsed && expandable && (
-        <ChevronRightIcon className={clsx('h-3.5 w-3.5 shrink-0 transition-transform duration-150', expanded && 'rotate-90')} />
-      )}
+      <span className="flex w-14 shrink-0 items-center justify-center">
+        <module.icon className="h-5 w-5 shrink-0" />
+      </span>
+      <span
+        className={clsx(
+          'flex items-center gap-1.5 overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out',
+          collapsed ? 'max-w-0 opacity-0' : 'max-w-[180px] opacity-100',
+        )}
+      >
+        <span className="min-w-0 flex-1 truncate pl-1 text-left text-sm font-medium">{label}</span>
+        {expandable && (
+          <ChevronRightIcon
+            className={clsx('h-3.5 w-3.5 shrink-0 transition-transform duration-150', expanded && 'rotate-90')}
+          />
+        )}
+      </span>
     </>
   )
 
@@ -227,19 +243,22 @@ export function Sidebar({
   const pinned = useNavStore((s) => s.pinned)
   const togglePinned = useNavStore((s) => s.togglePinned)
   const [hovering, setHovering] = useState(false)
-  const [manuallyExpanded, setManuallyExpanded] = useState<Set<string>>(new Set())
+  // Single-open accordion: only one module's sub-items show at a time.
+  // Starts (and re-syncs whenever) the active route changes so the current
+  // section always opens automatically; a manual click can switch which
+  // module is open (closing whichever was open before) or collapse the
+  // current one.
+  const [openModuleId, setOpenModuleId] = useState<string | null>(activeModuleId)
+
+  useEffect(() => {
+    setOpenModuleId(activeModuleId)
+  }, [activeModuleId])
 
   const collapsed = !pinned && !hovering
   const ctx: NavContext | undefined = project ? { project, isOwner } : undefined
   const modules = projectId ? globalModules : globalModules.filter((m) => !m.requiresProject)
 
-  const toggleModule = (id: string) =>
-    setManuallyExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  const toggleModule = (id: string) => setOpenModuleId((prev) => (prev === id ? null : id))
 
   return (
     <nav
@@ -247,15 +266,18 @@ export function Sidebar({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       className={clsx(
-        'flex shrink-0 flex-col border-r border-line bg-white transition-[width] duration-200',
+        'flex h-screen shrink-0 flex-col border-r border-line bg-white transition-[width] duration-300 ease-out',
         collapsed ? 'w-[72px]' : 'w-[260px]',
       )}
     >
-      <Link to="/projects" className="flex h-14 items-center justify-center border-b border-line px-2 text-include">
+      <Link
+        to="/projects"
+        className="flex h-14 shrink-0 items-center justify-center border-b border-line px-2 text-include"
+      >
         {collapsed ? <BioforMark size={22} /> : <Logo />}
       </Link>
 
-      <ul className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
+      <ul className="flex flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden p-2">
         {modules.map((mod) => {
           const isActive = mod.id === 'reviews' ? !projectId : projectId != null && mod.id === activeModuleId
           const to = mod.id === 'reviews' || !projectId ? '/projects' : `/projects/${projectId}/${mod.to}`
@@ -265,7 +287,7 @@ export function Sidebar({
           // own label underneath (e.g. Overview, whose only "item" is itself).
           const groupItemCount = ctx && mod.groups ? resolveModuleItems(mod, ctx).length : 0
           const expandable = Boolean(mod.staticItems?.length) || groupItemCount > 1
-          const expanded = !collapsed && expandable && (isActive || manuallyExpanded.has(mod.id))
+          const expanded = !collapsed && expandable && openModuleId === mod.id
 
           return (
             <li key={mod.id}>
@@ -286,7 +308,7 @@ export function Sidebar({
         })}
       </ul>
 
-      <div className="border-t border-line p-2">
+      <div className="shrink-0 border-t border-line p-2">
         <button
           onClick={togglePinned}
           aria-label={pinned ? t('sidebar.unpin') : t('sidebar.pin')}
@@ -296,8 +318,15 @@ export function Sidebar({
             pinned ? 'text-include' : 'text-mut hover:bg-bg hover:text-fg',
           )}
         >
-          <PinIcon className="h-4 w-4" />
-          {!collapsed && <span>{pinned ? t('sidebar.unpin') : t('sidebar.pin')}</span>}
+          <PinIcon className="h-4 w-4 shrink-0" />
+          <span
+            className={clsx(
+              'overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out',
+              collapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
+            )}
+          >
+            {pinned ? t('sidebar.unpin') : t('sidebar.pin')}
+          </span>
         </button>
         {collapsed ? (
           <div className="flex justify-center">
