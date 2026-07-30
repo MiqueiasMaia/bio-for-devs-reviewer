@@ -567,6 +567,24 @@ export const ptBR = {
     sdDetail:
       'Desvio-padrão {{sd}} fora da faixa possível ({{min}}–{{max}}) para a média, N e escala informados (SPRITE).',
   },
+  retractionWatch: {
+    title: 'Vigilância de retratação',
+    subtitle:
+      'Verifica periodicamente, via Crossref, se algum estudo já incluído foi retratado ou recebeu errata/expressão de preocupação depois da inclusão — inclusive após a revisão estar concluída.',
+    includedLabel: 'Incluídos com DOI',
+    checkedLabel: 'Já verificados',
+    flaggedLabel: 'Sinalizados',
+    batchSize: 'Estudos a verificar',
+    run: 'Verificar',
+    running: 'Verificando…',
+    doneSummary: '{{checked}} verificado(s) nesta execução, {{flagged}} com alerta.',
+    viewNotice: 'Ver aviso →',
+    status_retraction: 'Retratado',
+    status_partial_retraction: 'Retratação parcial',
+    status_expression_of_concern: 'Expressão de preocupação',
+    status_withdrawal: 'Retirado',
+    status_removal: 'Removido',
+  },
   backup: {
     title: 'Backup do projeto',
     subtitle: 'Exporte todos os dados do projeto (critérios, registros, triagens, resoluções) como JSON, ou restaure um backup em um novo projeto.',

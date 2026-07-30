@@ -3,6 +3,10 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/snowball.ts": { "maxDuration": 60 }
-  }
+    "api/snowball.ts": { "maxDuration": 60 },
+    "api/check-retractions.ts": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/check-retractions", "schedule": "0 7 * * *" }
+  ]
 }

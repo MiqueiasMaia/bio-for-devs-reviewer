@@ -20,6 +20,7 @@ import { useQueueSummary } from '@/features/screening/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import { AiScreeningCard } from '@/features/aiScreening/AiScreeningCard'
 import { SnowballingCard } from '@/features/snowballing/SnowballingCard'
+import { RetractionWatchCard } from '@/features/retractionWatch/RetractionWatchCard'
 import { GetStartedWidget } from './GetStartedWidget'
 import type { ScreeningStage } from '@/types/domain'
 
@@ -227,6 +228,8 @@ export function ProjectOverviewPage() {
       {project.settings.ai_screening_enabled && <AiScreeningCard projectId={project.id} stage={stage} />}
 
       <SnowballingCard projectId={project.id} />
+
+      <RetractionWatchCard projectId={project.id} />
 
       <Card>
         <div className="mb-3 flex items-center justify-between">

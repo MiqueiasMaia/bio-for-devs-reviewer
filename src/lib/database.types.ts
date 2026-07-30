@@ -203,6 +203,9 @@ export interface Database {
           translated_at: string | null
           unpaywall_checked_at: string | null
           snowball_expanded_at: string | null
+          retraction_status: string | null
+          retraction_notice_doi: string | null
+          retraction_checked_at: string | null
           created_at: string
           updated_at: string
         },
@@ -230,6 +233,9 @@ export interface Database {
           translated_at?: string | null
           unpaywall_checked_at?: string | null
           snowball_expanded_at?: string | null
+          retraction_status?: string | null
+          retraction_notice_doi?: string | null
+          retraction_checked_at?: string | null
         },
         {
           doi?: string | null
@@ -242,6 +248,9 @@ export interface Database {
           translated_at?: string | null
           unpaywall_checked_at?: string | null
           snowball_expanded_at?: string | null
+          retraction_status?: string | null
+          retraction_notice_doi?: string | null
+          retraction_checked_at?: string | null
         }
       >
       record_counters: Table<

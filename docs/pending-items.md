@@ -324,17 +324,29 @@ estatística" aparece no cabeçalho do registro em `DataExtractionPage` e
 `RiskOfBiasPage` (que passou a consultar `v_extraction_field_status` só
 para isso), sem bloquear a inclusão do estudo.
 
-### 7.3 Checagem contínua de retratação
+### 7.3 Checagem contínua de retratação — ✅ implementado (2026-07-30)
 
 Cruzar cada estudo incluído com bases de retratação (Retraction Watch
 Database, Crossref) e alertar se um estudo já incluído foi retratado ou
 recebeu errata/expressão de preocupação depois da inclusão — inclusive após
 a revisão estar "concluída".
 
-**Para implementar**: job periódico que consulta a API do Crossref (campo
-`update-to`/`is-retracted` quando disponível) pelo DOI de cada estudo
-incluído e notifica o(a) proprietário(a) do projeto em caso de mudança de
-status.
+Implementado em `api/check-retractions.ts`, consultando a API do Crossref
+(campo `update-to`) pelo DOI de cada estudo incluído — `retraction`,
+`partial_retraction`, `expression_of_concern`, `withdrawal` e `removal`
+sinalizam o registro (`records.retraction_status`/`retraction_notice_doi`,
+migração 0031); uma correção/errata comum não sinaliza. O selo nunca
+regride para um status menos grave numa checagem posterior
+(`isAtLeastAsSevere`, com testes). Sem envio de e-mail (a app ainda não tem
+esse mecanismo — ver item §2): a "notificação" é o cartão "Vigilância de
+retratação" na Visão Geral do projeto, sempre visível para quem abrir o
+projeto, com a lista de estudos sinalizados e link para o aviso do
+Crossref. Dois modos de disparo no mesmo endpoint: Vercel Cron (diário,
+`vercel.json`, autenticado via `CRON_SECRET`) varre todos os projetos,
+priorizando sempre os registros verificados há mais tempo
+(`retraction_checked_at`); o botão "Verificar" no cartão roda sob demanda,
+escopado ao projeto atual. Requer `CROSSREF_EMAIL` no ambiente do servidor
+(mesma convenção do `UNPAYWALL_EMAIL`/`OPENALEX_EMAIL`).
 
 ### 7.4 Proveniência ponta-a-ponta da extração
 
