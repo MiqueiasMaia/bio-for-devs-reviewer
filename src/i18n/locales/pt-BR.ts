@@ -209,6 +209,15 @@ export const ptBR = {
     labelPlaceholder: 'Rótulo (ex.: Tamanho da amostra)',
     add: 'Adicionar campo',
     empty: 'Nenhum campo de extração cadastrado ainda.',
+    statRole: 'Papel estatístico (GRIM/SPRITE)',
+    statRoleNone: 'Nenhum',
+    statRole_mean: 'Média',
+    statRole_sd: 'Desvio-padrão',
+    statRole_n: 'Tamanho da amostra (N)',
+    statRole_min: 'Mínimo da escala',
+    statRole_max: 'Máximo da escala',
+    statRoleHint:
+      'Marque no máximo um campo numérico de cada: Média, Desvio-padrão, N e (opcionalmente) Mínimo/Máximo da escala — usados para verificar automaticamente se os valores extraídos são matematicamente possíveis (GRIM/SPRITE), sinalizando possível erro ou fabricação de dados sem bloquear a inclusão do estudo.',
   },
   importWizard: {
     title: 'Importar registros',
@@ -550,6 +559,13 @@ export const ptBR = {
     nothingToExpand: 'Nenhum estudo incluído pendente de expansão — inclua artigos na triagem, ou todos já foram processados.',
     doneSummaryWithResults: '{{seeds}} estudo(s) processado(s), {{added}} candidato(s) novo(s) adicionado(s) à triagem.',
     doneSummaryNoResults: '{{seeds}} estudo(s) processado(s), nenhum candidato novo encontrado.',
+  },
+  statForensics: {
+    badgeLabel: 'Possível inconsistência estatística',
+    grimDetail:
+      'Média {{mean}} incompatível com N={{n}} (teste GRIM) — o valor mais próximo matematicamente possível é {{nearest}}.',
+    sdDetail:
+      'Desvio-padrão {{sd}} fora da faixa possível ({{min}}–{{max}}) para a média, N e escala informados (SPRITE).',
   },
   backup: {
     title: 'Backup do projeto',

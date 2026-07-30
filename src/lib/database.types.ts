@@ -8,6 +8,7 @@ import type {
   CriterionKind,
   Decision,
   ExtractionFieldType,
+  ExtractionStatRole,
   ImportFormat,
   PicotsDimension,
   ProjectRole,
@@ -432,6 +433,7 @@ export interface Database {
           options: string[]
           required: boolean
           order_index: number
+          stat_role: ExtractionStatRole | null
           created_at: string
           updated_at: string
         },
@@ -444,6 +446,7 @@ export interface Database {
           options?: string[]
           required?: boolean
           order_index?: number
+          stat_role?: ExtractionStatRole | null
         },
         {
           key?: string
@@ -452,6 +455,7 @@ export interface Database {
           options?: string[]
           required?: boolean
           order_index?: number
+          stat_role?: ExtractionStatRole | null
         }
       >
       data_extractions: Table<

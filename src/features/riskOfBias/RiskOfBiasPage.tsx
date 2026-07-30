@@ -11,6 +11,10 @@ import { SaveIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { PROBAST_DOMAINS, ROB_ANSWER_OPTIONS, ROB_JUDGMENT_OPTIONS, type ProbastDomainConfig } from '@/domain/riskOfBias/probast'
 import type { RobAnswer, RobJudgment } from '@/types/domain'
+import { useExtractionFields } from '@/features/projects/settings/hooks'
+import { useExtractionFieldStatus } from '@/features/dataExtraction/hooks'
+import { useRecordStatForensics } from '@/features/statForensics/useStatForensics'
+import { StatForensicsBadge } from '@/features/statForensics/StatForensicsBadge'
 import { useRobAssessments, useRobEligibleRecords, useRobOverallStatus, useSaveRobAssessment } from './hooks'
 import type { RobAssessmentRow } from './api'
 
@@ -191,6 +195,13 @@ export function RiskOfBiasPage() {
   const { data: assessments } = useRobAssessments(selectedId ?? '', assessorId)
   const current = useMemo(() => records?.find((r) => r.id === selectedId), [records, selectedId])
 
+  // Risk of Bias and Data Extraction are otherwise fully decoupled
+  // features — this is the one place RoB reads extraction data, purely to
+  // surface the same non-blocking GRIM/SPRITE flag here too (see §7.2).
+  const { data: extractionFields } = useExtractionFields(project.id)
+  const { data: extractionFieldStatus } = useExtractionFieldStatus(project.id)
+  const statForensics = useRecordStatForensics(selectedId ?? '', extractionFields, extractionFieldStatus)
+
   return (
     <StageGate project={project} stage="risk_of_bias">
       <div>
@@ -233,6 +244,7 @@ export function RiskOfBiasPage() {
                   <p className="text-sm text-mut">
                     {current.authors} · {current.year ?? '—'}
                   </p>
+                  <StatForensicsBadge view={statForensics} />
                 </Card>
 
                 {PROBAST_DOMAINS.map((config) => (

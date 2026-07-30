@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { CriterionKind, ExtractionFieldType, PicotsDimension, ProjectRole } from '@/types/domain'
+import type { CriterionKind, ExtractionFieldType, ExtractionStatRole, PicotsDimension, ProjectRole } from '@/types/domain'
 
 // Criteria -----------------------------------------------------------------
 export interface CriterionRow {
@@ -164,12 +164,13 @@ export interface ExtractionFieldRow {
   options: string[]
   required: boolean
   orderIndex: number
+  statRole: ExtractionStatRole | null
 }
 
 export async function listExtractionFields(projectId: string): Promise<ExtractionFieldRow[]> {
   const { data, error } = await supabase
     .from('extraction_fields')
-    .select('id, key, label, field_type, options, required, order_index')
+    .select('id, key, label, field_type, options, required, order_index, stat_role')
     .eq('project_id', projectId)
     .order('order_index', { ascending: true })
   if (error) throw error
@@ -181,6 +182,7 @@ export async function listExtractionFields(projectId: string): Promise<Extractio
     options: r.options,
     required: r.required,
     orderIndex: r.order_index,
+    statRole: r.stat_role,
   }))
 }
 
@@ -209,7 +211,13 @@ export async function createExtractionField(
 
 export async function updateExtractionField(
   id: string,
-  patch: { label?: string; fieldType?: ExtractionFieldType; options?: string[]; required?: boolean },
+  patch: {
+    label?: string
+    fieldType?: ExtractionFieldType
+    options?: string[]
+    required?: boolean
+    statRole?: ExtractionStatRole | null
+  },
 ): Promise<void> {
   const { error } = await supabase
     .from('extraction_fields')
@@ -218,6 +226,7 @@ export async function updateExtractionField(
       ...(patch.fieldType !== undefined ? { field_type: patch.fieldType } : {}),
       ...(patch.options !== undefined ? { options: patch.options } : {}),
       ...(patch.required !== undefined ? { required: patch.required } : {}),
+      ...(patch.statRole !== undefined ? { stat_role: patch.statRole } : {}),
     })
     .eq('id', id)
   if (error) throw error

@@ -54,6 +54,11 @@ export type RobJudgment = 'low' | 'high' | 'unclear'
 
 export type ExtractionFieldType = 'text' | 'number' | 'single_choice' | 'multi_choice'
 
+/** Marks a number-typed extraction field as feeding the GRIM/SPRITE
+ * statistical-forensics check (src/domain/statForensics) — see migration
+ * 0030_extraction_field_stat_role.sql. */
+export type ExtractionStatRole = 'mean' | 'sd' | 'n' | 'min' | 'max'
+
 export type AIProvider = 'google' | 'groq' | 'openrouter' | 'anthropic'
 
 export interface AiCriterionDetail {

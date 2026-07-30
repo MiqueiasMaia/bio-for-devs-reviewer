@@ -9,10 +9,19 @@ import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from '../ProjectLayout'
 import { useExtractionFields, useExtractionFieldMutations } from './hooks'
 import type { ExtractionFieldRow } from './api'
-import type { ExtractionFieldType } from '@/types/domain'
+import type { ExtractionFieldType, ExtractionStatRole } from '@/types/domain'
 
 const FIELD_TYPES: ExtractionFieldType[] = ['text', 'number', 'single_choice', 'multi_choice']
 const CHOICE_TYPES: ExtractionFieldType[] = ['single_choice', 'multi_choice']
+const STAT_ROLES: ExtractionStatRole[] = ['mean', 'sd', 'n', 'min', 'max']
+
+type FieldPatch = {
+  label?: string
+  fieldType?: ExtractionFieldType
+  options?: string[]
+  required?: boolean
+  statRole?: ExtractionStatRole | null
+}
 
 function ExtractionFieldEditor({
   field,
@@ -20,7 +29,7 @@ function ExtractionFieldEditor({
   onDelete,
 }: {
   field: ExtractionFieldRow
-  onUpdate: (patch: { label?: string; fieldType?: ExtractionFieldType; options?: string[]; required?: boolean }) => void
+  onUpdate: (patch: FieldPatch) => void
   onDelete: () => void
 }) {
   const { t } = useTranslation()
@@ -42,7 +51,13 @@ function ExtractionFieldEditor({
           aria-label={t('extractionFields.fieldType')}
           className="max-w-40"
           value={field.fieldType}
-          onChange={(e) => onUpdate({ fieldType: e.target.value as ExtractionFieldType })}
+          onChange={(e) => {
+            const fieldType = e.target.value as ExtractionFieldType
+            // stat_role only makes sense on a number field (DB constraint
+            // enforces this too) — clear it client-side on the same patch
+            // instead of letting the next save 400.
+            onUpdate(fieldType === 'number' ? { fieldType } : { fieldType, statRole: null })
+          }}
         >
           {FIELD_TYPES.map((ft) => (
             <option key={ft} value={ft}>
@@ -50,6 +65,22 @@ function ExtractionFieldEditor({
             </option>
           ))}
         </Select>
+        {field.fieldType === 'number' && (
+          <Select
+            label=""
+            aria-label={t('extractionFields.statRole')}
+            className="max-w-44"
+            value={field.statRole ?? ''}
+            onChange={(e) => onUpdate({ statRole: (e.target.value || null) as ExtractionStatRole | null })}
+          >
+            <option value="">{t('extractionFields.statRoleNone')}</option>
+            {STAT_ROLES.map((role) => (
+              <option key={role} value={role}>
+                {t(`extractionFields.statRole_${role}` as TranslationKey)}
+              </option>
+            ))}
+          </Select>
+        )}
         <label className="flex items-center gap-1.5 text-sm text-fg">
           <input type="checkbox" checked={field.required} onChange={(e) => onUpdate({ required: e.target.checked })} />
           {t('extractionFields.required')}
@@ -103,6 +134,7 @@ export function ExtractionFieldsTab() {
       <div>
         <h2 className="text-lg font-semibold text-fg">{t('extractionFields.title')}</h2>
         <p className="text-sm text-mut">{t('extractionFields.subtitle')}</p>
+        <p className="mt-1 text-xs text-mut">{t('extractionFields.statRoleHint')}</p>
       </div>
       <Card>
         {(!fields || fields.length === 0) && <p className="text-sm text-mut">{t('extractionFields.empty')}</p>}

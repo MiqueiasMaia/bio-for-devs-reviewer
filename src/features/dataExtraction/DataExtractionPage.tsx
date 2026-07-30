@@ -13,6 +13,8 @@ import { StageGate } from '@/components/StageGate'
 import { useExtractionFields } from '@/features/projects/settings/hooks'
 import type { ExtractionFieldRow } from '@/features/projects/settings/api'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
+import { useRecordStatForensics } from '@/features/statForensics/useStatForensics'
+import { StatForensicsBadge } from '@/features/statForensics/StatForensicsBadge'
 import { exportExtractionCsv } from './api'
 import {
   useExtractionEligibleRecords,
@@ -20,6 +22,7 @@ import {
   useExtraction,
   useSaveExtraction,
   useExtractionConflicts,
+  useExtractionFieldStatus,
 } from './hooks'
 
 function FieldInput({
@@ -154,6 +157,7 @@ export function DataExtractionPage() {
   const { data: records, isLoading } = useExtractionEligibleRecords(project.id)
   const { data: status } = useExtractionStatus(project.id, extractorId)
   const { data: conflicts } = useExtractionConflicts(project.id)
+  const { data: fieldStatus } = useExtractionFieldStatus(project.id)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -161,6 +165,7 @@ export function DataExtractionPage() {
   }, [records, selectedId])
 
   const current = useMemo(() => records?.find((r) => r.id === selectedId), [records, selectedId])
+  const statForensics = useRecordStatForensics(selectedId ?? '', fields, fieldStatus)
 
   async function handleExport() {
     if (!fields) return
@@ -229,6 +234,7 @@ export function DataExtractionPage() {
                   <p className="text-sm text-mut">
                     {current.authors} · {current.year ?? '—'}
                   </p>
+                  <StatForensicsBadge view={statForensics} />
                 </Card>
                 <ExtractionForm
                   key={selectedId}

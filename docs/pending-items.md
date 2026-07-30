@@ -298,17 +298,31 @@ extraído do artigo, consulta a API do ClinicalTrials.gov e compara a lista
 de desfechos registrados com os extraídos em `dataExtraction`, sinalizando
 divergências para revisão humana.
 
-### 7.2 Forense estatística de integridade de dados nos estudos incluídos
+### 7.2 Forense estatística de integridade de dados nos estudos incluídos — ✅ implementado (2026-07-30)
 
 Testes tipo GRIM/SPRITE (consistência de médias/desvios-padrão reportados
 com o N informado) para sinalizar possível erro ou fabricação de dados
 antes que um estudo entre na síntese — relevante dado o crescimento de
 retratações em periódicos que alimentam revisões sistemáticas.
 
-**Para implementar**: função pura em `src/domain` que roda GRIM/SPRITE sobre
-valores numéricos extraídos (média, DP, N) e marca o registro com um selo de
-alerta visível em `dataExtraction`/`riskOfBias`, sem bloquear a inclusão —
-só chamar atenção do revisor.
+Implementado em `src/domain/statForensics/grimSprite.ts` (função pura, com
+testes): `checkGrim` reproduz o teste clássico de Brown & Heathers
+(consistência da média reportada com N, respeitando as casas decimais
+informadas); `computeSdFeasibleRange` calcula em forma fechada o DP mínimo e
+máximo possíveis para N inteiros dentro de `[mínimo, máximo]` somando ao
+valor implícito pela média — o pré-check de viabilidade em que o SPRITE
+completo se baseia (não a busca iterativa inteira). Como
+`extraction_fields` é livremente configurável por projeto (sem médias/DP/N
+fixos no schema), foi adicionada a coluna opcional
+`extraction_fields.stat_role` (migração 0030, mesmo padrão de
+`criteria.picots_dimension`) para marcar qual campo numérico é a média, o
+DP, o N e (opcionalmente) o mínimo/máximo da escala — configurável em
+Configurações → Campos de extração, um campo por papel por projeto (várias
+médias/desfechos por estudo fica fora do escopo desta primeira versão).
+Quando há papéis suficientes marcados, um selo "Possível inconsistência
+estatística" aparece no cabeçalho do registro em `DataExtractionPage` e
+`RiskOfBiasPage` (que passou a consultar `v_extraction_field_status` só
+para isso), sem bloquear a inclusão do estudo.
 
 ### 7.3 Checagem contínua de retratação
 

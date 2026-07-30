@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from './api'
-import type { CriterionKind, ExtractionFieldType, PicotsDimension, ProjectRole } from '@/types/domain'
+import type { CriterionKind, ExtractionFieldType, ExtractionStatRole, PicotsDimension, ProjectRole } from '@/types/domain'
 
 const keys = {
   criteria: (projectId: string) => ['criteria', projectId] as const,
@@ -121,7 +121,13 @@ export function useExtractionFieldMutations(projectId: string) {
     update: useMutation({
       mutationFn: (args: {
         id: string
-        patch: { label?: string; fieldType?: ExtractionFieldType; options?: string[]; required?: boolean }
+        patch: {
+          label?: string
+          fieldType?: ExtractionFieldType
+          options?: string[]
+          required?: boolean
+          statRole?: ExtractionStatRole | null
+        }
       }) => api.updateExtractionField(args.id, args.patch),
       onSuccess: invalidate,
     }),
