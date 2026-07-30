@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { DecisionDonut } from '@/components/ui/DecisionDonut'
+import { CheckCircleIcon, SplitIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from './ProjectLayout'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useOpenConflictCount, useReviewerProgress } from '@/features/dashboard/hooks'
@@ -64,46 +65,63 @@ export function ProjectOverviewPage() {
       )}
 
       {/* Data Summary --------------------------------------------------- */}
-      <Card className="flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-fg">{t('dataSummary.title')}</h3>
+      <div className="flex flex-col gap-3">
+        <h3 className="border-b border-line pb-2 text-sm font-semibold text-fg">{t('dataSummary.title')}</h3>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="flex flex-col gap-1">
+          <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.imported')}</p>
-            <p className="font-mono text-xl font-bold text-fg">{counts?.recordsIdentified ?? '—'}</p>
-            <Button variant="secondary" className="self-start" onClick={() => navigate('import')}>
+            <p className="font-mono text-2xl font-bold text-fg">{counts?.recordsIdentified ?? '—'}</p>
+            <Button variant="secondary" onClick={() => navigate('import')}>
               {t('dashboard.addReferences')}
             </Button>
-          </div>
-          <div className="flex flex-col gap-1">
+          </Card>
+          <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.totalDuplicates')}</p>
-            <p className="font-mono text-xl font-bold text-fg">{counts?.duplicatesRemoved ?? '—'}</p>
+            <p className="font-mono text-2xl font-bold text-fg">{counts?.duplicatesRemoved ?? '—'}</p>
             <Button
               variant="secondary"
-              className="self-start"
               onClick={() => setDedupModalOpen(true)}
               disabled={!dedupSummary || dedupSummary.unresolved === 0}
             >
               {t('dashboard.reviewDuplicates')}
             </Button>
-          </div>
-          <div className="flex flex-col gap-1">
+          </Card>
+          <Card className="flex flex-col items-center gap-2 text-center">
             <p className="text-xs text-mut">{t('dataSummary.unresolved')}</p>
-            <p className="font-mono text-xl font-bold text-fg">{dedupSummary?.unresolved ?? '—'}</p>
+            <p className="font-mono text-2xl font-bold text-fg">{dedupSummary?.unresolved ?? '—'}</p>
             <Button
               variant="secondary"
-              className="self-start"
               onClick={() => setDedupModalOpen(true)}
               disabled={!dedupSummary || dedupSummary.unresolved === 0}
             >
               {t('dataSummary.continueResolving')}
             </Button>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-xs text-mut">{t('dataSummary.resolved')}</p>
-            <p className="font-mono text-xl font-bold text-fg">{dedupSummary?.resolved ?? '—'}</p>
-          </div>
+          </Card>
+          <Card className="flex flex-col justify-center gap-2.5">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="flex items-center gap-1.5 text-mut">
+                <CheckCircleIcon className="h-4 w-4 shrink-0" />
+                {t('dataSummary.resolved')}
+              </span>
+              <span className="font-mono font-semibold text-fg">{dedupSummary?.resolved ?? '—'}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="flex items-center gap-1.5 text-mut">
+                <SplitIcon className="h-4 w-4 shrink-0" />
+                {t('dataSummary.notDuplicate')}
+              </span>
+              <span className="font-mono font-semibold text-fg">{dedupSummary?.notDuplicateCount ?? '—'}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="flex items-center gap-1.5 text-mut">
+                <TrashIcon className="h-4 w-4 shrink-0" />
+                {t('dataSummary.deleted')}
+              </span>
+              <span className="font-mono font-semibold text-fg">{dedupSummary?.deletedRecords ?? '—'}</span>
+            </div>
+          </Card>
         </div>
-      </Card>
+      </div>
 
       <Modal open={dedupModalOpen} onClose={() => setDedupModalOpen(false)} title={t('duplicates.title')} size="wide">
         <DedupResolutionWizard projectId={project.id} />

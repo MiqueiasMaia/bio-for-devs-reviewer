@@ -53,6 +53,7 @@ export interface Database {
           created_at: string
           updated_at: string
           archived_at: string | null
+          dedup_not_duplicate_count: number
         },
         {
           id?: string
@@ -63,6 +64,7 @@ export interface Database {
           settings?: ProjectSettings
           created_by: string
           archived_at?: string | null
+          dedup_not_duplicate_count?: number
         },
         {
           name?: string
@@ -70,6 +72,7 @@ export interface Database {
           prospero_id?: string | null
           settings?: ProjectSettings
           archived_at?: string | null
+          dedup_not_duplicate_count?: number
         }
       >
       project_members: Table<
@@ -580,6 +583,10 @@ export interface Database {
           p_stages_enabled?: string[]
         }
         Returns: Database['public']['Tables']['projects']['Row']
+      }
+      increment_dedup_not_duplicate_count: {
+        Args: { p_project_id: string }
+        Returns: undefined
       }
       set_project_ai_key: {
         Args: { p_project_id: string; p_provider: AIProvider; p_model: string; p_api_key: string; p_secret: string }

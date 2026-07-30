@@ -465,6 +465,8 @@ export const ptBR = {
     unresolved: 'Não resolvidos',
     resolved: 'Resolvidos',
     continueResolving: 'Continuar resolvendo',
+    notDuplicate: 'Não é duplicata',
+    deleted: 'Excluídos',
   },
   progress: {
     title: 'Progresso da triagem',

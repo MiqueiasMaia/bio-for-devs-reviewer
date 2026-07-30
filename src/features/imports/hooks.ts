@@ -41,8 +41,8 @@ export function useDedupMutations(projectId: string) {
     qc.invalidateQueries({ queryKey: projectsQueryKey })
   }
   return {
-    split: useMutation({
-      mutationFn: (recordId: string) => api.splitRecordFromGroup(recordId),
+    markNotDuplicate: useMutation({
+      mutationFn: (recordIds: string[]) => api.markGroupAsNotDuplicate(projectId, recordIds),
       onSuccess: invalidate,
     }),
     setPrimary: useMutation({

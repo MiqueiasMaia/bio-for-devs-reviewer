@@ -71,9 +71,7 @@ export function DedupResolutionWizard({ projectId }: { projectId: string }) {
               primaryId: recordId,
             })
           }
-          onNotDuplicates={() => {
-            for (const r of current.records) mutations.split.mutate(r.id)
-          }}
+          onNotDuplicates={() => mutations.markNotDuplicate.mutate(current.records.map((r) => r.id))}
         />
       )}
 

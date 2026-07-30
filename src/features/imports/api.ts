@@ -215,6 +215,18 @@ export async function splitRecordFromGroup(recordId: string): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * The wizard's "not duplicates" action for a whole group: splits every
+ * member out (same as splitRecordFromGroup) and bumps the project's
+ * dedup_not_duplicate_count once — splitting alone would leave no trace
+ * this group was ever reviewed, since it resets every flag on each record.
+ */
+export async function markGroupAsNotDuplicate(projectId: string, recordIds: string[]): Promise<void> {
+  for (const id of recordIds) await splitRecordFromGroup(id)
+  const { error } = await supabase.rpc('increment_dedup_not_duplicate_count', { p_project_id: projectId })
+  if (error) throw error
+}
+
 /** A human explicitly picking/confirming a group's primary in the dedup wizard. */
 export async function setDedupPrimary(groupId: string, recordIds: string[], primaryId: string): Promise<void> {
   await applyDedupGroup(groupId, recordIds, primaryId, true)
@@ -261,27 +273,37 @@ export async function autoResolveDedupGroups(
 }
 
 export interface DedupSummary {
-  /** Total records marked as duplicates (member_count - 1 per group, summed). */
+  /** Total records marked as duplicates across every group, confirmed or not (member_count - 1 per group, summed). */
   totalDuplicates: number
   /** Groups nobody has confirmed yet (still just the automatic heuristic pick). */
   unresolved: number
-  /** Groups a human or the Auto Resolver has explicitly confirmed. */
+  /** Groups a human or the Auto Resolver has explicitly confirmed (kept one primary, deleted the rest). */
   resolved: number
+  /** Duplicate records actually removed from active review, i.e. member_count - 1 summed over CONFIRMED groups only — a subset of totalDuplicates. */
+  deletedRecords: number
+  /** Groups a human explicitly said were NOT duplicates (see markGroupAsNotDuplicate) — tracked as a standalone counter since splitting a group erases every other trace of it. */
+  notDuplicateCount: number
 }
 
 export async function fetchDedupSummary(projectId: string): Promise<DedupSummary> {
-  const { data, error } = await supabase
-    .from('v_dedup_groups')
-    .select('member_count, confirmed')
-    .eq('project_id', projectId)
+  const [{ data, error }, { data: project, error: projectError }] = await Promise.all([
+    supabase.from('v_dedup_groups').select('member_count, confirmed').eq('project_id', projectId),
+    supabase.from('projects').select('dedup_not_duplicate_count').eq('id', projectId).single(),
+  ])
   if (error) throw error
+  if (projectError) throw projectError
   let totalDuplicates = 0
   let unresolved = 0
   let resolved = 0
+  let deletedRecords = 0
   for (const g of data) {
     totalDuplicates += g.member_count - 1
-    if (g.confirmed) resolved++
-    else unresolved++
+    if (g.confirmed) {
+      resolved++
+      deletedRecords += g.member_count - 1
+    } else {
+      unresolved++
+    }
   }
-  return { totalDuplicates, unresolved, resolved }
+  return { totalDuplicates, unresolved, resolved, deletedRecords, notDuplicateCount: project.dedup_not_duplicate_count }
 }

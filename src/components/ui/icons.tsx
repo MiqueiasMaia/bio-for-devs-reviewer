@@ -51,6 +51,31 @@ export function LockIcon({ className }: IconProps) {
   )
 }
 
+export function CheckCircleIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <circle cx="10" cy="10" r="7" />
+      <path d="m6.8 10 2.2 2.2 4.2-4.6" />
+    </svg>
+  )
+}
+
+export function SplitIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M10 4v4M10 8 6 12M10 8l4 4M5.5 12h-.2c-.72 0-1.3.58-1.3 1.3V16M14.7 12h.2c.72 0 1.3.58 1.3 1.3V16" />
+    </svg>
+  )
+}
+
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M4.5 6h11M8 6V4.8c0-.44.36-.8.8-.8h2.4c.44 0 .8.36.8.8V6M6 6l.6 9.2c.04.68.6 1.2 1.28 1.2h4.24c.68 0 1.24-.52 1.28-1.2L14 6" />
+    </svg>
+  )
+}
+
 /** Generic (monochrome, currentColor) provider glyphs for the disabled
  * "coming soon" sign-in buttons — not brand-accurate logomarks, just
  * recognizable enough to read as "Google" / "GitHub" / "ORCID" at a glance. */
