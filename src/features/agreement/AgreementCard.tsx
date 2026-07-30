@@ -14,11 +14,12 @@ export function AgreementCard({ projectId, stage }: { projectId: string; stage: 
     <Card className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-fg">{t('agreement.title')}</h3>
-        <label className="flex items-center gap-1.5 text-xs text-mut">
+        <label className="flex items-center gap-1.5 text-xs text-mut" title={t('agreement.includeAiHint')}>
           <input type="checkbox" checked={includeAi} onChange={(e) => setIncludeAi(e.target.checked)} />
           {t('agreement.includeAi')}
         </label>
       </div>
+      <p className="-mt-2 text-[11px] text-mut">{t('agreement.includeAiHint')}</p>
 
       {isLoading && <p className="text-sm text-mut">{t('common.loading')}</p>}
 

@@ -421,7 +421,9 @@ export const ptBR = {
     kappaFleiss: "Kappa de Fleiss",
     observedAgreement: 'Concordância observada',
     percentAgreement: '% de concordância unânime',
-    includeAi: 'Incluir IA como avaliador',
+    includeAi: 'Incluir decisão da IA no cálculo de concordância',
+    includeAiHint:
+      'Não inicia a triagem por IA — só decide se uma decisão já existente entra nesse cálculo. Para rodar a triagem por IA, use o cartão "Triagem assistida por IA" na Visão Geral do projeto.',
     notEnoughData: 'Dados insuficientes para calcular a concordância nesta etapa.',
     interpretation_poor: 'fraca',
     interpretation_fair: 'razoável',

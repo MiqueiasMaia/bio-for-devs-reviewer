@@ -28,7 +28,7 @@ fora (WhatsApp, e-mail manual etc.).
 `supabase.auth.admin.inviteUserByEmail` quando a pessoa ainda não tem
 conta), com link direto para o projeto.
 
-## 3. Clareza sobre o checkbox "Incluir IA como avaliador"
+## 3. Clareza sobre o checkbox "Incluir IA como avaliador" — ✅ implementado (2026-07-30)
 
 No `AgreementCard`, o checkbox "Incluir IA como avaliador" controla se a
 decisão da IA entra no cálculo de concordância/kappa — não inicia nem
@@ -37,10 +37,12 @@ marcou o checkbox, viu que ele "desmarcava sozinho" ao voltar à tela, e
 não tinha como saber se o processo de triagem por IA de fato havia
 iniciado.
 
-**Para implementar**: ajustar o rótulo/texto de apoio do checkbox para
-deixar explícito que ele é sobre o cálculo de concordância, não sobre
-disparar a triagem — e apontar para onde de fato se inicia a triagem
-(`AiScreeningCard`, na Visão Geral do projeto).
+Rótulo trocado para "Incluir decisão da IA no cálculo de concordância" e
+adicionado um texto de apoio (visível abaixo do checkbox e como `title` no
+hover) deixando explícito que ele não dispara a triagem e apontando para o
+cartão "Triagem assistida por IA" na Visão Geral do projeto como o lugar
+certo para isso. Só texto/rótulo — nenhuma lógica do `AgreementCard` foi
+alterada.
 
 ## 4. Indicador de "última execução da IA"
 
