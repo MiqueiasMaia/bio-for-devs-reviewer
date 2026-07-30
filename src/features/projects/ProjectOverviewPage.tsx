@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { DecisionDonut } from '@/components/ui/DecisionDonut'
+import { Avatar } from '@/components/ui/Avatar'
 import { CheckCircleIcon, SplitIcon, TrashIcon } from '@/components/ui/icons'
 import type { ProjectOutletContext } from './ProjectLayout'
 import { usePrismaCounts } from '@/features/prisma/hooks'
@@ -13,7 +14,8 @@ import { useOpenConflictCount, useReviewerProgress } from '@/features/dashboard/
 import { useDedupSummary } from '@/features/imports/hooks'
 import { DedupResolutionWizard } from '@/features/imports/DedupResolutionWizard'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
-import { useQueueSummary, useProjectDecisionCounts } from '@/features/screening/hooks'
+import { useAgreement } from '@/features/agreement/hooks'
+import { useQueueSummary } from '@/features/screening/hooks'
 import { useAuth } from '@/features/auth/useAuth'
 import { AiScreeningCard } from '@/features/aiScreening/AiScreeningCard'
 import { GetStartedWidget } from './GetStartedWidget'
@@ -26,17 +28,19 @@ export function ProjectOverviewPage() {
   const { user } = useAuth()
   const [stage, setStage] = useState<ScreeningStage>(project.settings.stages_enabled[0] ?? 'title_abstract')
   const [dedupModalOpen, setDedupModalOpen] = useState(false)
-  const [progressView, setProgressView] = useState<'mine' | 'project'>('mine')
 
   const { data: counts } = usePrismaCounts(project.id)
   const { data: reviewerProgress } = useReviewerProgress(project.id, stage)
   const { data: conflictCount } = useOpenConflictCount(project.id, stage)
   const { data: dedupSummary } = useDedupSummary(project.id)
   const { data: myProgress } = useQueueSummary(project.id, stage, user!.id)
-  const { data: projectProgress } = useProjectDecisionCounts(project.id, stage)
+  const { data: agreement } = useAgreement(project.id, stage, false)
 
   const stageTotal = stage === 'title_abstract' ? counts?.recordsScreenedTa : counts?.fulltextSought
-  const donutData = progressView === 'mine' ? myProgress : projectProgress
+  const alignedPct =
+    agreement && agreement.method !== 'insufficient_data' && !Number.isNaN(agreement.percentAgreement)
+      ? Math.round(agreement.percentAgreement * 100)
+      : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -127,86 +131,101 @@ export function ProjectOverviewPage() {
         <DedupResolutionWizard projectId={project.id} />
       </Modal>
 
-      {/* Your progress / Project progress -------------------------------- */}
-      <Card className="flex flex-col items-center gap-4">
-        <div className="flex w-full items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">{t('progress.title')}</h3>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setProgressView('mine')}
-              className={clsx(
-                'px-3 py-1 text-xs font-medium',
-                progressView === 'mine' ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
-              )}
-            >
-              {t('progress.yourView')}
-            </button>
-            <button
-              onClick={() => setProgressView('project')}
-              className={clsx(
-                'px-3 py-1 text-xs font-medium',
-                progressView === 'project' ? 'bg-fg text-white' : 'text-mut hover:bg-bg',
-              )}
-            >
-              {t('progress.projectView')}
-            </button>
-          </div>
-        </div>
-        {donutData && (
-          <DecisionDonut
-            include={donutData.include}
-            uncertain={donutData.uncertain}
-            exclude={donutData.exclude}
-            undecided={donutData.undecided}
-            total={donutData.total}
-          />
-        )}
-        <Link to={stage === 'title_abstract' ? 'screening/title-abstract' : 'screening/full-text'}>
-          <Button>{t('progress.goToScreening')}</Button>
-        </Link>
-      </Card>
-
-      {/* Screening summary ------------------------------------------------ */}
-      <Card className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">{t('screeningSummary.title')}</h3>
-          <Link to="conflicts" className="text-sm text-include">
-            {t('conflicts.title')} →
+      {/* Unified screening + team progress, Rayyan-style ------------------ */}
+      <div className="border border-line bg-white">
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <h3 className="text-sm font-semibold text-fg">
+            {t('progress.title')}{' '}
+            <span className="font-normal text-mut">
+              ({project.settings.blind_screening ? t('progress.blindOn') : t('progress.blindOff')})
+            </span>
+          </h3>
+          <Link to="settings/criteria">
+            <Button variant="secondary">{t('progress.screeningCriteria')}</Button>
           </Link>
         </div>
-        <div>
-          <p className="text-xs text-mut">{t('screeningSummary.conflicts')}</p>
-          <p className="font-mono text-2xl font-bold text-fg">{conflictCount ?? '—'}</p>
+
+        <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
+          {/* Your Progress */}
+          <div className="flex flex-col items-center gap-4 border-b border-line pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
+            <h4 className="self-start text-xs font-semibold uppercase tracking-wide text-mut">
+              {t('progress.yourProgress')}
+            </h4>
+            {myProgress && (
+              <DecisionDonut
+                include={myProgress.include}
+                uncertain={myProgress.uncertain}
+                exclude={myProgress.exclude}
+                undecided={myProgress.undecided}
+                total={myProgress.total}
+              />
+            )}
+            <p className="text-sm text-fg">
+              {myProgress?.undecided === 0
+                ? t('progress.allScreened')
+                : t('progress.articlesLeft', { count: myProgress?.undecided ?? 0 })}
+            </p>
+            <Link to={stage === 'title_abstract' ? 'screening/title-abstract' : 'screening/full-text'}>
+              <Button>{t('progress.goToScreening')}</Button>
+            </Link>
+          </div>
+
+          {/* Screening Summary + Team Progress */}
+          <div className="flex flex-col gap-5">
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mut">
+                {t('screeningSummary.title')}
+              </h4>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <Link to="conflicts" className="font-medium text-fg hover:text-include">
+                  {t('screeningSummary.conflictsCount', { count: conflictCount ?? 0 })}
+                </Link>
+                <span className="text-mut">
+                  {alignedPct !== null ? t('screeningSummary.alignedPct', { pct: alignedPct }) : '—'}
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-exclude">
+                <div className="h-full bg-include" style={{ width: `${alignedPct ?? 0}%` }} />
+              </div>
+            </div>
+
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mut">
+                {t('teamProgress.title')}
+              </h4>
+              {reviewerProgress?.length === 0 && <p className="text-sm text-mut">—</p>}
+              <ul className="flex flex-col gap-1">
+                {reviewerProgress?.map((r) => {
+                  const total = stageTotal ?? 0
+                  const pending = Math.max(total - r.decisionsMade, 0)
+                  const pct = total > 0 ? Math.round((100 * r.decisionsMade) / total) : 0
+                  return (
+                    <li
+                      key={r.reviewerId}
+                      className="flex items-center justify-between gap-3 border-b border-line py-2 text-sm last:border-b-0"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Avatar seed={r.reviewerId} initials={r.reviewerInitials} />
+                        <span className="text-fg">
+                          {r.reviewerName} <span className="text-xs text-mut">({t(`projects.role_${r.role}`)})</span>
+                        </span>
+                      </span>
+                      <span className="text-right text-xs text-mut">
+                        <div>{t('teamProgress.pending', { count: pending })}</div>
+                        <div className="font-semibold text-fg">{t('progress.pctDone', { pct })}</div>
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </div>
         </div>
-      </Card>
+      </div>
 
       <AgreementCard projectId={project.id} stage={stage} />
 
       {project.settings.ai_screening_enabled && <AiScreeningCard projectId={project.id} stage={stage} />}
-
-      {/* Team progress ------------------------------------------------ */}
-      <Card>
-        <h3 className="mb-3 text-sm font-semibold text-fg">{t('teamProgress.title')}</h3>
-        {reviewerProgress?.length === 0 && <p className="text-sm text-mut">—</p>}
-        <ul className="flex flex-col gap-1.5 text-sm">
-          {reviewerProgress?.map((r) => {
-            const total = stageTotal ?? 0
-            const pending = Math.max(total - r.decisionsMade, 0)
-            const pct = total > 0 ? Math.round((100 * r.decisionsMade) / total) : 0
-            return (
-              <li
-                key={r.reviewerId}
-                className="flex items-center justify-between gap-2 border-b border-line py-1.5 last:border-b-0"
-              >
-                <span className="text-fg">{r.reviewerName}</span>
-                <span className="font-mono text-xs text-mut">
-                  {pct}% · {t('teamProgress.pending', { count: pending })}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-      </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">

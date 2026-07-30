@@ -234,6 +234,7 @@ export interface MemberRow {
   userId: string
   displayName: string
   email: string
+  initials: string
   role: ProjectRole
 }
 
@@ -247,7 +248,7 @@ interface MemberQueryRow {
   id: string
   user_id: string
   role: ProjectRole
-  profile: { display_name: string; email: string } | null
+  profile: { display_name: string; email: string; initials: string } | null
 }
 
 export async function listMembers(projectId: string): Promise<MemberRow[]> {
@@ -256,7 +257,7 @@ export async function listMembers(projectId: string): Promise<MemberRow[]> {
   // explicitly rather than inferred.
   const { data, error } = await supabase
     .from('project_members')
-    .select('id, user_id, role, profile:profiles(display_name, email)')
+    .select('id, user_id, role, profile:profiles(display_name, email, initials)')
     .eq('project_id', projectId)
     .returns<MemberQueryRow[]>()
   if (error) throw error
@@ -265,6 +266,7 @@ export async function listMembers(projectId: string): Promise<MemberRow[]> {
     userId: r.user_id,
     displayName: r.profile?.display_name ?? '',
     email: r.profile?.email ?? '',
+    initials: r.profile?.initials ?? '',
     role: r.role,
   }))
 }

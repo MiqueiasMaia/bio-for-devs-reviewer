@@ -14,6 +14,8 @@ export async function countOpenConflicts(projectId: string, stage: ScreeningStag
 export interface ReviewerProgress {
   reviewerId: string
   reviewerName: string
+  reviewerInitials: string
+  role: 'owner' | 'reviewer'
   /** Decisions made by this reviewer at this stage — the numerator. The
    * denominator (total eligible records) is the same for every reviewer at
    * a given stage, so callers get it from `usePrismaCounts` instead of
@@ -27,10 +29,10 @@ export interface ReviewerProgress {
 export async function fetchReviewerProgress(projectId: string, stage: ScreeningStage): Promise<ReviewerProgress[]> {
   const { data: members, error: membersError } = await supabase
     .from('project_members')
-    .select('user_id, role, profile:profiles(display_name)')
+    .select('user_id, role, profile:profiles(display_name, initials)')
     .eq('project_id', projectId)
     .in('role', ['owner', 'reviewer'])
-    .returns<{ user_id: string; role: string; profile: { display_name: string } | null }[]>()
+    .returns<{ user_id: string; role: 'owner' | 'reviewer'; profile: { display_name: string; initials: string } | null }[]>()
   if (membersError) throw membersError
 
   const { data: screenings, error: screeningsError } = await supabase
@@ -48,6 +50,8 @@ export async function fetchReviewerProgress(projectId: string, stage: ScreeningS
     .map((m) => ({
       reviewerId: m.user_id,
       reviewerName: m.profile?.display_name ?? '—',
+      reviewerInitials: m.profile?.initials ?? '',
+      role: m.role,
       decisionsMade: countByReviewer.get(m.user_id) ?? 0,
     }))
     .sort((a, b) => b.decisionsMade - a.decisionsMade)

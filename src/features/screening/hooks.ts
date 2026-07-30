@@ -48,13 +48,6 @@ export function useAiMatchForStage(projectId: string, stage: ScreeningStage, ena
   })
 }
 
-export function useProjectDecisionCounts(projectId: string, stage: ScreeningStage) {
-  return useQuery({
-    queryKey: ['project_decision_counts', projectId, stage],
-    queryFn: () => api.fetchProjectDecisionCounts(projectId, stage),
-  })
-}
-
 export function useSaveScreening(projectId: string, stage: ScreeningStage, reviewerId: string) {
   const qc = useQueryClient()
   return useMutation({
