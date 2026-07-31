@@ -29,6 +29,7 @@ export interface ProjectSettings {
   ai_counts_as_reviewer: boolean
   risk_of_bias_enabled: boolean
   data_extraction_enabled: boolean
+  active_learning_enabled: boolean
   unlocked_stages: StageKey[]
 }
 
@@ -43,6 +44,7 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   ai_counts_as_reviewer: false,
   risk_of_bias_enabled: false,
   data_extraction_enabled: false,
+  active_learning_enabled: false,
   unlocked_stages: ['title_abstract'],
 }
 

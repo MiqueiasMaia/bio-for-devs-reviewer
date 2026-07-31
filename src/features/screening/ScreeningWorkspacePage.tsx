@@ -65,7 +65,13 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const qc = useQueryClient()
-  const queue = useQueue(project.id, stage, reviewerId, reviewersRequired)
+  const queue = useQueue(
+    project.id,
+    stage,
+    reviewerId,
+    reviewersRequired,
+    project.settings.active_learning_enabled && stage === 'title_abstract',
+  )
   const myScreenings = useMyScreenings(project.id, stage, reviewerId)
   const summary = useQueueSummary(project.id, stage, reviewerId)
   const applicableStages = useMemo(() => getApplicableStages(project.settings), [project.settings])

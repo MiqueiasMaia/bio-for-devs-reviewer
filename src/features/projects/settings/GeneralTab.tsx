@@ -162,6 +162,17 @@ export function GeneralTab() {
           />
           {t('settingsGeneral.dataExtractionEnabled')}
         </label>
+        <label className="flex flex-col gap-1 text-sm text-fg">
+          <span className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={settings.active_learning_enabled}
+              onChange={(e) => setSettings({ ...settings, active_learning_enabled: e.target.checked })}
+            />
+            {t('settingsGeneral.activeLearningEnabled')}
+          </span>
+          <span className="text-xs text-mut">{t('settingsGeneral.activeLearningHint')}</span>
+        </label>
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-fg">{t('settingsGeneral.stagesEnabled')}</legend>
           <label className="flex items-center gap-2 text-sm text-fg">

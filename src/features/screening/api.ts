@@ -64,17 +64,25 @@ export async function fetchQueue(
   stage: ScreeningStage,
   reviewerId: string,
   reviewersRequired: number,
+  /** Active-learning reranking (§6.1) — orders title/abstract records by
+   * predicted relevance (highest first, unscored last) instead of
+   * human_ref. Only meaningful at title_abstract; callers gate this on
+   * `project.settings.active_learning_enabled && stage === 'title_abstract'`. */
+  orderByRelevance = false,
 ): Promise<QueueRecord[]> {
   const eligibleIds = await listEligibleRecordIds(projectId, stage)
   if (eligibleIds.size === 0) return []
 
-  const { data: records, error: recordsError } = await supabase
+  let query = supabase
     .from('records')
     .select(
       'id, human_ref, title, authors, abstract, year, journal, doi, source_db, title_translated, abstract_translated, unpaywall_checked_at',
     )
     .eq('project_id', projectId)
-    .order('human_ref', { ascending: true })
+  query = orderByRelevance
+    ? query.order('relevance_score', { ascending: false, nullsFirst: false }).order('human_ref', { ascending: true })
+    : query.order('human_ref', { ascending: true })
+  const { data: records, error: recordsError } = await query
   if (recordsError) throw recordsError
 
   const { data: decisions, error: decisionsError } = await supabase

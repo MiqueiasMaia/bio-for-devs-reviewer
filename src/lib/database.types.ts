@@ -206,6 +206,8 @@ export interface Database {
           retraction_status: string | null
           retraction_notice_doi: string | null
           retraction_checked_at: string | null
+          relevance_score: number | null
+          relevance_scored_at: string | null
           created_at: string
           updated_at: string
         },
@@ -236,6 +238,8 @@ export interface Database {
           retraction_status?: string | null
           retraction_notice_doi?: string | null
           retraction_checked_at?: string | null
+          relevance_score?: number | null
+          relevance_scored_at?: string | null
         },
         {
           doi?: string | null
@@ -251,6 +255,8 @@ export interface Database {
           retraction_status?: string | null
           retraction_notice_doi?: string | null
           retraction_checked_at?: string | null
+          relevance_score?: number | null
+          relevance_scored_at?: string | null
         }
       >
       record_counters: Table<
@@ -627,6 +633,10 @@ export interface Database {
       }
       set_active_ai_provider: {
         Args: { p_project_id: string; p_provider: AIProvider }
+        Returns: undefined
+      }
+      set_relevance_scores: {
+        Args: { p_record_ids: string[]; p_scores: number[] }
         Returns: undefined
       }
     }

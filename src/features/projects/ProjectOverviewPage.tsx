@@ -21,6 +21,7 @@ import { useAuth } from '@/features/auth/useAuth'
 import { AiScreeningCard } from '@/features/aiScreening/AiScreeningCard'
 import { SnowballingCard } from '@/features/snowballing/SnowballingCard'
 import { RetractionWatchCard } from '@/features/retractionWatch/RetractionWatchCard'
+import { ActiveLearningCard } from '@/features/activeLearning/ActiveLearningCard'
 import { GetStartedWidget } from './GetStartedWidget'
 import type { ScreeningStage } from '@/types/domain'
 
@@ -226,6 +227,10 @@ export function ProjectOverviewPage() {
       <AgreementCard projectId={project.id} stage={stage} />
 
       {project.settings.ai_screening_enabled && <AiScreeningCard projectId={project.id} stage={stage} />}
+
+      {project.settings.active_learning_enabled && stage === 'title_abstract' && (
+        <ActiveLearningCard projectId={project.id} />
+      )}
 
       <SnowballingCard projectId={project.id} />
 

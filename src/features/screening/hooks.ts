@@ -19,10 +19,16 @@ const myScreeningsKey = (projectId: string, stage: ScreeningStage, reviewerId: s
 const summaryKey = (projectId: string, stage: ScreeningStage, reviewerId: string) =>
   ['screening_summary', projectId, stage, reviewerId] as const
 
-export function useQueue(projectId: string, stage: ScreeningStage, reviewerId: string, reviewersRequired: number) {
+export function useQueue(
+  projectId: string,
+  stage: ScreeningStage,
+  reviewerId: string,
+  reviewersRequired: number,
+  orderByRelevance = false,
+) {
   return useQuery({
-    queryKey: queueKey(projectId, stage, reviewerId),
-    queryFn: () => api.fetchQueue(projectId, stage, reviewerId, reviewersRequired),
+    queryKey: [...queueKey(projectId, stage, reviewerId), orderByRelevance] as const,
+    queryFn: () => api.fetchQueue(projectId, stage, reviewerId, reviewersRequired, orderByRelevance),
   })
 }
 

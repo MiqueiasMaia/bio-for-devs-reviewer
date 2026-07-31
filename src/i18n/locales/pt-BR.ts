@@ -147,6 +147,9 @@ export const ptBR = {
     aiCountsAsReviewerHint: 'Uma decisão confiante da IA (Incluir/Excluir) ocupa uma vaga de revisor exigida. Se a IA disser "Incerto", não conta — a vaga continua aberta para um humano.',
     riskOfBiasEnabled: 'Habilitar avaliação de risco de viés (PROBAST)',
     dataExtractionEnabled: 'Habilitar extração de dados',
+    activeLearningEnabled: 'Habilitar priorização por aprendizado ativo na triagem',
+    activeLearningHint:
+      'Reordena a fila de título/resumo com base nas decisões já tomadas, trazendo os artigos mais parecidos com os incluídos para o topo — não substitui nenhuma decisão humana.',
     stagesUnlocked: 'Etapas destravadas',
     stageLockedHint: 'Destrave a etapa anterior primeiro.',
     dedupTitle: 'Deduplicação',
@@ -584,6 +587,19 @@ export const ptBR = {
     status_expression_of_concern: 'Expressão de preocupação',
     status_withdrawal: 'Retirado',
     status_removal: 'Removido',
+  },
+  activeLearning: {
+    title: 'Priorização por aprendizado ativo',
+    subtitle:
+      'Reordena a fila de título/resumo para trazer primeiro os artigos mais parecidos com os já incluídos, com base nas decisões já tomadas. Não decide nada sozinho — só muda a ordem.',
+    lastTrainedLabel: 'Último treino',
+    scoredLabel: 'Registros priorizados',
+    never: 'Nunca',
+    run: 'Retreinar e reordenar',
+    running: 'Treinando…',
+    insufficientData:
+      'Ainda faltam decisões para treinar: {{decided}} de {{minTotal}} necessárias ({{positive}} incluir/incerto e {{negative}} excluir — mínimo de {{minPerClass}} de cada). Continue triando e tente novamente.',
+    doneSummary: 'Modelo treinado com {{trainingSize}} decisão(ões); {{scored}} registro(s) reordenado(s).',
   },
   backup: {
     title: 'Backup do projeto',

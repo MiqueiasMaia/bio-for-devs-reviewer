@@ -132,7 +132,7 @@ equipe de pesquisa conseguir concluir uma revisão sistemática em 2 semanas.
 Ordenado por impacto esperado nessa meta (maior alavanca primeiro), não por
 ordem de implementação — decisão de sequenciamento fica para o planejamento.
 
-### 6.1 Priorização por aprendizado ativo na fila de triagem
+### 6.1 Priorização por aprendizado ativo na fila de triagem — 🟡 MVP implementado (2026-07-31)
 
 Reordena continuamente os artigos ainda não triados, colocando primeiro os
 mais prováveis de inclusão, e permite encerrar a triagem mais cedo com
@@ -142,9 +142,20 @@ com benchmark de 87,2% de redução de carga de trabalho mantendo recall
 total. Diferente da IA atual do Biofor (`aiScreening`), que classifica cada
 artigo isoladamente sem reordenar a fila. Resolve o item 5.6.
 
-**Para implementar**: modelo de reranking incremental (ex.: regressão
-logística leve ou embeddings + classificador) retreinado a cada N decisões
-humanas, reordenando a fila de `screening` em tempo real.
+**Implementado (escopo reduzido, decisão registrada em conversa)**: só a
+reordenação, sem critério de parada com garantia estatística de recall —
+essa parte fica para uma iteração futura, dado o custo de validar
+corretamente sem dados reais de múltiplas revisões. TF-IDF + regressão
+logística leve, 100% cliente (`src/domain/activeLearning/`, com testes) —
+sem dependência de ML, sem chamada a API externa, treinado sob demanda
+("Retreinar e reordenar" no cartão da Visão Geral) sobre os registros já
+decididos em título/resumo (INCLUDE/UNCERTAIN = relevante, EXCLUDE =
+irrelevante), com pesos de classe para não colapsar na classe majoritária.
+Requer no mínimo 10 decisões (≥3 por classe) antes de treinar. Os escores
+(`records.relevance_score`, migração 0032, gravados em lote via
+`set_relevance_scores`) reordenam a fila de título/resumo em
+`fetchQueue` quando `active_learning_enabled` está ligado nas configurações
+do projeto — não altera nem sugere nenhuma decisão, só a ordem.
 
 ### 6.2 Pré-preenchimento de extração de dados por IA
 
