@@ -161,10 +161,14 @@ export function ProjectOverviewPage() {
                 total={myProgress.total}
               />
             )}
-            <p className="text-sm text-fg">
-              {myProgress?.undecided === 0
-                ? t('progress.allScreened')
-                : t('progress.articlesLeft', { count: myProgress?.undecided ?? 0 })}
+            <p className="flex items-center gap-1.5 text-sm text-fg">
+              {myProgress?.undecided === 0 ? (
+                <>
+                  <CheckCircleIcon className="h-4 w-4 text-include" /> {t('progress.allScreened')}
+                </>
+              ) : (
+                t('progress.articlesLeft', { count: myProgress?.undecided ?? 0 })
+              )}
             </p>
             <Link to={stage === 'title_abstract' ? 'screening/title-abstract' : 'screening/full-text'}>
               <Button>{t('progress.goToScreening')}</Button>

@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
-import { DownloadIcon, RefreshIcon } from '@/components/ui/icons'
+import { CheckIcon, DownloadIcon, RefreshIcon, XIcon } from '@/components/ui/icons'
 import { AgreementCard } from '@/features/agreement/AgreementCard'
 import { downloadCsv } from '@/features/screening/csvRoundTrip'
 import { decisionLabelKey } from '@/lib/decisionLabel'
@@ -243,9 +243,12 @@ export function AiAuditPage() {
                         // a correctly-non-applicable exclusion criterion (the
                         // desired outcome) look like a failure.
                         const isGood = c.kind === 'exclusion' ? !c.met : c.met
+                        const MetIcon = isGood ? CheckIcon : XIcon
                         return (
                           <div key={i} className="flex items-start gap-2 text-sm">
-                            <span className={isGood ? 'text-include' : 'text-red-700'}>{isGood ? '✓' : '✗'}</span>
+                            <span className={clsx('mt-0.5', isGood ? 'text-include' : 'text-red-700')}>
+                              <MetIcon className="h-3.5 w-3.5" />
+                            </span>
                             <div>
                               <p className="text-fg">
                                 {c.criterion}{' '}

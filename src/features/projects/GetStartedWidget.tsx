@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useTranslation, type TranslationKey } from '@/i18n'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
-import { PlusIcon, SplitIcon } from '@/components/ui/icons'
+import { CheckIcon, PlusIcon, SplitIcon } from '@/components/ui/icons'
 import { usePrismaCounts } from '@/features/prisma/hooks'
 import { useCriteria, useMembers } from './settings/hooks'
 import type { ProjectDetail } from './api'
@@ -132,11 +132,11 @@ export function GetStartedWidget({ project, onReviewDuplicates }: { project: Pro
             <div className="flex items-center gap-2 text-sm">
               <span
                 className={clsx(
-                  'flex h-4 w-4 shrink-0 items-center justify-center border text-[10px] font-bold',
+                  'flex h-4 w-4 shrink-0 items-center justify-center border',
                   step.done ? 'border-include bg-include text-white' : 'border-line text-transparent',
                 )}
               >
-                ✓
+                <CheckIcon className="h-2.5 w-2.5" />
               </span>
               <span className={step.done ? 'text-mut line-through' : 'text-fg'}>{t(step.labelKey)}</span>
             </div>

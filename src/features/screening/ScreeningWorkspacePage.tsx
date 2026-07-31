@@ -10,10 +10,12 @@ import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Select } from '@/components/ui/Select'
 import { TextField } from '@/components/ui/TextField'
-import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UploadIcon } from '@/components/ui/icons'
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UncertainIcon, UploadIcon, XIcon } from '@/components/ui/icons'
 import { StageGate } from '@/components/StageGate'
 import { getApplicableStages, getNextStage, isStageUnlocked } from '@/domain/stageLock/stageLock'
 import { useUnlockStage } from '@/features/projects/hooks'
+import { decisionIcon } from '@/lib/decisionIcon'
+import { decisionLabelKey } from '@/lib/decisionLabel'
 import type { Decision, ScreeningStage } from '@/types/domain'
 import { useQueryClient } from '@tanstack/react-query'
 import { useQueue, useMyScreenings, useQueueSummary, useAiMatchForStage, useSaveScreening, useReconcileDrafts, queueKey } from './hooks'
@@ -428,8 +430,13 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
       {showResumedNote && (
         <p className="mb-3 flex items-center justify-between text-xs text-mut">
           <span>{t('screening.resumedNote')}</span>
-          <button type="button" className="cursor-pointer underline" onClick={() => setShowResumedNote(false)}>
-            ✕
+          <button
+            type="button"
+            aria-label={t('common.close')}
+            className="cursor-pointer underline"
+            onClick={() => setShowResumedNote(false)}
+          >
+            <XIcon className="h-3 w-3" />
           </button>
         </p>
       )}
@@ -477,18 +484,20 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                 >
                   <div className="flex min-w-0 items-center justify-between gap-2">
                     <span className="min-w-0 truncate font-mono text-[11px] text-mut">{r.humanRef}</span>
-                    {decision && (
-                      <span
-                        data-sel="true"
-                        className={clsx('shrink-0 border px-1.5 py-0.5 text-[10px] font-semibold', DECISION_STYLES[decision])}
-                      >
-                        {decision === 'INCLUDE'
-                          ? t('screening.include')
-                          : decision === 'UNCERTAIN'
-                            ? t('screening.uncertain')
-                            : t('screening.exclude')}
-                      </span>
-                    )}
+                    {decision &&
+                      (() => {
+                        const DecisionIcon = decisionIcon(decision)
+                        return (
+                          <span
+                            data-sel="true"
+                            title={t(decisionLabelKey(decision))}
+                            aria-label={t(decisionLabelKey(decision))}
+                            className={clsx('shrink-0 border p-0.5', DECISION_STYLES[decision])}
+                          >
+                            <DecisionIcon className="h-3 w-3" />
+                          </span>
+                        )
+                      })()}
                   </div>
                   <p
                     className={clsx(
@@ -526,9 +535,14 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
                     const match = aiMatch.data?.get(current.id)
                     if (!match) return null
                     const badge = computeAiMatchBadge(match.decision, match.confidence)
+                    const BadgeIcon = decisionIcon(badge.decision)
                     return (
-                      <span className={clsx('text-sm', badge.className)} title={t('screening.aiMatchHint')}>
-                        {badge.icon}
+                      <span
+                        className={clsx('inline-flex items-center gap-0.5', badge.className)}
+                        title={t('screening.aiMatchHint')}
+                      >
+                        <BadgeIcon className="h-3.5 w-3.5" />
+                        {badge.strong && <BadgeIcon className="h-3.5 w-3.5" />}
                       </span>
                     )
                   })()}
@@ -602,24 +616,29 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
               </div>
 
               <div className="mt-6 flex gap-2.5">
-                {(['INCLUDE', 'UNCERTAIN', 'EXCLUDE'] as Decision[]).map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    data-sel={decisionDraft === d}
-                    aria-pressed={decisionDraft === d}
-                    onClick={() => handleDecision(d)}
-                    className={clsx(
-                      'flex-1 border-2 py-3 text-[15px] font-bold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
-                      DECISION_STYLES[d],
-                    )}
-                  >
-                    {d === 'INCLUDE' ? t('screening.include') : d === 'UNCERTAIN' ? t('screening.uncertain') : t('screening.exclude')}{' '}
-                    <span className="text-[11px] font-medium opacity-60">
-                      ({d === 'INCLUDE' ? 'I' : d === 'UNCERTAIN' ? 'U' : 'E'})
-                    </span>
-                  </button>
-                ))}
+                {(['INCLUDE', 'UNCERTAIN', 'EXCLUDE'] as Decision[]).map((d) => {
+                  const DecisionIcon = decisionIcon(d)
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      data-sel={decisionDraft === d}
+                      aria-pressed={decisionDraft === d}
+                      aria-label={t(decisionLabelKey(d))}
+                      title={t(decisionLabelKey(d))}
+                      onClick={() => handleDecision(d)}
+                      className={clsx(
+                        'flex flex-1 items-center justify-center gap-1.5 border-2 py-3 text-[15px] font-bold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-include',
+                        DECISION_STYLES[d],
+                      )}
+                    >
+                      <DecisionIcon className="h-5 w-5" />
+                      <span className="text-[11px] font-medium opacity-60">
+                        ({d === 'INCLUDE' ? 'I' : d === 'UNCERTAIN' ? 'U' : 'E'})
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
 
               {decisionDraft === 'EXCLUDE' && (
@@ -701,14 +720,23 @@ export function ScreeningWorkspacePage({ stage }: { stage: ScreeningStage }) {
 
               {summary.data && (
                 <div className="mt-3 flex flex-wrap gap-1.5 text-[11.5px]">
-                  <span className="border border-line bg-[#e7f1f4] px-2 py-0.5 font-semibold text-include">
-                    {t('screening.include')} {summary.data.include}
+                  <span
+                    title={t('screening.include')}
+                    className="inline-flex items-center gap-1 border border-line bg-[#e7f1f4] px-2 py-0.5 font-semibold text-include"
+                  >
+                    <CheckIcon className="h-3 w-3" /> {summary.data.include}
                   </span>
-                  <span className="border border-line bg-[#fbefdc] px-2 py-0.5 font-semibold text-uncertain">
-                    {t('screening.uncertain')} {summary.data.uncertain}
+                  <span
+                    title={t('screening.uncertain')}
+                    className="inline-flex items-center gap-1 border border-line bg-[#fbefdc] px-2 py-0.5 font-semibold text-uncertain"
+                  >
+                    <UncertainIcon className="h-3 w-3" /> {summary.data.uncertain}
                   </span>
-                  <span className="border border-line bg-[#eef1f3] px-2 py-0.5 font-semibold text-mut">
-                    {t('screening.exclude')} {summary.data.exclude}
+                  <span
+                    title={t('screening.exclude')}
+                    className="inline-flex items-center gap-1 border border-line bg-[#eef1f3] px-2 py-0.5 font-semibold text-mut"
+                  >
+                    <XIcon className="h-3 w-3" /> {summary.data.exclude}
                   </span>
                   <span className="border border-line px-2 py-0.5 font-semibold text-red-700">
                     {t('screening.filterUndecided')} {summary.data.undecided}

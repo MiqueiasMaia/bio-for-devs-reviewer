@@ -507,7 +507,7 @@ export const ptBR = {
     blindOff: 'cega: desligada',
     screeningCriteria: 'Critérios de triagem',
     yourProgress: 'Seu progresso',
-    allScreened: 'Você triou todos os artigos! 🎉',
+    allScreened: 'Você triou todos os artigos!',
     articlesLeft: '{{count}} artigo(s) restante(s) para triar',
     pctDone: '{{pct}}% concluído',
   },

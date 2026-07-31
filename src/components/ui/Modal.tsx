@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
+import { XIcon } from './icons'
 
 interface ModalProps {
   open: boolean
@@ -46,7 +47,7 @@ export function Modal({ open, onClose, title, children, size = 'default' }: Moda
             aria-label={t('common.close')}
             className="p-1 text-mut hover:bg-bg focus-visible:outline-2 focus-visible:outline-include"
           >
-            ✕
+            <XIcon className="h-4 w-4" />
           </button>
         </div>
         {children}

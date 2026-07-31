@@ -255,6 +255,18 @@ export function CheckIcon({ className }: IconProps) {
   )
 }
 
+/** Decision icons (Incluir/Incerto/Excluir) — same shared stroke style,
+ * used wherever a decision was previously spelled out as text (screening
+ * triage buttons, per-record status flag, sidebar summary counts). */
+export function UncertainIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M7.3 7.8a2.7 2.7 0 1 1 3.6 2.7c-.8.3-1.4.9-1.4 1.9v.4" />
+      <path d="M9.5 15v.01" />
+    </svg>
+  )
+}
+
 export function ArchiveIcon({ className }: IconProps) {
   return (
     <svg {...shared} className={className}>
